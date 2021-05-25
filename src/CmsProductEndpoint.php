@@ -174,9 +174,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 				return $image->toArray();
 			})($product->getMainImage()),
-			'mainCategoryId' => (static function (?ProductCategory $category): ?int {
-				return $category === null ? null : $category->getId();
-			})($product->getMainCategory()),
+			'mainCategoryId' => (static fn(?ProductCategory $category): ?int => $category === null ? null : $category->getId())($product->getMainCategory()),
 			'dynamicDescriptions' => (function (array $descriptions): array {
 				$return = [];
 				foreach ($descriptions as $description) {
@@ -589,7 +587,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$candidates = [];
 		foreach ($selection->getQuery()->getArrayResult() as $candidate) {
 			$score = 0;
-			if (isset($candidate['mainCategory']) && $productCategoryId === $candidate['mainCategory']['id']) { // same main category
+			if (
+				isset($candidate['mainCategory'])
+				&& $productCategoryId === $candidate['mainCategory']['id']
+			) { // same main category
 				$score += 2;
 			}
 
@@ -916,18 +917,27 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
+	/**
+	 * @return string[]
+	 */
 	private function getColorMap(): array
 	{
 		static $cache;
 
-		return $cache ?? $cache = array_map(
-			static fn(array $item): string => strtolower($item['color']),
-			$this->entityManager->getRepository(ColorMap::class)
+		$process = function(): array {
+			$map = $this->entityManager->getRepository(ColorMap::class)
 				->createQueryBuilder('color')
 				->select('PARTIAL color.{id, color}')
 				->getQuery()
-				->getArrayResult(),
+				->getArrayResult();
+
+			return array_map(
+				static fn(array $item): string => strtolower($item['color']),
+				$map,
 			);
+		};
+
+		return $cache ?? $cache = $process();
 	}
 
 
@@ -940,7 +950,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 		if ($name === 'barva' || $name === 'color') {
 			$notInclude = [];
 			foreach ($values as $value) {
-				if (\in_array($value = strtolower($value), $this->getColorMap(), true) === false) {
+				$value = strtolower($value);
+				if (\in_array($value, $this->getColorMap(), true) === false) {
 					$notInclude[] = $value;
 				}
 			}
