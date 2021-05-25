@@ -3,7 +3,7 @@ name: Integrity check
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     types: [ assigned, opened, synchronize, reopened ]
   schedule:
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@main
 
     - name: Install PHP
-      uses: shivammathur/setup-php@master
+      uses: shivammathur/setup-php@main
       with:
         php-version: 8.0
 
