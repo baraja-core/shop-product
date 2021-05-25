@@ -63,7 +63,8 @@ class ProductCategory
 
 	public function getRootId(): int
 	{
-		if (($parent = $this->getParent()) !== null) {
+		$parent = $this->getParent();
+		if ($parent !== null) {
 			return $parent->getRootId();
 		}
 
@@ -85,14 +86,14 @@ class ProductCategory
 	}
 
 
-	public function getParent(): ?ProductCategory
+	public function getParent(): ?self
 	{
 		return $this->parent;
 	}
 
 
 	/**
-	 * @return ProductCategory[]|Collection
+	 * @return self[]|Collection
 	 */
 	public function getChild()
 	{

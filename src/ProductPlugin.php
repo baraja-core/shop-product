@@ -65,9 +65,10 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 		}
 
 		$link = $this->linkGenerator->link(
-			'Front:Product:detail', [
-			'slug' => $product->getSlug(),
-		]
+			'Front:Product:detail',
+			[
+				'slug' => $product->getSlug(),
+			],
 		);
 		$this->addButton(new Button(Button::VARIANT_INFO, 'Web', Button::ACTION_LINK_TARGET, $link));
 	}

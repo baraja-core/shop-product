@@ -11,15 +11,15 @@ use Baraja\ImageGenerator\ImageGenerator;
 use Baraja\Markdown\CommonMarkRenderer;
 use Baraja\Search\Search;
 use Baraja\SelectboxTree\SelectboxTree;
-use Baraja\Shop\Product\Entity\RelatedProduct;
-use Baraja\StructuredApi\BaseEndpoint;
-use CleverMinds\Entity\ColorMap;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
+use Baraja\Shop\Product\Entity\RelatedProduct;
+use Baraja\StructuredApi\BaseEndpoint;
+use CleverMinds\Entity\ColorMap;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Http\FileUpload;
@@ -79,7 +79,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$return = [];
 		foreach ($items as $item) {
-			if (($mainImage = $item['mainImage']) !== null) {
+			$mainImage = $item['mainImage'];
+			if ($mainImage !== null) {
 				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 100, 'h' => 100]);
 				$item['shortDescription'] = Strings::truncate(strip_tags($this->renderer->render($item['shortDescription'])), 128);
 			}
@@ -103,8 +104,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$product = $this->getProductById($id);
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Produkt "' . $id . '" neexistuje.');
-
-			return;
 		}
 		$product->setActive(!$product->isActive());
 		$this->entityManager->flush();
@@ -118,8 +117,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$product = $this->getProductById($id);
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Produkt "' . $id . '" neexistuje.');
-
-			return;
 		}
 
 		$product->setPosition($position);
@@ -148,8 +145,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$product = $this->getProductById($id);
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Produkt "' . $id . '" neexistuje.');
-
-			return;
 		}
 
 		$cat = new SelectboxTree;
@@ -172,20 +167,17 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'slug' => $product->getSlug(),
 			]),
 			'soldOut' => $product->isSoldOut(),
-			'mainImage' => (static function (?ProductImage $image): ?array
-			{
+			'mainImage' => (static function (?ProductImage $image): ?array {
 				if ($image === null) {
 					return null;
 				}
 
 				return $image->toArray();
 			})($product->getMainImage()),
-			'mainCategoryId' => (static function (?ProductCategory $category): ?int
-			{
+			'mainCategoryId' => (static function (?ProductCategory $category): ?int {
 				return $category === null ? null : $category->getId();
 			})($product->getMainCategory()),
-			'dynamicDescriptions' => (function (array $descriptions): array
-			{
+			'dynamicDescriptions' => (function (array $descriptions): array {
 				$return = [];
 				foreach ($descriptions as $description) {
 					$return[] = [
@@ -283,23 +275,24 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson([
 			'images' => $images,
 			'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
-			'variants' => $this->formatBootstrapSelectArray([null => '--- žádná varianta ---'] + (static function (array $variants): array
-				{
-					$return = [];
-					foreach ($variants as $variant) {
-						$return[$variant['id']] = $variant['relationHash'];
-					}
+			'variants' => $this->formatBootstrapSelectArray((static function (array $variants): array {
+				$return = [
+					[null => '--- žádná varianta ---'],
+				];
+				foreach ($variants as $variant) {
+					$return[$variant['id']] = $variant['relationHash'];
+				}
 
-					return $return;
-				})(
-					$this->entityManager->getRepository(ProductVariant::class)
-						->createQueryBuilder('v')
-						->select('PARTIAL v.{id, relationHash}')
-						->where('v.product = :productId')
-						->setParameter('productId', $id)
-						->getQuery()
-						->getArrayResult()
-				)),
+				return $return;
+			})(
+				$this->entityManager->getRepository(ProductVariant::class)
+					->createQueryBuilder('v')
+					->select('PARTIAL v.{id, relationHash}')
+					->where('v.product = :productId')
+					->setParameter('productId', $id)
+					->getQuery()
+					->getArrayResult()
+			)),
 		]);
 	}
 
@@ -379,12 +372,14 @@ final class CmsProductEndpoint extends BaseEndpoint
 		/** @var ProductImage $image */
 		$image = $this->entityManager->getRepository(ProductImage::class)->find($id);
 
-		if (($mainImage = $image->getProduct()->getMainImage()) !== null && $mainImage->getId() === $id) {
+		$mainImage = $image->getProduct()->getMainImage();
+		if ($mainImage !== null && $mainImage->getId() === $id) {
 			$image->getProduct()->setMainImage(null);
 		}
 
 		FileSystem::delete($this->getParameter('wwwDir') . '/' . $image->getRelativePath());
-		$this->entityManager->remove($image)->flush();
+		$this->entityManager->remove($image);
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -395,7 +390,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$desc = new ProductSmartDescription($product, $description);
 		$desc->setPosition($position);
 
-		$this->entityManager->persist($desc)->flush();
+		$this->entityManager->persist($desc);
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -425,7 +421,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 				$this->sendError('Nahrávaný soubor musí být obrázek.');
 			}
 
-			$desc->setImage(date('Y-m-d') . '/' . strtolower(Random::generate(8) . '-' . $image->getSanitizedName()));
+			$desc->setImage(
+				date('Y-m-d')
+				. '/' . strtolower(Random::generate(8) . '-' . $image->getSanitizedName()),
+			);
 			$image->move($this->getParameter('wwwDir') . '/' . $desc->getImageRelativePath());
 		}
 
@@ -475,7 +474,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 	{
 		$this->checkParameter($name, $values);
 		$parameter = new ProductParameter($this->getProductById($productId), $name, $values, $variant);
-		$this->entityManager->persist($parameter)->flush();
+		$this->entityManager->persist($parameter);
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -522,7 +522,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getSingleResult();
 
-		$this->entityManager->remove($parameter)->flush();
+		$this->entityManager->remove($parameter);
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -598,7 +599,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
-		usort($candidates, static fn(array $a, array $b): int => $a['score'] < $b['score'] ? 1 : -1);
+		usort(
+			$candidates,
+			static fn(array $a, array $b): int => $a['score'] < $b['score'] ? 1 : -1,
+		);
 
 		$this->sendJson([
 			'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
@@ -626,7 +630,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$this->entityManager->persist(new RelatedProduct(
 				$this->getProductById($id),
 				$this->getProductById($relatedId)
-			))->flush();
+			));
+			$this->entityManager->flush();
 		}
 
 		$this->sendOk();
@@ -646,7 +651,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->getQuery()
 				->getSingleResult();
 
-			$this->entityManager->remove($relation)->flush();
+			$this->entityManager->remove($relation);
+			$this->entityManager->flush();
 		} catch (NoResultException | NonUniqueResultException) {
 		}
 
@@ -712,7 +718,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$variantToHash[$variantItem['relationHash']] = $variantItem['id'];
 		}
 		foreach ((new CombinationGenerator)->generate($this->getVariantParameters($id)) as $variantParameters) {
-			if (isset($variantToHash[$hash = ProductVariant::serializeParameters($variantParameters)]) === false) {
+			$hash = ProductVariant::serializeParameters($variantParameters);
+			if (isset($variantToHash[$hash]) === false) {
 				$this->entityManager->persist(new ProductVariant($product, $hash));
 			}
 		}
@@ -739,8 +746,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 		foreach ($variants as $variant) {
 			if (isset($variantById[$variant['id']]) === false) {
 				$this->sendError('Varianta "' . $variant['id'] . '" neexistuje.');
-
-				return;
 			}
 			/** @var ProductVariant $entity */
 			$entity = $variantById[$variant['id']];
@@ -760,14 +765,16 @@ final class CmsProductEndpoint extends BaseEndpoint
 	{
 		/** @var ProductVariant $variant */
 		$variant = $this->entityManager->getRepository(ProductVariant::class)->find($id);
-		$this->entityManager->remove($variant)->flush();
+		$this->entityManager->remove($variant);
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
 
 	public function actionAddColor(string $color, string $value): void
 	{
-		$this->entityManager->persist(new ColorMap($color, $value))->flush();
+		$this->entityManager->persist(new ColorMap($color, $value));
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -776,7 +783,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 	{
 		/** @var ColorMap $color */
 		$color = $this->entityManager->getRepository(ColorMap::class)->find($id);
-		$this->entityManager->remove($color)->flush();
+		$this->entityManager->remove($color);
+		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -913,12 +921,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 		static $cache;
 
 		return $cache ?? $cache = array_map(
-				static fn(array $item): string => strtolower($item['color']),
-				$this->entityManager->getRepository(ColorMap::class)
-					->createQueryBuilder('color')
-					->select('PARTIAL color.{id, color}')
-					->getQuery()
-					->getArrayResult()
+			static fn(array $item): string => strtolower($item['color']),
+			$this->entityManager->getRepository(ColorMap::class)
+				->createQueryBuilder('color')
+				->select('PARTIAL color.{id, color}')
+				->getQuery()
+				->getArrayResult(),
 			);
 	}
 

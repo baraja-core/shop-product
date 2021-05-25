@@ -217,11 +217,10 @@ class Product
 
 	public function setEan(?string $ean): void
 	{
-		if ($ean === null) {
-			$this->ean = null;
-		} else {
-			$this->ean = Strings::webalize($ean) ?: null;
+		if ($ean !== null) {
+			$ean = Strings::webalize($ean) ?: null;
 		}
+		$this->ean = $ean;
 	}
 
 

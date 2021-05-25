@@ -155,7 +155,9 @@ class ProductVariant
 
 	public function setPriceAddition(?float $priceAddition): void
 	{
-		$this->priceAddition = abs($priceAddition) < 0.01 ? $priceAddition : (float) $priceAddition;
+		$this->priceAddition = abs($priceAddition) < 0.01
+			? $priceAddition
+			: (float) $priceAddition;
 	}
 
 
