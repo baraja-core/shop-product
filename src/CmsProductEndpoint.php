@@ -924,7 +924,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	{
 		static $cache;
 
-		$process = function(): array {
+		$process = function (): array {
 			$map = $this->entityManager->getRepository(ColorMap::class)
 				->createQueryBuilder('color')
 				->select('PARTIAL color.{id, color}')
