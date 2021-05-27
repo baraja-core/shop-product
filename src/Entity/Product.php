@@ -9,6 +9,7 @@ use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\BeautifulPrice;
+use Baraja\Shop\Product\Validators;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -202,7 +203,13 @@ class Product
 	public function setEan(?string $ean): void
 	{
 		if ($ean !== null) {
-			$ean = Strings::webalize($ean) ?: null;
+			$ean = Strings::webalize($ean);
+			if (Validators::validateEAN13($ean) === false) {
+				throw new \InvalidArgumentException(
+					'EAN "' . $ean . '" is not valid. Please read EAN-13 specification.'
+					. "\n" . 'To solve this issue: Please read https://en.wikipedia.org/wiki/International_Article_Number.',
+				);
+			}
 		}
 		$this->ean = $ean;
 	}
