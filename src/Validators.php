@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product;
 
 
-use function Baraja\Heureka\;
-
 final class Validators
 {
 	public static function validateEAN13(string $barcode): bool
