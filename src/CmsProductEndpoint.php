@@ -19,7 +19,6 @@ use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\StructuredApi\BaseEndpoint;
-use CleverMinds\Entity\ColorMap;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Http\FileUpload;
@@ -453,14 +452,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
-		$colors = $this->entityManager->getRepository(ColorMap::class)
-			->createQueryBuilder('color')
-			->getQuery()
-			->getArrayResult();
-
 		$this->sendJson([
 			'parameters' => $parameters,
-			'colors' => $colors,
 		]);
 	}
 
@@ -772,24 +765,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	public function actionAddColor(string $color, string $value): void
-	{
-		$this->entityManager->persist(new ColorMap($color, $value));
-		$this->entityManager->flush();
-		$this->sendOk();
-	}
-
-
-	public function actionRemoveColor(int $id): void
-	{
-		/** @var ColorMap $color */
-		$color = $this->entityManager->getRepository(ColorMap::class)->find($id);
-		$this->entityManager->remove($color);
-		$this->entityManager->flush();
-		$this->sendOk();
-	}
-
-
 	public function actionCategories(int $id): void
 	{
 		$product = $this->getProductById($id);
@@ -918,30 +893,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 
 	/**
-	 * @return string[]
-	 */
-	private function getColorMap(): array
-	{
-		static $cache;
-
-		$process = function (): array {
-			$map = $this->entityManager->getRepository(ColorMap::class)
-				->createQueryBuilder('color')
-				->select('PARTIAL color.{id, color}')
-				->getQuery()
-				->getArrayResult();
-
-			return array_map(
-				static fn(array $item): string => strtolower($item['color']),
-				$map,
-			);
-		};
-
-		return $cache ?? $cache = $process();
-	}
-
-
-	/**
 	 * @param string[] $values
 	 */
 	private function checkParameter(string $name, array $values): void
@@ -951,7 +902,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$notInclude = [];
 			foreach ($values as $value) {
 				$value = strtolower($value);
-				if (\in_array($value, $this->getColorMap(), true) === false) {
+				if (\in_array($value, $this->getExcludeMap(), true) === false) {
 					$notInclude[] = $value;
 				}
 			}
@@ -961,5 +912,14 @@ final class CmsProductEndpoint extends BaseEndpoint
 				);
 			}
 		}
+	}
+
+
+	/**
+	 * @return string[]
+	 */
+	private function getExcludeMap(): array
+	{
+		return [];
 	}
 }

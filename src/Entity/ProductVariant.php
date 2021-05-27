@@ -6,9 +6,6 @@ namespace Baraja\Shop\Product\Entity;
 
 
 use Baraja\Doctrine\Identifier\IdentifierUnsigned;
-use CleverMinds\Entity\CartItem;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
@@ -41,18 +38,11 @@ class ProductVariant
 	/** @ORM\Column(type="boolean") */
 	private bool $soldOut = false;
 
-	/**
-	 * @var CartItem[]|Collection
-	 * @ORM\OneToMany(targetEntity="\CleverMinds\Entity\CartItem", mappedBy="variant")
-	 */
-	private $reservedCarts;
-
 
 	public function __construct(Product $product, string $relationHash)
 	{
 		$this->product = $product;
 		$this->relationHash = $relationHash;
-		$this->reservedCarts = new ArrayCollection;
 	}
 
 

@@ -9,8 +9,6 @@ use App\BeautifulPrice;
 use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
-use CleverMinds\Entity\CartItem;
-use CleverMinds\Entity\OrderItem;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -106,18 +104,6 @@ class Product
 	private $smartDescriptions;
 
 	/**
-	 * @var CartItem[]|Collection
-	 * @ORM\OneToMany(targetEntity="\CleverMinds\Entity\CartItem", mappedBy="product")
-	 */
-	private $reservedCarts;
-
-	/**
-	 * @var OrderItem[]|Collection
-	 * @ORM\OneToMany(targetEntity="\CleverMinds\Entity\OrderItem", mappedBy="product")
-	 */
-	private $soldOrders;
-
-	/**
 	 * @var ProductParameter[]|Collection
 	 * @ORM\OneToMany(targetEntity="ProductParameter", mappedBy="product")
 	 */
@@ -152,8 +138,6 @@ class Product
 		$this->categories = new ArrayCollection;
 		$this->labels = new ArrayCollection;
 		$this->smartDescriptions = new ArrayCollection;
-		$this->reservedCarts = new ArrayCollection;
-		$this->soldOrders = new ArrayCollection;
 		$this->parameters = new ArrayCollection;
 		$this->variants = new ArrayCollection;
 		$this->productRelatedBasic = new ArrayCollection;
@@ -436,24 +420,6 @@ class Product
 	public function getSmartDescriptions()
 	{
 		return $this->smartDescriptions;
-	}
-
-
-	/**
-	 * @return CartItem[]|Collection
-	 */
-	public function getReservedCarts()
-	{
-		return $this->reservedCarts;
-	}
-
-
-	/**
-	 * @return OrderItem[]|Collection
-	 */
-	public function getSoldOrders()
-	{
-		return $this->soldOrders;
 	}
 
 
