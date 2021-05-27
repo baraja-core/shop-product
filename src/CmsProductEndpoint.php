@@ -341,7 +341,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$request = $this->container->getByType(Request::class);
 		$productId = (int) $request->getPost('productId');
 
-		/** @var FileUpload $image */
+		/** @var FileUpload|null $image */
 		$image = $request->getFile('mainImage');
 		$product = $this->getProductById($productId);
 
@@ -806,9 +806,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->select('PARTIAL category.{id, name}')
 			->orderBy('category.name', 'ASC');
 
-		if ($product->getMainCategory()) {
+		$mainCategory = $product->getMainCategory();
+		if ($mainCategory !== null) {
 			$selection->andWhere('category.id != :mainCategoryId')
-				->setParameter('mainCategoryId', $product->getMainCategory()->getId());
+				->setParameter('mainCategoryId', $mainCategory->getId());
 		}
 		$subCategoryIds = [];
 		foreach ($product->getCategories() as $subCategory) {
@@ -881,7 +882,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	 */
 	private function getVariantParameters(int $productId): array
 	{
-		/** @var string[][]|string[][][] $parameters */
+		/** @var array<int, array<string, string|array<string, string>>> $parameters */
 		$parameters = $this->entityManager->getRepository(ProductParameter::class)
 			->createQueryBuilder('parameter')
 			->andWhere('parameter.product = :productId')
@@ -893,9 +894,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$return = [];
 		foreach ($parameters as $parameter) {
-			$return[$parameter['name']] = array_map(
+			$return[(string) $parameter['name']] = array_map(
 				static fn(string $value): string => Strings::firstUpper($value),
-				$parameter['values'],
+				(array) $parameter['values'],
 			);
 		}
 

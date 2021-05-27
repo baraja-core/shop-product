@@ -81,7 +81,7 @@ class ProductCategory
 	 */
 	public function getAllChildIds(): array
 	{
-		$return = [$this->getId()];
+		$return = [(int) $this->getId()];
 		foreach ($this->getChild() as $child) {
 			$childId = $child->getId();
 			if (is_int($childId) === false) {

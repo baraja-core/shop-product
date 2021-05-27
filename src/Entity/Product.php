@@ -164,7 +164,7 @@ class Product
 		$category = $this->mainCategory;
 		do {
 			$return[] = [
-				'id' => $category->getId(),
+				'id' => (int) $category->getId(),
 				'name' => (string) $category->getName(),
 				'slug' => $category->getSlug(),
 			];
