@@ -67,19 +67,30 @@ class ProductCategory
 		if ($parent !== null) {
 			return $parent->getRootId();
 		}
+		$id = $this->getId();
+		if (is_int($id) === false) {
+			throw new \LogicException('Entity "' . __CLASS__ . '" must be flushed first.');
+		}
 
-		return $this->getId();
+		return $id;
 	}
 
 
 	/**
-	 * @return int[]
+	 * @return array<int, int>
 	 */
 	public function getAllChildIds(): array
 	{
 		$return = [$this->getId()];
 		foreach ($this->getChild() as $child) {
-			$return[] = $child->getId();
+			$childId = $child->getId();
+			if (is_int($childId) === false) {
+				throw new \LogicException(
+					'Entity "' . __CLASS__ . '" child ID does not exist, '
+					. 'because related entities must be flushed first.',
+				);
+			}
+			$return[] = $childId;
 		}
 
 		return array_unique($return);

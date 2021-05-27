@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use App\BeautifulPrice;
 use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
+use Baraja\Shop\Product\BeautifulPrice;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -152,7 +152,7 @@ class Product
 
 
 	/**
-	 * @return string[]|int[]
+	 * @return array<int, array<string, string|int>>
 	 */
 	public function getCategoriesTree(): array
 	{

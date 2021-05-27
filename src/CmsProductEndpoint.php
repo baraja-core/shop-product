@@ -294,6 +294,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
+	/**
+	 * @param array<int, array<string, mixed>> $images
+	 */
 	public function postSaveImages(int $productId, array $images, int $mainImageId): void
 	{
 		$product = $this->getProductById($productId);
@@ -302,7 +305,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$imageEntities = $this->entityManager->getRepository(ProductImage::class)
 			->createQueryBuilder('image')
 			->where('image.id IN (:ids)')
-			->setParameter('ids', array_map(fn(array $image) => $image['id'], $images))
+			->setParameter('ids', array_map(fn(array $image): int => (int) $image['id'], $images))
 			->getQuery()
 			->getResult();
 
@@ -471,6 +474,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
+	/**
+	 * @param array<int, array<string, mixed>> $parameters
+	 */
 	public function postSaveParameters(array $parameters): void
 	{
 		$entityById = [];
@@ -521,6 +527,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionRelated(int $id): void
 	{
+		/** @var array<int, array<string, mixed>> $products */
 		$products = $this->entityManager->getRepository(RelatedProduct::class)
 			->createQueryBuilder('r')
 			->select('PARTIAL r.{id}, PARTIAL product.{id, name}, PARTIAL mainCategory.{id, name}')
@@ -723,6 +730,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
+	/**
+	 * @param array<int, array<string, mixed>> $variants
+	 */
 	public function postSaveVariants(int $id, array $variants): void
 	{
 		/** @var ProductVariant[] $variantEntities */
@@ -739,7 +749,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		}
 		foreach ($variants as $variant) {
 			if (isset($variantById[$variant['id']]) === false) {
-				$this->sendError('Varianta "' . $variant['id'] . '" neexistuje.');
+				$this->sendError('Variant "' . $variant['id'] . '" does not exist.');
 			}
 			/** @var ProductVariant $entity */
 			$entity = $variantById[$variant['id']];
@@ -777,10 +787,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
+		$mainCategory = $product->getMainCategory();
 		$this->sendJson([
-			'mainCategory' => $product->getMainCategory()
-				? (string) $product->getMainCategory()->getName()
-				: 'Nemá',
+			'mainCategory' => $mainCategory !== null
+				? (string) $mainCategory->getName()
+				: 'No main category',
 			'categories' => $categories,
 		]);
 	}

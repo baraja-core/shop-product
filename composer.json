@@ -11,7 +11,9 @@
 	"require": {
 		"php": "^8.0",
 		"baraja-core/cms": "^4.0",
-		"baraja-core/combinations": "^2.0"
+		"baraja-core/combinations": "^2.0",
+		"baraja-core/markdown-latte-filter": "^3.0",
+		"baraja-core/doctrine-fulltext-search": "^3.0"
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^0.12.74",

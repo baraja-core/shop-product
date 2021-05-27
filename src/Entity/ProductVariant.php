@@ -129,7 +129,7 @@ class ProductVariant
 
 	public function setPrice(?float $price): void
 	{
-		$price = abs($price) < 0.01 ? $price : (float) $price;
+		$price = $price === null || abs($price) < 0.01 ? null : $price;
 		if (abs($this->getProduct()->getPrice() - $price) < 0.01) {
 			$price = null;
 		}
@@ -145,9 +145,11 @@ class ProductVariant
 
 	public function setPriceAddition(?float $priceAddition): void
 	{
-		$this->priceAddition = abs($priceAddition) < 0.01
-			? $priceAddition
-			: (float) $priceAddition;
+		if ($priceAddition === null || abs($priceAddition) < 0.01) {
+			$priceAddition = null;
+		}
+
+		$this->priceAddition = $priceAddition;
 	}
 
 
