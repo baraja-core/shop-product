@@ -894,6 +894,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$return = [];
 		foreach ($parameters as $parameter) {
+			/** @phpstan-ignore-next-line */
 			$return[(string) $parameter['name']] = array_map(
 				static fn(string $value): string => Strings::firstUpper($value),
 				(array) $parameter['values'],
