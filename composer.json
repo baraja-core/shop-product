@@ -14,7 +14,8 @@
 		"baraja-core/combinations": "^2.0",
 		"baraja-core/markdown-latte-filter": "^3.0",
 		"baraja-core/doctrine-fulltext-search": "^3.0",
-		"baraja-core/selectbox-tree": "^2.0"
+		"baraja-core/selectbox-tree": "^2.0",
+		"baraja-core/image-generator": "^1.0"
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^0.12.74",
