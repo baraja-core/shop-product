@@ -131,7 +131,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 		}
 
 		$product = new Product($name, $code, $price);
-		$this->entityManager->persist($product)->flush();
+		$this->entityManager->persist($product);
+		$this->entityManager->flush();
 		$this->sendJson([
 			'id' => $product->getId(),
 		]);
