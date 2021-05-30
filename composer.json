@@ -18,6 +18,7 @@
 		"baraja-core/image-generator": "^1.0"
 	},
 	"require-dev": {
+		"baraja-core/heureka-feed": "^2.0",
 		"phpstan/phpstan": "^0.12.74",
 		"tracy/tracy": "^2.8",
 		"phpstan/phpstan-nette": "^0.12.14",
