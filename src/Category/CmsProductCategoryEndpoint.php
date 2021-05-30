@@ -40,8 +40,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 				'name' => $category['name'],
 				'parent' => $category['parent'],
 				'code' => $category['code'],
-				'heurekaCategoryId' => (function (?int $heurekaCategoryId): ?string
-				{
+				'heurekaCategoryId' => (function (?int $heurekaCategoryId): ?string {
 					if ($heurekaCategoryId === null) {
 						return null;
 					}
