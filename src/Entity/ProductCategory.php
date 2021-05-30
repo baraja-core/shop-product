@@ -8,8 +8,10 @@ namespace Baraja\Shop\Product\Entity;
 use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Nette\Utils\Strings;
 
 /**
  * @ORM\Entity()
@@ -25,7 +27,7 @@ class ProductCategory
 	use TranslateObject;
 
 	/** @ORM\ManyToOne(targetEntity="ProductCategory", inversedBy="child") */
-	private ?self $parent;
+	private ?self $parent = null;
 
 	/**
 	 * @var self[]|Collection
@@ -52,13 +54,24 @@ class ProductCategory
 	 * @var Product[]|Collection
 	 * @ORM\OneToMany(targetEntity="Product", mappedBy="mainCategory")
 	 */
-	private $mainProduct;
+	private $mainProducts;
 
 	/**
 	 * @var Product[]|Collection
 	 * @ORM\ManyToMany(targetEntity="ProductCategory", mappedBy="products")
 	 */
 	private $products;
+
+
+	public function __construct(string $name, string $code, ?string $slug = null)
+	{
+		$this->setName(Strings::firstUpper($name));
+		$this->code = Strings::webalize($code);
+		$this->slug = Strings::webalize($slug ?: $code);
+		$this->child = new ArrayCollection;
+		$this->mainProducts = new ArrayCollection;
+		$this->products = new ArrayCollection;
+	}
 
 
 	public function getRootId(): int
@@ -139,9 +152,9 @@ class ProductCategory
 	/**
 	 * @return Product[]|Collection
 	 */
-	public function getMainProduct()
+	public function getMainProducts()
 	{
-		return $this->mainProduct;
+		return $this->mainProducts;
 	}
 
 

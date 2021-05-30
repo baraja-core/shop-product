@@ -149,7 +149,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$cat = new SelectboxTree;
 		$categories = $this->entityManager->getConnection()
-			->executeQuery($cat->sqlBuilder('cm__product_category'))
+			->executeQuery($cat->sqlBuilder('shop__product_category'))
 			->fetchAllAssociative();
 
 		$this->sendJson([
@@ -163,7 +163,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			'price' => $product->getPrice(),
 			'vat' => $product->getVat(),
 			'standardPricePercentage' => $product->getStandardPricePercentage(),
-			'url' => $this->link('Front:Product:detail', [
+			'url' => $this->linkSafe('Front:Product:detail', [
 				'slug' => $product->getSlug(),
 			]),
 			'soldOut' => $product->isSoldOut(),
@@ -274,9 +274,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			'images' => $images,
 			'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
 			'variants' => $this->formatBootstrapSelectArray((static function (array $variants): array {
-				$return = [
-					[null => '--- žádná varianta ---'],
-				];
+				$return = [];
+				$return[null] = '--- žádná varianta ---';
 				foreach ($variants as $variant) {
 					$return[$variant['id']] = $variant['relationHash'];
 				}

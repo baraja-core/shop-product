@@ -9,6 +9,7 @@ use Baraja\Doctrine\ORM\DI\OrmAnnotationsExtension;
 use Baraja\Plugin\Component\VueComponent;
 use Baraja\Plugin\PluginComponentExtension;
 use Baraja\Plugin\PluginManager;
+use Baraja\Shop\Product\Category\ProductCategoryPlugin;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\ServiceDefinition;
 
@@ -37,10 +38,99 @@ final class ProductExtension extends CompilerExtension
 			'implements' => ProductPlugin::class,
 			'componentClass' => VueComponent::class,
 			'view' => 'default',
-			'source' => __DIR__ . '/../templates/default.js',
+			'source' => __DIR__ . '/../templates/product/default.js',
 			'position' => 100,
 			'tab' => 'Products',
 			'params' => [],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productOverview',
+			'name' => 'cms-product-overview',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/overview.js',
+			'position' => 100,
+			'tab' => 'Overview',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productCategory',
+			'name' => 'cms-product-category',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/category.js',
+			'position' => 80,
+			'tab' => 'Category',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productImages',
+			'name' => 'cms-product-images',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/images.js',
+			'position' => 60,
+			'tab' => 'Images',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productParameter',
+			'name' => 'cms-product-parameter',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/parameter.js',
+			'position' => 50,
+			'tab' => 'Parameters',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productVariants',
+			'name' => 'cms-product-variants',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/variants.js',
+			'position' => 40,
+			'tab' => 'Variants',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productRelated',
+			'name' => 'cms-product-related',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/related.js',
+			'position' => 20,
+			'tab' => 'Related',
+			'params' => ['id'],
+		]]);
+
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productCategoryDefault',
+			'name' => 'cms-product-category-default',
+			'implements' => ProductCategoryPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'default',
+			'source' => __DIR__ . '/../templates/category/default.js',
+			'position' => 100,
+			'tab' => 'Category',
+			'params' => [],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productCategoryOverview',
+			'name' => 'cms-product-category-overview',
+			'implements' => ProductCategoryPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/category/overview.js',
+			'position' => 100,
+			'tab' => 'Overview',
+			'params' => ['id'],
 		]]);
 	}
 }

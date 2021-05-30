@@ -59,8 +59,13 @@ Vue.component('cms-product-default', {
 					</tr>
 					<tr v-for="item in items">
 						<td>
-							<a v-if="item.mainImage" :href="link('Product:detail', { id: item.id })">
-								<img :src="basePath + '/product-image/' + item.mainImage.source">
+							<a :href="link('Product:detail', { id: item.id })">
+								<template v-if="item.mainImage">
+									<img :src="basePath + '/product-image/' + item.mainImage.source">
+								</template>
+								<template v-else>
+									<img src="https://cdn.baraja.cz/icon/no-product-image.jpg" class="w-100" alt="No product image">
+								</template>
 							</a>
 						</td>
 						<td>

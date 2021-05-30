@@ -83,7 +83,7 @@ class Product
 	/** @ORM\Column(type="smallint", nullable=true) */
 	private ?int $vat = null;
 
-	/** @ORM\ManyToOne(targetEntity="ProductCategory", inversedBy="mainProduct") */
+	/** @ORM\ManyToOne(targetEntity="ProductCategory", inversedBy="mainProducts") */
 	private ?ProductCategory $mainCategory;
 
 	/**
