@@ -13,6 +13,7 @@ use Baraja\Shop\Product\Entity\Product;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Application\LinkGenerator;
+use Nette\Application\UI\InvalidLinkException;
 
 final class ProductPlugin extends BasePlugin implements SearchablePlugin
 {
@@ -64,12 +65,16 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 			$this->error('Product "' . $id . '" doest not exist.');
 		}
 
-		$link = $this->linkGenerator->link(
-			'Front:Product:detail',
-			[
-				'slug' => $product->getSlug(),
-			],
-		);
-		$this->addButton(new Button(Button::VARIANT_INFO, 'Web', Button::ACTION_LINK_TARGET, $link));
+		try {
+			$webLink = $this->linkGenerator->link(
+				'Front:Product:detail',
+				[
+					'slug' => $product->getSlug(),
+				],
+			);
+			$this->addButton(new Button(Button::VARIANT_INFO, 'Web', Button::ACTION_LINK_TARGET, $webLink));
+		} catch (InvalidLinkException) {
+			// Silence is golden.
+		}
 	}
 }
