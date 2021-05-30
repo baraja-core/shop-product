@@ -44,7 +44,7 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 
 	public function getLabel(): string
 	{
-		return 'Produkty';
+		return 'Products';
 	}
 
 
@@ -60,7 +60,7 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 				->getQuery()
 				->getSingleResult();
 
-			$this->setTitle((string) $product->getName());
+			$this->setTitle('(' . $id . ') ' . $product->getName());
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->error('Product "' . $id . '" doest not exist.');
 		}

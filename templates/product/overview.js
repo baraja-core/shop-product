@@ -9,10 +9,10 @@ Vue.component('cms-product-overview', {
 			<div class="row">
 				<div class="col-sm-2">
 					<template v-if="product.mainImage === null">
-						<i>Nemá hlavní obrázek</i>
+						<img src="https://cdn.baraja.cz/icon/no-product-image.jpg" class="w-100" alt="No product image" style="max-width:200px;max-height:200px">
 					</template>
 					<template v-else>
-						<img :src="product.mainImage.url" class="w-100" style="max-width:200px;max-height:200px">
+						<img :src="product.mainImage.url" class="w-100" :alt="product.name" style="max-width:200px;max-height:200px">
 					</template>
 				</div>
 				<div class="col">

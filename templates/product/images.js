@@ -7,7 +7,7 @@ Vue.component('cms-product-images', {
 	<div v-else class="container-fluid">
 		<div class="row">
 			<div class="col">
-				<h4>Obrázky</h4>
+				<h4>Images</h4>
 			</div>
 			<div class="col-sm-6">
 				<b-form @submit="processUpload">
@@ -29,38 +29,43 @@ Vue.component('cms-product-images', {
 				</b-form>
 			</div>
 		</div>
-		<b-button variant="primary" @click="save">Uložit změny</b-button>
-		<table class="table table-sm mt-2">
-			<tr v-for="image in images" :class="{ 'table-secondary': image.id === mainImageId }">
-				<td width="200">
-					<img :src="basePath + '/product-image/' + image.source" class="w-100">
-				</td>
-				<td>
-					<div>
-						<label>
-							<input type="radio" v-model="mainImageId" :value="image.id"> Hlavní?
-						</label>
-					</div>
-					<div class="mt-1">
-						<input v-model="image.title" class="form-control" placeholder="Zadejte alternativní popisek">
-						<div class="row mt-2">
-							<div class="col-sm-4">
-								Pozice:<br>
-								<b-form-spinbutton v-model="image.position" min="0" max="1000"></b-form-spinbutton>
-							</div>
-							<div class="col">
-								Varianta:<br>
-								<b-form-select v-model="image.variant" :options="variants"></b-form-select>
+		<div v-if="images.length === 0" class="text-center my-5">
+			No images.
+		</div>
+		<template v-else>
+			<b-button variant="primary" @click="save">Save changes</b-button>
+			<table class="table table-sm mt-2">
+				<tr v-for="image in images" :class="{ 'table-secondary': image.id === mainImageId }">
+					<td width="200">
+						<img :src="basePath + '/product-image/' + image.source" class="w-100">
+					</td>
+					<td>
+						<div>
+							<label>
+								<input type="radio" v-model="mainImageId" :value="image.id"> Hlavní?
+							</label>
+						</div>
+						<div class="mt-1">
+							<input v-model="image.title" class="form-control" placeholder="Zadejte alternativní popisek">
+							<div class="row mt-2">
+								<div class="col-sm-4">
+									Pozice:<br>
+									<b-form-spinbutton v-model="image.position" min="0" max="1000"></b-form-spinbutton>
+								</div>
+								<div class="col">
+									Varianta:<br>
+									<b-form-select v-model="image.variant" :options="variants"></b-form-select>
+								</div>
 							</div>
 						</div>
-					</div>
-				</td>
-				<td class="text-right">
-					<b-button variant="danger" size="sm" @click="deleteImage(image.id)">x</b-button>
-				</td>
-			</tr>
-		</table>
-		<b-button variant="primary" @click="save">Uložit změny</b-button>
+					</td>
+					<td class="text-right">
+						<b-button variant="danger" size="sm" @click="deleteImage(image.id)">x</b-button>
+					</td>
+				</tr>
+			</table>
+			<b-button variant="primary" @click="save">Save changes</b-button>
+		</template>
 	</div>
 </b-card>`,
 	data() {
