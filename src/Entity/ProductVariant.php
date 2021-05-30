@@ -11,7 +11,7 @@ use Nette\Utils\Strings;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="cm__product_variant")
+ * @ORM\Table(name="shop__product_variant")
  */
 class ProductVariant
 {

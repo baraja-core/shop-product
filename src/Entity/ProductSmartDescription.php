@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="cm__product_description")
+ * @ORM\Table(name="shop__product_description")
  * @method Translation getDescription(?string $locale = null)
  * @method void setDescription(string $content, ?string $locale = null)
  */

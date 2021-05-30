@@ -15,7 +15,7 @@ use Nette\Utils\Strings;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="cm__product_label")
+ * @ORM\Table(name="shop__product_label")
  * @method Translation getName(?string $locale = null)
  * @method void setName(string $content, ?string $locale = null)
  */

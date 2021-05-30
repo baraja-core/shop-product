@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="cm__related_product")
+ * @ORM\Table(name="shop__related_product")
  */
 class RelatedProduct
 {

@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="cm__product_parameter")
+ * @ORM\Table(name="shop__product_parameter")
  */
 class ProductParameter
 {
