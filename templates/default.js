@@ -29,11 +29,68 @@ Vue.component('cms-product-default', {
 			</b-form>
 		</cms-filter>
 		<b-card>
-			<div class="row">
-				<div class="col">
-					<b>{{ count }}</b> products shown
+			<div v-if="count === 0" class="text-center my-5">
+				Product list is empty.
+				<div class="mt-5">
+					<b-button variant="primary" v-b-modal.modal-new-product>Create first product</b-button>
 				</div>
-				<div class="col-4">
+			</div>
+			<template v-else>
+				<div class="row">
+					<div class="col">
+						<b>{{ count }}</b> products shown
+					</div>
+					<div class="col-4">
+						<b-pagination
+							v-model="paginator.page"
+							:per-page="paginator.itemsPerPage"
+							@change="syncPaginator()"
+							:total-rows="paginator.itemCount" align="right" size="sm">
+						</b-pagination>
+					</div>
+				</div>
+				<table class="table table-sm">
+					<tr>
+						<th width="100">Image</th>
+						<th>Name</th>
+						<th width="150">Category</th>
+						<th width="80">Position</th>
+						<th width="100">Price</th>
+					</tr>
+					<tr v-for="item in items">
+						<td>
+							<a v-if="item.mainImage" :href="link('Product:detail', { id: item.id })">
+								<img :src="basePath + '/product-image/' + item.mainImage.source">
+							</a>
+						</td>
+						<td>
+							<div>
+								<a :href="link('Product:detail', { id: item.id })">{{ item.name }}</a>
+								<span @click="makeActive(item.id)" style="cursor:pointer">
+									<span v-if="item.active" class="badge badge-success">Active</span>
+									<span v-else class="badge badge-danger">Hidden </span>
+								</span>
+								<span v-if="item.soldOut" class="badge badge-warning">Sold&nbsp;out</span>
+							</div>
+							<div>
+								Code: <code>{{ item.code }}</code> | EAN: <code>{{ item.ean }}</code>
+							</div>
+							<p class="text-secondary">
+								{{ item.shortDescription }}
+							</p>
+						</td>
+						<td>
+							<template v-if="item.mainCategory">
+								{{ item.mainCategory.name }}
+							</template>
+						</td>
+						<td>
+							<b-form-input type="number" v-model="item.position" min="0" max="1000" size="sm" @change="changePosition(item.id, item.position)"></b-form-input>
+						</td>
+						<td>{{ item.price }}&nbsp;Kč</td>
+					</tr>
+				</table>
+				<div class="text-right">
 					<b-pagination
 						v-model="paginator.page"
 						:per-page="paginator.itemsPerPage"
@@ -41,59 +98,10 @@ Vue.component('cms-product-default', {
 						:total-rows="paginator.itemCount" align="right" size="sm">
 					</b-pagination>
 				</div>
-			</div>
-			<table class="table table-sm">
-				<tr>
-					<th width="100">Image</th>
-					<th>Name</th>
-					<th>Category</th>
-					<th width="80">Position</th>
-					<th>Price</th>
-				</tr>
-				<tr v-for="item in items">
-					<td>
-						<a v-if="item.mainImage" :href="link('Product:detail', { id: item.id })">
-							<img :src="basePath + '/product-image/' + item.mainImage.source">
-						</a>
-					</td>
-					<td>
-						<div>
-							<a :href="link('Product:detail', { id: item.id })">{{ item.name }}</a>
-							<span @click="makeActive(item.id)">
-								<span v-if="item.active" class="badge badge-success">Active</span>
-								<span v-else class="badge badge-danger">Hidden </span>
-							</span>
-							<span v-if="item.soldOut" class="badge badge-warning">Sold&nbsp;out</span>
-						</div>
-						<div>
-							Code: <code>{{ item.code }}</code> | EAN: <code>{{ item.ean }}</code>
-						</div>
-						<p class="text-secondary">
-							{{ item.shortDescription }}
-						</p>
-					</td>
-					<td>
-						<template v-if="item.mainCategory">
-							{{ item.mainCategory.name }}
-						</template>
-					</td>
-					<td>
-						<b-form-input type="number" v-model="item.position" min="0" max="1000" size="sm" @change="changePosition(item.id, item.position)"></b-form-input>
-					</td>
-					<td>{{ item.price }}&nbsp;Kč</td>
-				</tr>
-			</table>
-			<div class="text-right">
-				<b-pagination
-					v-model="paginator.page"
-					:per-page="paginator.itemsPerPage"
-					@change="syncPaginator()"
-					:total-rows="paginator.itemCount" align="right" size="sm">
-				</b-pagination>
-			</div>
+			</template>
 		</b-card>
 	</template>
-	<b-modal id="modal-new-product" title="Create new product" hide-footer>
+	<b-modal id="modal-new-product" :title="'Create ' + (count === 0 ? 'first' : 'new') + ' product'" hide-footer>
 		<b-form @submit="createNewProduct">
 			<div class="mb-3">
 				Name:
@@ -171,6 +179,9 @@ Vue.component('cms-product-default', {
 				code: this.newProduct.code,
 				price: this.newProduct.price
 			}).then(req => {
+				window.location.href = link('Product:detail', {
+					id: req.data.id
+				});
 				this.sync();
 			});
 		},
