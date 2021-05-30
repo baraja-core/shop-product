@@ -1,39 +1,39 @@
 {
-	"name": "baraja-core/shop-product",
-	"description": "E-shop product.",
-	"homepage": "https://github.com/baraja-core/shop-product",
-	"authors": [
-		{
-			"name": "Jan Barášek",
-			"homepage": "https://baraja.cz"
-		}
-	],
-	"require": {
-		"php": "^8.0",
-		"baraja-core/cms": "^4.0",
-		"baraja-core/combinations": "^2.0",
-		"baraja-core/markdown-latte-filter": "^3.0",
-		"baraja-core/doctrine-fulltext-search": "^3.0",
-		"baraja-core/selectbox-tree": "^2.0",
-		"baraja-core/image-generator": "^1.0"
-	},
-	"require-dev": {
-		"baraja-core/heureka-feed": "2.0.2",
-		"phpstan/phpstan": "0.12.88",
-		"tracy/tracy": "2.8.4",
-		"phpstan/phpstan-nette": "0.12.19",
-		"spaze/phpstan-disallowed-calls": "1.4.0",
-		"roave/security-advisories": "dev-master"
-	},
-	"autoload": {
-		"classmap": [
-			"src/"
-		]
-	},
-	"scripts": {
-		"phpstan": [
-			"vendor/bin/phpstan analyse src -c phpstan.neon --level 8 --no-progress"
-		]
-	},
-	"minimum-stability": "stable"
+  "name": "baraja-core/shop-product",
+  "description": "E-shop product.",
+  "homepage": "https://github.com/baraja-core/shop-product",
+  "authors": [
+    {
+      "name": "Jan Barášek",
+      "homepage": "https://baraja.cz"
+    }
+  ],
+  "require": {
+    "php": "^8.0",
+    "baraja-core/cms": "^4.0",
+    "baraja-core/combinations": "^2.0",
+    "baraja-core/markdown-latte-filter": "^3.0",
+    "baraja-core/doctrine-fulltext-search": "^3.0",
+    "baraja-core/selectbox-tree": "^2.0",
+    "baraja-core/image-generator": "^1.0"
+  },
+  "require-dev": {
+    "baraja-core/heureka-feed": "2.0.2",
+    "phpstan/phpstan": "0.12.88",
+    "tracy/tracy": "2.8.4",
+    "phpstan/phpstan-nette": "0.12.19",
+    "spaze/phpstan-disallowed-calls": "1.4.0",
+    "roave/security-advisories": "dev-master"
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ]
+  },
+  "scripts": {
+    "phpstan": [
+      "vendor/bin/phpstan analyse src -c phpstan.neon --level 8 --no-progress"
+    ]
+  },
+  "minimum-stability": "stable"
 }
