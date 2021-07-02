@@ -18,15 +18,15 @@ Vue.component('cms-product-overview', {
 				<div class="col">
 					<div class="row">
 						<div class="col-4">
-							Název:
+							Name:
 							<input v-model="product.name" class="form-control">
 						</div>
 						<div class="col-4">
-							Kód produktu:
+							Unique code:
 							<input v-model="product.code" class="form-control">
 						</div>
 						<div class="col-3">
-							EAN produktu:
+							EAN:
 							<input v-model="product.ean" class="form-control">
 						</div>
 						<div class="col-1">
@@ -35,26 +35,26 @@ Vue.component('cms-product-overview', {
 									<b-spinner small></b-spinner>
 								</template>
 								<template v-else>
-									Uložit
+									Save
 								</template>
 							</b-button>
 						</div>
 					</div>
 					<div class="row my-3">
 						<div class="col-2">
-							Hlavní cena (v&nbsp;Kč):
+							Primary price (CZK):
 							<input v-model="product.price" class="form-control">
 						</div>
 						<div class="col-1">
-							Sleva %:
+							Sale&nbsp;%:
 							<input v-model="product.standardPricePercentage" class="form-control">
 						</div>
 						<div class="col-1">
-							DPH:
+							VAT:
 							<input v-model="product.vat" class="form-control">
 						</div>
 						<div class="col-3">
-							Hlavní kategorie:
+							Main category:
 							<b-form-select v-model="product.mainCategoryId" :options="product.categories"></b-form-select>
 						</div>
 						<div class="col-1">
@@ -71,11 +71,11 @@ Vue.component('cms-product-overview', {
 							URL: <code><a :href="product.url" target="_blank">{{ product.url }}</a></code>
 						</div>
 						<div class="col-1">
-							Aktivní?<br>
+							Active?<br>
 							<b-form-checkbox v-model="product.active" switch></b-form-checkbox>
 						</div>
 						<div class="col-1">
-							Vyprod.?<br>
+							Sold&nbsp;out?<br>
 							<b-form-checkbox v-model="product.soldOut" switch></b-form-checkbox>
 						</div>
 					</div>
@@ -83,7 +83,7 @@ Vue.component('cms-product-overview', {
 			</div>
 			<div class="row mt-3">
 				<div class="col-6">
-					Krátký popis:
+					Short description:
 					<textarea v-model="product.shortDescription" class="form-control" rows="8"></textarea>
 				</div>
 			</div>
