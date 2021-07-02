@@ -33,7 +33,7 @@ class ProductParameter
 
 
 	/**
-	 * @param string[] $values
+	 * @param array<int, string> $values
 	 */
 	public function __construct(Product $product, string $name, array $values = [], bool $variant = false)
 	{
@@ -63,7 +63,7 @@ class ProductParameter
 
 
 	/**
-	 * @return string[]
+	 * @return array<int, string>
 	 */
 	public function getValues(): array
 	{
@@ -72,11 +72,11 @@ class ProductParameter
 
 
 	/**
-	 * @param string[] $values
+	 * @param array<int, string> $values
 	 */
 	public function setValues(array $values): void
 	{
-		$this->values = $values;
+		$this->values = array_values($values);
 	}
 
 
