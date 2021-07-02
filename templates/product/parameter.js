@@ -1,6 +1,6 @@
 Vue.component('cms-product-parameter', {
 	props: ['id'],
-	template: `<b-card>
+	template: `<cms-card>
 		<div v-if="parameters === null" class="text-center my-5">
 			<b-spinner></b-spinner>
 		</div>
@@ -94,7 +94,7 @@ Vue.component('cms-product-parameter', {
 				<b-button type="submit" variant="primary" class="mt-3">Add color</b-button>
 			</b-form>
 		</b-modal>
-	</b-card>`,
+	</cms-card>`,
 	data() {
 		return {
 			parameters: null,
