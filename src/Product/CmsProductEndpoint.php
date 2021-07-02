@@ -175,7 +175,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				return $image->toArray();
 			})($product->getMainImage()),
 			'mainCategoryId' => (static fn(?ProductCategory $category): ?int => $category === null ? null : $category->getId())($product->getMainCategory()),
-			'dynamicDescriptions' => (function (array $descriptions): array {
+			'smartDescriptions' => (function (array $descriptions): array {
 				$return = [];
 				foreach ($descriptions as $description) {
 					$return[] = [
@@ -384,7 +384,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	public function postAddDynamicDescription(int $productId, string $description, int $position): void
+	public function postAddSmartDescription(int $productId, string $description, int $position): void
 	{
 		$product = $this->getProductById($productId);
 		$desc = new ProductSmartDescription($product, $description);
@@ -396,7 +396,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	public function postSaveDynamicDescription(): void
+	public function postSaveSmartDescription(): void
 	{
 		/** @var Request $request */
 		$request = $this->container->getByType(Request::class);
@@ -433,7 +433,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	public function postDeleteDynamicDescription(int $productId, int $descriptionId): void
+	public function postDeleteSmartDescription(int $productId, int $descriptionId): void
 	{
 		foreach ($this->getProductById($productId)->getSmartDescriptions() as $description) {
 			if ($description->getId() === $descriptionId) {

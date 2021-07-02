@@ -31,7 +31,7 @@ Vue.component('cms-product-overview', {
 						</div>
 						<div class="col-1">
 							<b-button type="submit" variant="primary" class="mt-3">
-								<template v-if="editDynamicDescription.uploading">
+								<template v-if="editSmartDescription.uploading">
 									<b-spinner small></b-spinner>
 								</template>
 								<template v-else>
@@ -91,42 +91,42 @@ Vue.component('cms-product-overview', {
 				<div class="col-12">
 					<div class="row">
 						<div class="col">
-							<h4>Dynamické popisky</h4>
+							<h4>Smart descriptions</h4>
 						</div>
 						<div class="col-3 text-right">
-							<b-button variant="secondary" size="sm" v-b-modal.modal-add-description>Přidat popisek</b-button>
+							<b-button variant="secondary" size="sm" v-b-modal.modal-add-description>Add description</b-button>
 						</div>
 					</div>
-					<div v-if="product.dynamicDescriptions.length === 0" class="text-center my-3">
-						<i>Dynamické popisky neexistují.</i>
+					<div v-if="product.smartDescriptions.length === 0" class="text-center text-secondary my-3">
+						<i>Here is not smart description.</i>
 					</div>
 					<table v-else class="table table-sm">
 						<tr>
-							<th>Popis</th>
-							<th width="200">Obrázek</th>
-							<th width="80">Pořadí</th>
+							<th>Description</th>
+							<th width="200">Media</th>
+							<th width="80">Position</th>
 							<th width="64"></th>
 						</tr>
-						<tr v-for="dynamicDescription in product.dynamicDescriptions">
+						<tr v-for="smartDescription in product.smartDescriptions">
 							<td>
-								<p v-if="dynamicDescription.color === null" class="text-danger">Nastavte barvu!</p>
+								<p v-if="smartDescription.color === null" class="text-danger">Please choose color!</p>
 								<div class="card px-3 py-2"
-									:style="'background:' + (dynamicDescription.color ? dynamicDescription.color : '#eee')"
-									v-html="dynamicDescription.html"></div>
+									:style="'background:' + (smartDescription.color ? smartDescription.color : '#eee')"
+									v-html="smartDescription.html"></div>
 							</td>
 							<td>
-								<template v-if="dynamicDescription.image !== null">
-									<img :src="basePath + '/' + dynamicDescription.image">
+								<template v-if="smartDescription.image !== null">
+									<img :src="basePath + '/' + smartDescription.image">
 								</template>
 							</td>
 							<td>
-								{{ dynamicDescription.position }}
+								{{ smartDescription.position }}
 							</td>
 							<td class="text-right">
 								<b-button variant="secondary" size="sm" class="px-1 py-0"
-									@click="editDescription(dynamicDescription)"
+									@click="editDescription(smartDescription)"
 									v-b-modal.modal-edit-description>edit</b-button>
-								<b-button variant="danger" size="sm" class="px-1 py-0" @click="deleteDescription(dynamicDescription.id)">smazat</b-button>
+								<b-button variant="danger" size="sm" class="px-1 py-0" @click="deleteDescription(smartDescription.id)">remove</b-button>
 							</td>
 						</tr>
 					</table>
@@ -134,52 +134,52 @@ Vue.component('cms-product-overview', {
 			</div>
 			<div class="row mt-3">
 				<div class="col">
-					<b-button type="submit" variant="primary">Uložit</b-button>
+					<b-button type="submit" variant="primary">Save</b-button>
 				</div>
 			</div>
 		</b-form>
 	</div>
-	<b-modal id="modal-add-description" title="Nový dynamický popisek" size="lg" hide-footer>
+	<b-modal id="modal-add-description" title="New smart description" size="lg" hide-footer>
 		<b-form @submit="createNewDescription">
-			Popis:
-			<textarea v-model="newDynamicDescription.description" class="form-control" rows="12"></textarea>
+			Description:
+			<textarea v-model="newSmartDescription.description" class="form-control" rows="12"></textarea>
 			<div class="row my-3">
 				<div class="col">
-					Preferované pořadí:
-					<input v-model="newDynamicDescription.position" class="form-control">
+					Position:
+					<input v-model="newSmartDescription.position" class="form-control">
 				</div>
 				<div class="col">
-					Barva pozadí:
-					<b-form-select v-model="newDynamicDescription.color" :options="dynamicColors"></b-form-select>
+					Background color:
+					<b-form-select v-model="newSmartDescription.color" :options="smartColors"></b-form-select>
 				</div>
 			</div>
-			<b-button type="submit" variant="primary" class="mt-3">Přidat nový popisek</b-button>
+			<b-button type="submit" variant="primary" class="mt-3">Add new description</b-button>
 		</b-form>
 	</b-modal>
-	<b-modal id="modal-edit-description" title="Editace dynamického popisku" size="lg" hide-footer>
+	<b-modal id="modal-edit-description" title="Edit smart description" size="lg" hide-footer>
 		<b-form @submit="saveEditDescription">
-			Popis:
-			<textarea v-model="editDynamicDescription.description" class="form-control" rows="12"></textarea>
+			Description:
+			<textarea v-model="editSmartDescription.description" class="form-control" rows="12"></textarea>
 			<div class="row my-3">
 				<div class="col">
-					Preferované pořadí:
-					<input v-model="editDynamicDescription.position" class="form-control">
+					Position:
+					<input v-model="editSmartDescription.position" class="form-control">
 				</div>
 				<div class="col">
-					Barva pozadí:
-					<b-form-select v-model="editDynamicDescription.color" :options="dynamicColors"></b-form-select>
+					Background color:
+					<b-form-select v-model="editSmartDescription.color" :options="smartColors"></b-form-select>
 				</div>
 				<div class="col">
-					Obrázek:
-					<b-form-file v-model="editDynamicDescription.file" accept="image/*"></b-form-file>
+					Image:
+					<b-form-file v-model="editSmartDescription.file" accept="image/*"></b-form-file>
 				</div>
 			</div>
 			<b-button type="submit" variant="primary" class="mt-3">
-				<template v-if="editDynamicDescription.uploading">
+				<template v-if="editSmartDescription.uploading">
 					<b-spinner small></b-spinner>
 				</template>
 				<template v-else>
-					Uložit změny
+					Save changes
 				</template>
 			</b-button>
 		</b-form>
@@ -188,12 +188,12 @@ Vue.component('cms-product-overview', {
 	data() {
 		return {
 			product: null,
-			newDynamicDescription: {
+			newSmartDescription: {
 				description: '',
 				position: 0,
 				color: null
 			},
-			editDynamicDescription: {
+			editSmartDescription: {
 				id: null,
 				description: '',
 				position: 0,
@@ -201,8 +201,8 @@ Vue.component('cms-product-overview', {
 				file: null,
 				uploading: false
 			},
-			dynamicColors: [
-				{value: null, text: 'Vyberte'},
+			smartColors: [
+				{value: null, text: '--- select ---'},
 				{value: '#F1F4F9', text: '[#F1F4F9] světle šedá'},
 				{value: '#B6B7C5', text: '[#B6B7C5] tmavě šedá'},
 				{value: '#FFBBB6', text: '[#FFBBB6] červená'},
@@ -244,12 +244,12 @@ Vue.component('cms-product-overview', {
 		},
 		createNewDescription(evt) {
 			evt.preventDefault();
-			axiosApi.post('cms-product/add-dynamic-description', {
+			axiosApi.post('cms-product/add-smart-description', {
 				productId: this.id,
-				description: this.newDynamicDescription.description,
-				position: this.newDynamicDescription.position,
+				description: this.newSmartDescription.description,
+				position: this.newSmartDescription.position,
 			}).then(req => {
-				this.newDynamicDescription = {
+				this.newSmartDescription = {
 					description: '',
 					position: 0
 				};
@@ -257,35 +257,35 @@ Vue.component('cms-product-overview', {
 			});
 		},
 		editDescription(description) {
-			this.editDynamicDescription.id = description.id;
-			this.editDynamicDescription.description = description.description;
-			this.editDynamicDescription.position = description.position;
-			this.editDynamicDescription.color = description.color;
-			this.editDynamicDescription.file = null;
+			this.editSmartDescription.id = description.id;
+			this.editSmartDescription.description = description.description;
+			this.editSmartDescription.position = description.position;
+			this.editSmartDescription.color = description.color;
+			this.editSmartDescription.file = null;
 		},
 		saveEditDescription(evt) {
 			evt.preventDefault();
-			this.editDynamicDescription.uploading = true;
+			this.editSmartDescription.uploading = true;
 
 			let formData = new FormData();
-			formData.append('id', this.editDynamicDescription.id);
-			formData.append('description', this.editDynamicDescription.description);
-			formData.append('color', this.editDynamicDescription.color);
-			formData.append('position', this.editDynamicDescription.position);
-			formData.append('image', this.editDynamicDescription.file);
+			formData.append('id', this.editSmartDescription.id);
+			formData.append('description', this.editSmartDescription.description);
+			formData.append('color', this.editSmartDescription.color);
+			formData.append('position', this.editSmartDescription.position);
+			formData.append('image', this.editSmartDescription.file);
 
-			axiosApi.post('cms-product/save-dynamic-description', formData, {
+			axiosApi.post('cms-product/save-smart-description', formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data'
 				}
 			}).then(req => {
-				this.editDynamicDescription.uploading = false;
+				this.editSmartDescription.uploading = false;
 				this.sync();
 			});
 		},
 		deleteDescription(id) {
-			if (confirm('Opravdu chcete tento popisek smazat?')) {
-				axiosApi.post('cms-product/delete-dynamic-description', {
+			if (confirm('Do you really want to delete this smart description?')) {
+				axiosApi.post('cms-product/delete-smart-description', {
 					productId: this.id,
 					descriptionId: id
 				}).then(req => {
