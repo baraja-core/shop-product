@@ -102,7 +102,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		try {
 			$product = $this->getProductById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Produkt "' . $id . '" neexistuje.');
+			$this->sendError('Product "' . $id . '" does not exist.');
 		}
 		$product->setActive(!$product->isActive());
 		$this->entityManager->flush();
@@ -115,7 +115,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		try {
 			$product = $this->getProductById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Produkt "' . $id . '" neexistuje.');
+			$this->sendError('Product "' . $id . '" does not exist.');
 		}
 
 		$product->setPosition($position);
@@ -127,7 +127,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function postCreateProduct(string $name, string $code, int $price): void
 	{
 		if (!$name || !$code || !$price) {
-			$this->sendError('Vyplňte, prosím, všechna pole.');
+			$this->sendError('Please enter all fields.');
 		}
 
 		$product = new Product($name, $code, $price);
@@ -144,7 +144,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		try {
 			$product = $this->getProductById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Produkt "' . $id . '" neexistuje.');
+			$this->sendError('Product "' . $id . '" does not exist.');
 		}
 
 		$cat = new SelectboxTree;
@@ -239,7 +239,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		}
 
 		$this->entityManager->flush();
-		$this->flashMessage('Detail produktu byl uložen.', 'success');
+		$this->flashMessage('Product has been saved.', 'success');
 		$this->sendOk();
 	}
 
@@ -275,7 +275,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
 			'variants' => $this->formatBootstrapSelectArray((static function (array $variants): array {
 				$return = [];
-				$return[null] = '--- žádná varianta ---';
+				$return[null] = '--- no variant ---';
 				foreach ($variants as $variant) {
 					$return[$variant['id']] = $variant['relationHash'];
 				}
@@ -346,10 +346,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product = $this->getProductById($productId);
 
 		if ($image === null) {
-			$this->sendError('Vyberte obrázek k uploadu.');
+			$this->sendError('Please select media to upload.');
 		}
 		if ($image->isImage() === false) {
-			$this->sendError('Nahrávaný soubor musí být obrázek.');
+			$this->sendError('Uploaded file must be a image.');
 		}
 
 		$source = date('Y-m-d') . '/' . strtolower(Random::generate(8) . '-' . $image->getSanitizedName());
@@ -418,7 +418,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$image = $request->getFile('image');
 		if ($image !== null) {
 			if ($image->isImage() === false) {
-				$this->sendError('Nahrávaný soubor musí být obrázek.');
+				$this->sendError('Uploaded file must be a image.');
 			}
 
 			$desc->setImage(
@@ -503,7 +503,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		}
 
 		$this->entityManager->flush();
-		$this->flashMessage('Parametry byly uloženy.', 'success');
+		$this->flashMessage('Parameters has been saved.', 'success');
 		$this->sendOk();
 	}
 
@@ -614,7 +614,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function actionAddRelated(int $id, int $relatedId): void
 	{
 		if ($id === $relatedId) {
-			$this->sendError('Produkt nemůže být relevantní sám k sobě.');
+			$this->sendError('The product cannot be relevant to itself.');
 		}
 
 		try { // relation exist?
@@ -725,7 +725,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			}
 		}
 		$this->entityManager->flush();
-		$this->flashMessage('Varianty produktu byly vygenerovány.', 'success');
+		$this->flashMessage('Product variants has been created.', 'success');
 		$this->sendOk();
 	}
 
@@ -921,7 +921,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			}
 			if ($notInclude !== []) {
 				throw new \InvalidArgumentException(
-					'Barvy "' . implode('", "', $notInclude) . '" nebyly nalezeny. Jsou založeny v tabulce barev?',
+					'Colors "' . implode('", "', $notInclude) . '" no found. Are they created on the color settings?',
 				);
 			}
 		}
