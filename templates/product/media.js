@@ -1,4 +1,4 @@
-Vue.component('cms-product-images', {
+Vue.component('cms-product-media', {
 	props: ['id'],
 	template: `<b-card>
 	<div v-if="images === null" class="text-center my-5">

@@ -66,14 +66,14 @@ final class ProductExtension extends CompilerExtension
 			'params' => ['id'],
 		]]);
 		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
-			'key' => 'productImages',
-			'name' => 'cms-product-images',
+			'key' => 'productMedia',
+			'name' => 'cms-product-media',
 			'implements' => ProductPlugin::class,
 			'componentClass' => VueComponent::class,
 			'view' => 'detail',
-			'source' => __DIR__ . '/../templates/product/images.js',
+			'source' => __DIR__ . '/../templates/product/media.js',
 			'position' => 60,
-			'tab' => 'Images',
+			'tab' => 'Media',
 			'params' => ['id'],
 		]]);
 		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
