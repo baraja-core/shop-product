@@ -7,7 +7,7 @@ Vue.component('cms-product-images', {
 	<div v-else class="container-fluid">
 		<div class="row">
 			<div class="col">
-				<h4>Images</h4>
+				<h4>Media</h4>
 			</div>
 			<div class="col-sm-6">
 				<b-form @submit="processUpload">
@@ -30,7 +30,7 @@ Vue.component('cms-product-images', {
 			</div>
 		</div>
 		<div v-if="images.length === 0" class="text-center my-5">
-			No images.
+			No media.
 		</div>
 		<template v-else>
 			<b-button variant="primary" @click="save">Save changes</b-button>
@@ -42,18 +42,18 @@ Vue.component('cms-product-images', {
 					<td>
 						<div>
 							<label>
-								<input type="radio" v-model="mainImageId" :value="image.id"> Hlavní?
+								<input type="radio" v-model="mainImageId" :value="image.id"> Main?
 							</label>
 						</div>
 						<div class="mt-1">
 							<input v-model="image.title" class="form-control" placeholder="Zadejte alternativní popisek">
 							<div class="row mt-2">
 								<div class="col-sm-4">
-									Pozice:<br>
+									Position:<br>
 									<b-form-spinbutton v-model="image.position" min="0" max="1000"></b-form-spinbutton>
 								</div>
 								<div class="col">
-									Varianta:<br>
+									Product variant:<br>
 									<b-form-select v-model="image.variant" :options="variants"></b-form-select>
 								</div>
 							</div>
