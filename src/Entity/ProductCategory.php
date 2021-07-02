@@ -67,7 +67,7 @@ class ProductCategory
 	{
 		$this->setName(Strings::firstUpper($name));
 		$this->code = Strings::webalize($code);
-		$this->slug = Strings::webalize($slug ?: $code);
+		$this->setSlug($slug ?: $code);
 		$this->child = new ArrayCollection;
 		$this->mainProducts = new ArrayCollection;
 		$this->products = new ArrayCollection;
@@ -134,6 +134,19 @@ class ProductCategory
 	public function getSlug(): string
 	{
 		return $this->slug;
+	}
+
+
+	public function setSlug(string $slug): void
+	{
+		$slug = trim(Strings::webalize($slug, '/'), '/');
+		if ($slug === '') {
+			$slug = $this->slug ?: Strings::webalize((string) $this->getName(), '/');
+		}
+		if ($slug === '') {
+			throw new \InvalidArgumentException('Product category slug and product name can not be empty.');
+		}
+		$this->slug = $slug;
 	}
 
 
