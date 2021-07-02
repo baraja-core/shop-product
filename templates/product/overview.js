@@ -1,6 +1,6 @@
 Vue.component('cms-product-overview', {
 	props: ['id'],
-	template: `<b-card>
+	template: `<cms-card>
 	<div v-if="product === null" class="text-center my-5">
 		<b-spinner></b-spinner>
 	</div>
@@ -184,7 +184,7 @@ Vue.component('cms-product-overview', {
 			</b-button>
 		</b-form>
 	</b-modal>
-	</b-card>`,
+	</cms-card>`,
 	data() {
 		return {
 			product: null,

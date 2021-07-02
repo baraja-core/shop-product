@@ -1,6 +1,6 @@
 Vue.component('cms-product-related', {
 	props: ['id'],
-	template: `<b-card>
+	template: `<cms-card>
 		<div class="text-right mb-3">
 			<b-button variant="primary" size="sm" v-b-modal.modal-add-related>Add related</b-button>
 		</div>
@@ -74,7 +74,7 @@ Vue.component('cms-product-related', {
 				</table>
 			</template>
 		</b-modal>
-	</b-card>`,
+	</cms-card>`,
 	data() {
 		return {
 			list: null,

@@ -1,6 +1,6 @@
 Vue.component('cms-product-media', {
 	props: ['id'],
-	template: `<b-card>
+	template: `<cms-card>
 	<div v-if="images === null" class="text-center my-5">
 		<b-spinner></b-spinner>
 	</div>
@@ -67,7 +67,7 @@ Vue.component('cms-product-media', {
 			<b-button variant="primary" @click="save">Save changes</b-button>
 		</template>
 	</div>
-</b-card>`,
+</cms-card>`,
 	data() {
 		return {
 			images: null,

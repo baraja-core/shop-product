@@ -1,6 +1,6 @@
 Vue.component('cms-product-variants', {
 	props: ['id'],
-	template: `<b-card>
+	template: `<cms-card>
 		<div v-if="list === null" class="text-center my-5">
 			<b-spinner></b-spinner>
 		</div>
@@ -94,7 +94,7 @@ Vue.component('cms-product-variants', {
 				</i>
 			</p>
 		</template>
-	</b-card>`,
+	</cms-card>`,
 	data() {
 		return {
 			list: null,
