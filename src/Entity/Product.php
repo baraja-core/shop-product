@@ -223,7 +223,14 @@ class Product
 
 	public function setSlug(string $slug): void
 	{
-		$this->slug = Strings::webalize($slug, '/');
+		$slug = trim(Strings::webalize($slug, '/'), '/');
+		if ($slug === '') {
+			$slug = $this->slug ?: Strings::webalize((string) $this->getName(), '/');
+		}
+		if ($slug === '') {
+			throw new \InvalidArgumentException('Product slug and product name can not be empty.');
+		}
+		$this->slug = $slug;
 	}
 
 
