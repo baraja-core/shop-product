@@ -153,7 +153,7 @@ class Product
 
 
 	/**
-	 * @return array<int, array<string, string|int>>
+	 * @return array<int, array{id: int, name: string, slug: string}>
 	 */
 	public function getCategoriesTree(): array
 	{
