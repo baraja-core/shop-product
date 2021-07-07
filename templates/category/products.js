@@ -8,20 +8,20 @@ Vue.component('cms-product-category-products', {
 		Work in progress.
 	</div>
 </b-card>`,
-    data() {
-        return {
-            products: null
-        }
-    },
-    created() {
-        this.sync();
-    },
-    methods: {
-        sync() {
-            axiosApi.get(`cms-product-category/products?id=${this.id}`)
-                .then(req => {
-                    this.products = req.products;
-                });
-        }
-    }
+	data() {
+		return {
+			products: null
+		}
+	},
+	created() {
+		this.sync();
+	},
+	methods: {
+		sync() {
+			axiosApi.get(`cms-product-category/products?id=${this.id}`)
+				.then(req => {
+					this.products = req.products;
+				});
+		}
+	}
 });
