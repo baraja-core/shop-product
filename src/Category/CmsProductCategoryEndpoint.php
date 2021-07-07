@@ -81,7 +81,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 		$category = new ProductCategory($name, $code ?: $name);
 		$this->entityManager->persist($category);
 		$this->entityManager->flush();
-
+		$this->flashMessage('Category has been created.', self::FLASH_MESSAGE_SUCCESS);
 		$this->sendJson(
 			[
 				'id' => $category->getId(),
