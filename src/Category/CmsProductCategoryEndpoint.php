@@ -7,6 +7,7 @@ namespace Baraja\Shop\Product\Category;
 
 use Baraja\Doctrine\EntityManager;
 use Baraja\Heureka\CategoryManager;
+use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\StructuredApi\BaseEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
@@ -65,7 +66,11 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 
 	public function actionOverview(int $id): void
 	{
-		$category = $this->getCategory($id);
+		try {
+			$category = $this->getCategory($id);
+		} catch (NoResultException | NonUniqueResultException) {
+			$this->sendError('Category "' . $id . '" does not exist.');
+		}
 
 		$this->sendJson(
 			[
@@ -89,6 +94,30 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 					'id' => $category->getHeurekaCategoryId(),
 					'isAvailable' => class_exists(CategoryManager::class),
 				],
+			]
+		);
+	}
+
+
+	public function actionProducts(int $id): void
+	{
+		try {
+			$category = $this->getCategory($id);
+		} catch (NoResultException | NonUniqueResultException) {
+			$this->sendError('Category "' . $id . '" does not exist.');
+		}
+
+		$this->sendJson(
+			[
+				'products' => $this->entityManager->getRepository(Product::class)
+					->createQueryBuilder('p')
+					->select('PARTIAL p.{id, name, price, active}')
+					->leftJoin('p.categories', 'c')
+					->where('p.mainCategory = :mainCategoryId OR c.id = :categoryId')
+					->setParameter('categoryId', $category->getId())
+					->orderBy('p.position', 'DESC')
+					->getQuery()
+					->getArrayResult(),
 			]
 		);
 	}
