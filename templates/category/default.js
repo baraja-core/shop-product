@@ -21,9 +21,9 @@ Vue.component('cms-product-category-default', {
 		<template v-else>
 			<table class="table table-sm">
 				<tr>
-					<th>Název</th>
-					<th>Rodič</th>
-					<th width="150">Kód</th>
+					<th>Name</th>
+					<th>Parent</th>
+					<th width="150">Code</th>
 					<th v-if="heurekaAvailable" width="100">Heureka ID</th>
 				</tr>
 				<tr v-for="item in items">
