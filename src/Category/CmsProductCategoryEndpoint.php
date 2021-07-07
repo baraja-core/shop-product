@@ -113,7 +113,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 					->createQueryBuilder('p')
 					->select('PARTIAL p.{id, name, price, active}')
 					->leftJoin('p.categories', 'c')
-					->where('p.mainCategory = :mainCategoryId OR c.id = :categoryId')
+					->where('p.mainCategory = :categoryId OR c.id = :categoryId')
 					->setParameter('categoryId', $category->getId())
 					->orderBy('p.position', 'DESC')
 					->getQuery()
