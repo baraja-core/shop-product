@@ -1,6 +1,6 @@
 Vue.component('cms-product-category-products', {
-    props: ['id'],
-    template: `<b-card>
+	props: ['id'],
+	template: `<b-card>
 	<div v-if="products === null" class="text-center my-5">
 		<b-spinner></b-spinner>
 	</div>
