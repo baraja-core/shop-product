@@ -47,6 +47,12 @@ class ProductCategory
 	/** @ORM\Column(type="translate", nullable=true) */
 	private ?Translation $description = null;
 
+	/** @ORM\Column(type="integer") */
+	private int $position = 0;
+
+	/** @ORM\Column(type="boolean") */
+	private bool $active = false;
+
 	/** @ORM\Column(type="integer", nullable=true) */
 	private ?int $heurekaCategoryId = null;
 
