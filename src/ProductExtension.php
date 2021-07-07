@@ -132,5 +132,16 @@ final class ProductExtension extends CompilerExtension
 			'tab' => 'Overview',
 			'params' => ['id'],
 		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productCategoryProducts',
+			'name' => 'cms-product-category-products',
+			'implements' => ProductCategoryPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/category/products.js',
+			'position' => 80,
+			'tab' => 'Products',
+			'params' => ['id'],
+		]]);
 	}
 }
