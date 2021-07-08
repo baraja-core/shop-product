@@ -437,7 +437,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 	{
 		foreach ($this->getProductById($productId)->getSmartDescriptions() as $description) {
 			if ($description->getId() === $descriptionId) {
-				$this->entityManager->remove($description)->flush();
+				$this->entityManager->remove($description);
+				$this->entityManager->flush();
 				break;
 			}
 		}
