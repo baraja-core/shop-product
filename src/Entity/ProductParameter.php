@@ -7,6 +7,7 @@ namespace Baraja\Shop\Product\Entity;
 
 use Baraja\Doctrine\Identifier\Identifier;
 use Doctrine\ORM\Mapping as ORM;
+use Nette\Utils\Strings;
 
 /**
  * @ORM\Entity()
@@ -38,9 +39,9 @@ class ProductParameter
 	public function __construct(Product $product, string $name, array $values = [], bool $variant = false)
 	{
 		$this->product = $product;
-		$this->name = $name;
-		$this->values = $values;
-		$this->variant = $variant;
+		$this->setName($name);
+		$this->setValues($values);
+		$this->setVariant($variant);
 	}
 
 
@@ -58,7 +59,7 @@ class ProductParameter
 
 	public function setName(string $name): void
 	{
-		$this->name = $name;
+		$this->name = Strings::firstUpper(trim($name, ': '));
 	}
 
 
@@ -76,7 +77,11 @@ class ProductParameter
 	 */
 	public function setValues(array $values): void
 	{
-		$this->values = array_values($values);
+		$return = [];
+		foreach (array_values($values) as $value) {
+			$return[] = trim($value);
+		}
+		$this->values = $return;
 	}
 
 
