@@ -69,7 +69,10 @@ class ProductField
 			$validators = $definition->getValidators();
 			foreach ($validators as $validator) {
 				try {
-					if (!$validator((string) $value)) {
+					if (is_callable($validator) === false) {
+						throw new \LogicException('Validator "' . $validator . '" must be callable.');
+					}
+					if (!$validator((string) $value)) { // must be falsifiable
 						throw new \InvalidArgumentException(
 							$validator . ' validator: Value "' . $value . '" is not valid.',
 						);
