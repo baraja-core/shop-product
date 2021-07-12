@@ -53,8 +53,8 @@ class ProductFieldDefinition
 
 	public function __construct(string $name, string $type)
 	{
-		$this->name = $name;
-		$this->type = $type;
+		$this->setName($name);
+		$this->setType($type);
 		$this->setLabel(Strings::firstUpper($name));
 	}
 
@@ -111,13 +111,13 @@ class ProductFieldDefinition
 
 	public function setName(string $name): void
 	{
-		$this->name = $name;
+		$this->name = Strings::webalize($name);
 	}
 
 
 	public function setType(string $type): void
 	{
-		$this->type = $type;
+		$this->type = strtolower(trim($type));
 	}
 
 
