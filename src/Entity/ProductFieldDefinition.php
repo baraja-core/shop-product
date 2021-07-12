@@ -139,6 +139,9 @@ class ProductFieldDefinition
 	}
 
 
+	/**
+	 * @param array<int, string>|null $validators
+	 */
 	public function setValidators(?array $validators): void
 	{
 		$this->validators = $validators !== null
