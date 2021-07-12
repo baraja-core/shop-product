@@ -53,7 +53,7 @@ class ProductField
 			if ($definition->isRequired() && !$value) {
 				throw new \InvalidArgumentException('Value is required.');
 			}
-			if ($definition->getLength() !== null && mb_strlen($value, 'UTF-8') > $definition->getLength()) {
+			if ($value && $definition->getLength() !== null && mb_strlen($value, 'UTF-8') > $definition->getLength()) {
 				throw new \InvalidArgumentException(
 					'Maximal allowed length is "' . $definition->getLength() . '", '
 					. 'but string "' . $value . '" (length "' . mb_strlen($value, 'UTF-8') . '") given.',
@@ -69,7 +69,7 @@ class ProductField
 			$validators = $definition->getValidators();
 			foreach ($validators as $validator) {
 				try {
-					if (!call_user_func($validator, $value)) {
+					if (!$validator((string) $value)) {
 						throw new \InvalidArgumentException(
 							$validator . ' validator: Value "' . $value . '" is not valid.',
 						);
