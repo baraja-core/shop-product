@@ -117,7 +117,15 @@ class ProductFieldDefinition
 
 	public function setType(string $type): void
 	{
-		$this->type = strtolower(trim($type));
+		$type = strtolower(trim($type));
+		$supportedTypes = ['string', 'int'];
+		if (in_array($type, $supportedTypes, true) === false) {
+			throw new \InvalidArgumentException(
+				'Type "' . $type . '" is not supported now. '
+				. 'Did you mean "' . implode('", "', $supportedTypes) . '"?',
+			);
+		}
+		$this->type = $type;
 	}
 
 
