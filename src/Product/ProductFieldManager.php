@@ -23,7 +23,7 @@ final class ProductFieldManager
 	 */
 	public function getFields(Product $product): array
 	{
-		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, label: string|null}}> $fields */
+		/** @var array<int, array{id: int, value: string|null}> $fields */
 		$fields = $this->entityManager->getRepository(ProductField::class)
 			->createQueryBuilder('field')
 			->select('PARTIAL field.{id, value}')
@@ -52,11 +52,11 @@ final class ProductFieldManager
 
 
 	/**
-	 * @return array<string, array{id: int|null, name: string, label: string, value: string|null}>
+	 * @return array<string, array{id: int|null, name: string, label: string, value: string|null, description: string|null}>
 	 */
 	public function getFieldsInfo(Product $product): array
 	{
-		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, label: string|null}}> $fields */
+		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, label: string|null, description: string|null}}> $fields */
 		$fields = $this->entityManager->getRepository(ProductField::class)
 			->createQueryBuilder('field')
 			->select('PARTIAL field.{id, value}')
