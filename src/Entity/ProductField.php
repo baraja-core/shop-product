@@ -95,6 +95,12 @@ class ProductField
 	}
 
 
+	public function getName(): string
+	{
+		return $this->definition->getName();
+	}
+
+
 	public function getDefinition(): ProductFieldDefinition
 	{
 		return $this->definition;
@@ -122,6 +128,7 @@ class ProductField
 	public function setValue(?string $value): void
 	{
 		if ($value === null) {
+			self::validate(null, $this->definition);
 			$this->value = null;
 		} else {
 			$value = trim($value);
