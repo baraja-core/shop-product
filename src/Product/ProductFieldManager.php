@@ -19,11 +19,46 @@ final class ProductFieldManager
 
 
 	/**
-	 * @return array<string, array{id: int|null, name: string, label: string, value: string|null}>
+	 * @return array<string, string|null>
 	 */
 	public function getFields(Product $product): array
 	{
-		/** @var ProductField[] $fields */
+		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, label: string|null}}> $fields */
+		$fields = $this->entityManager->getRepository(ProductField::class)
+			->createQueryBuilder('field')
+			->select('PARTIAL field.{id, value}')
+			->addSelect('PARTIAL definition.{id, name, label}')
+			->leftJoin('field.definition', 'definition')
+			->where('field.product = :productId')
+			->setParameter('productId', $product->getId())
+			->getQuery()
+			->getArrayResult();
+
+		$return = [];
+		foreach ($fields as $field) { // set current default values
+			$name = (string) $field['definition']['name'];
+			$return[$name] = ((string) $field['value']) ?: null;
+		}
+		if (count($return) !== $this->getDefinitionsCount()) {
+			foreach ($this->getDefinitions() as $definition) { // generate missing fields
+				$name = $definition->getName();
+				if (isset($return[$name]) === true) {
+					continue;
+				}
+				$return[$name] = null;
+			}
+		}
+
+		return $return;
+	}
+
+
+	/**
+	 * @return array<string, array{id: int|null, name: string, label: string, value: string|null}>
+	 */
+	public function getFieldsInfo(Product $product): array
+	{
+		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, label: string|null}}> $fields */
 		$fields = $this->entityManager->getRepository(ProductField::class)
 			->createQueryBuilder('field')
 			->select('PARTIAL field.{id, value}')
@@ -40,7 +75,8 @@ final class ProductFieldManager
 			$return[$name] = [
 				'id' => $field['id'],
 				'name' => $name,
-				'label' => (string) $field['definition']['label'],
+				'label' => ((string) $field['definition']['label']) ?: null,
+				'description' => ((string) $field['definition']['description']) ?: null,
 				'value' => $field['value'],
 			];
 		}
@@ -53,7 +89,8 @@ final class ProductFieldManager
 				$return[$name] = [
 					'id' => null,
 					'name' => $name,
-					'label' => (string) $definition->getLabel(),
+					'label' => ((string) $definition->getLabel()) ?: null,
+					'description' => ((string) $definition->getDescription()) ?: null,
 					'value' => null,
 				];
 			}
