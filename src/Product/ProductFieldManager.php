@@ -23,10 +23,12 @@ final class ProductFieldManager
 	 */
 	public function getFields(Product $product): array
 	{
-		/** @var array<int, array{id: int, value: string|null}> $fields */
+		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string}}> $fields */
 		$fields = $this->entityManager->getRepository(ProductField::class)
 			->createQueryBuilder('field')
 			->select('PARTIAL field.{id, value}')
+			->addSelect('PARTIAL definition.{id, name}')
+			->leftJoin('field.definition', 'definition')
 			->where('field.product = :productId')
 			->setParameter('productId', $product->getId())
 			->getQuery()
@@ -52,7 +54,7 @@ final class ProductFieldManager
 
 
 	/**
-	 * @return array<string, array{id: int|null, name: string, label: string, value: string|null, description: string|null}>
+	 * @return array<string, array{id: int|null, name: string, label: non-empty-string, value: non-empty-string|null, description: non-empty-string|null}>
 	 */
 	public function getFieldsInfo(Product $product): array
 	{
@@ -75,7 +77,7 @@ final class ProductFieldManager
 				'name' => $name,
 				'label' => ((string) $field['definition']['label']) ?: null,
 				'description' => ((string) $field['definition']['description']) ?: null,
-				'value' => $field['value'],
+				'value' => ((string) $field['value']) ?: null,
 			];
 		}
 		if (count($return) !== $this->getDefinitionsCount()) {
