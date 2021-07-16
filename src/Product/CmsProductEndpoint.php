@@ -221,7 +221,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		int $vat,
 		?float $standardPricePercentage,
 		bool $soldOut,
-		?int $mainCategoryId = null,
+		?int $mainCategoryId,
 		array $customFields,
 	): void {
 		$product = $this->getProductById($productId);
