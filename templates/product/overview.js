@@ -81,6 +81,25 @@ Vue.component('cms-product-overview', {
 					</div>
 				</div>
 			</div>
+			<div v-if="product.customFields.length > 0" class="row">
+				<div v-for="customField in product.customFields" class="col-3">
+					<div class="row">
+						<div class="col">
+							<span :title="customField.name">{{ customField.label }}</span>:
+							<span v-if="customField.required" class="text-danger">*</span>
+						</div>
+						<div v-if="customField.description" class="col text-secondary text-right">
+							<small>{{ customField.description }}</small>
+						</div>
+					</div>
+					<template v-if="customField.type === 'text'">
+						<textarea v-model="customField.value" class="form-control" rows="3"></textarea>
+					</template>
+					<template v-else>
+						<input v-model="customField.value" class="form-control">
+					</template>
+				</div>
+			</div>
 			<div class="row mt-3">
 				<div class="col-6">
 					Short description:
@@ -237,7 +256,8 @@ Vue.component('cms-product-overview', {
 				standardPricePercentage: this.product.standardPricePercentage,
 				vat: this.product.vat,
 				soldOut: this.product.soldOut,
-				mainCategoryId: this.product.mainCategoryId
+				mainCategoryId: this.product.mainCategoryId,
+				customFields: this.product.customFields
 			}).then(req => {
 				this.sync();
 			});

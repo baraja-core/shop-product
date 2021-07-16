@@ -58,14 +58,15 @@ final class ProductFieldManager
 	 */
 	public function getFieldsInfo(Product $product): array
 	{
-		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, label: string|null, description: string|null}}> $fields */
+		/** @var array<int, array{id: int, value: string|null, definition: array{id: int, name: string, type: string, label: string|null, description: string|null, required: bool}}> $fields */
 		$fields = $this->entityManager->getRepository(ProductField::class)
 			->createQueryBuilder('field')
 			->select('PARTIAL field.{id, value}')
-			->addSelect('PARTIAL definition.{id, name, label, description}')
+			->addSelect('PARTIAL definition.{id, name, type, label, description, required}')
 			->leftJoin('field.definition', 'definition')
 			->where('field.product = :productId')
 			->setParameter('productId', $product->getId())
+			->orderBy('definition.position', 'ASC')
 			->getQuery()
 			->getArrayResult();
 
@@ -75,9 +76,11 @@ final class ProductFieldManager
 			$return[$name] = [
 				'id' => $field['id'],
 				'name' => $name,
+				'type' => $field['definition']['type'],
 				'label' => ((string) $field['definition']['label']) ?: null,
 				'description' => ((string) $field['definition']['description']) ?: null,
 				'value' => ((string) $field['value']) ?: null,
+				'required' => $field['definition']['required'],
 			];
 		}
 		if (count($return) !== $this->getDefinitionsCount()) {
@@ -89,14 +92,16 @@ final class ProductFieldManager
 				$return[$name] = [
 					'id' => null,
 					'name' => $name,
+					'type' => $definition->getType(),
 					'label' => ((string) $definition->getLabel()) ?: null,
 					'description' => ((string) $definition->getDescription()) ?: null,
 					'value' => null,
+					'required' => $definition->isRequired(),
 				];
 			}
 		}
 
-		return $return;
+		return array_values($return);
 	}
 
 

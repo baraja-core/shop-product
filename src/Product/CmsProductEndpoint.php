@@ -33,7 +33,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function __construct(
 		private EntityManager $entityManager,
 		private CommonMarkRenderer $renderer,
-		private Search $search
+		private Search $search,
+		private ProductFieldManager $productFieldManager,
 	) {
 	}
 
@@ -175,6 +176,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				return $image->toArray();
 			})($product->getMainImage()),
 			'mainCategoryId' => (static fn(?ProductCategory $category): ?int => $category === null ? null : $category->getId())($product->getMainCategory()),
+			'customFields' => $this->productFieldManager->getFieldsInfo($product),
 			'smartDescriptions' => (function (array $descriptions): array {
 				$return = [];
 				foreach ($descriptions as $description) {
@@ -204,6 +206,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
+	/**
+	 * @param array<int, array{id: int|null, name: string, value: string|null}> $customFields
+	 */
 	public function postSave(
 		int $productId,
 		string $name,
@@ -217,6 +222,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		?float $standardPricePercentage,
 		bool $soldOut,
 		?int $mainCategoryId = null,
+		array $customFields,
 	): void {
 		$product = $this->getProductById($productId);
 		$product->setName($name);
@@ -236,6 +242,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 			/** @var ProductCategory $mainCategory */
 			$mainCategory = $this->entityManager->getRepository(ProductCategory::class)->find($mainCategoryId);
 			$product->setMainCategory($mainCategory);
+		}
+		if ($customFields !== []) {
+			$saveFields = [];
+			foreach ($customFields as $customField) {
+				$saveFields[$customField['name']] = $customField['value'];
+			}
+			$this->productFieldManager->setFields($product, $saveFields);
 		}
 
 		$this->entityManager->flush();
