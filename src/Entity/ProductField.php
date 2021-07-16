@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product\Entity;
 
 
 use Baraja\Doctrine\Identifier\IdentifierUnsigned;
+use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -17,6 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
 class ProductField
 {
 	use IdentifierUnsigned;
+	use TranslateObject;
 
 	#[ORM\ManyToOne(targetEntity: ProductFieldDefinition::class)]
 	private ProductFieldDefinition $definition;
@@ -50,10 +52,14 @@ class ProductField
 	{
 		$value = ((string) $value) ?: null;
 		try {
-			if ($definition->isRequired() && !$value) {
+			if ($value && is_numeric($value) === false && $definition->getType() === 'int') {
+				throw new \InvalidArgumentException('Value must be a number, but "' . $value . '" given.');
+			}
+			if (!$value && $definition->isRequired()) {
 				throw new \InvalidArgumentException('Value is required.');
 			}
-			if ($value && $definition->getLength() !== null && mb_strlen($value, 'UTF-8') > $definition->getLength()) {
+			$length = $definition->getLength();
+			if ($value && $length !== null && mb_strlen($value, 'UTF-8') > $length) {
 				throw new \InvalidArgumentException(
 					'Maximal allowed length is "' . $definition->getLength() . '", '
 					. 'but string "' . $value . '" (length "' . mb_strlen($value, 'UTF-8') . '") given.',
@@ -138,6 +144,8 @@ class ProductField
 				$this->value = $translation;
 			}
 		}
-		$this->updatedDate = new \DateTimeImmutable;
+		if ((string) $this->value !== (string) $value) {
+			$this->updatedDate = new \DateTimeImmutable;
+		}
 	}
 }

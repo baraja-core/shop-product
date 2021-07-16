@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product\Entity;
 
 
 use Baraja\Doctrine\Identifier\IdentifierUnsigned;
+use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
@@ -21,6 +22,7 @@ use Nette\Utils\Strings;
 class ProductFieldDefinition
 {
 	use IdentifierUnsigned;
+	use TranslateObject;
 
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $name;
@@ -40,8 +42,11 @@ class ProductFieldDefinition
 	#[ORM\Column(type: 'integer', nullable: true)]
 	private ?int $length = null;
 
-	#[ORM\Column(type: 'boolean')]
+	#[ORM\Column(name: '`unique`', type: 'boolean')]
 	private bool $unique = false;
+
+	#[ORM\Column(type: 'integer')]
+	private int $position = 0;
 
 	#[ORM\Column(type: 'string', length: 500, nullable: true)]
 	private ?string $validators = null;
@@ -89,6 +94,21 @@ class ProductFieldDefinition
 	}
 
 
+	public function getPosition(): int
+	{
+		return $this->position;
+	}
+
+
+	public function setPosition(int $position): void
+	{
+		if ($position < 0) {
+			$position = 0;
+		}
+		$this->position = $position;
+	}
+
+
 	/**
 	 * @return array<int, string>
 	 */
@@ -118,7 +138,7 @@ class ProductFieldDefinition
 	public function setType(string $type): void
 	{
 		$type = strtolower(trim($type));
-		$supportedTypes = ['string', 'int'];
+		$supportedTypes = ['string', 'text', 'int'];
 		if (in_array($type, $supportedTypes, true) === false) {
 			throw new \InvalidArgumentException(
 				'Type "' . $type . '" is not supported now. '
@@ -137,6 +157,9 @@ class ProductFieldDefinition
 
 	public function setLength(?int $length): void
 	{
+		if ($length === 0) {
+			$length = null;
+		}
 		$this->length = $length;
 	}
 

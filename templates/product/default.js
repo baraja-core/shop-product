@@ -5,6 +5,7 @@ Vue.component('cms-product-default', {
 			<h1>Products</h1>
 		</div>
 		<div class="col-3 text-right">
+			<b-button variant="secondary" v-b-modal.modal-field-manager>Field manager</b-button>
 			<b-button variant="primary" v-b-modal.modal-new-product>New product</b-button>
 		</div>
 	</div>
@@ -123,6 +124,78 @@ Vue.component('cms-product-default', {
 			<b-button type="submit" variant="primary" class="mt-3">Create new product</b-button>
 		</b-form>
 	</b-modal>
+	<b-modal id="modal-field-manager" title="Product field manager" size="xl" @shown="syncCustomFields" hide-footer>
+		<div v-if="customField.list === null" class="text-center my-5">
+			<b-spinner></b-spinner>
+		</div>
+		<template v-else>
+			<div class="mb-3 text-right">
+				<b-button variant="primary" size="sm" v-b-modal.modal-new-field-definition>Add field</b-button>
+			</div>
+			<div v-if="customField.list.length === 0" class="text-center my-5 text-secondary">
+				Field definition list is empty.
+			</div>
+			<table v-else class="table table-sm">
+				<tr>
+					<th>Name / Label</th>
+					<th width="160">Value type</th>
+					<th>Description</th>
+					<th width="80" class="text-center">Required</th>
+					<th width="80" class="text-center">Length</th>
+					<th width="80" class="text-center">Unique</th>
+					<th width="80" class="text-center">Position</th>
+				</tr>
+				<tr v-for="fieldDefinition in customField.list">
+					<td>
+						<table class="w-100" cellspacing="0" cellpadding="0">
+							<tr>
+								<th class="p-0" style="border:0">Name:</th>
+								<td class="py-0" style="border:0">
+									<input v-model="fieldDefinition.name" class="form-control form-control-sm">
+								</td>
+							</tr>
+							<tr>
+								<th class="p-0" style="border:0">Label:</th>
+								<td class="py-0" style="border:0">
+									<input v-model="fieldDefinition.label" class="form-control form-control-sm">
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<b-form-select size="sm" v-model="fieldDefinition.type" :options="customField.types"></b-form-select>
+					</td>
+					<td class="text-secondary">
+						<textarea v-model="fieldDefinition.description" class="form-control form-control-sm" rows="2"></textarea>
+					</td>
+					<td class="text-center">
+						<button :class="['btn', 'btn-sm', 'py-0', fieldDefinition.required ? 'btn-success' : 'btn-danger']" @click="fieldDefinition.required=!fieldDefinition.required">
+							{{ fieldDefinition.required ? 'YES' : 'NO' }}
+						</button>
+					</td>
+					<td><input type="number" v-model="fieldDefinition.length" class="form-control form-control-sm"></td>
+					<td class="text-center">
+						<button :class="['btn', 'btn-sm', 'py-0', fieldDefinition.unique ? 'btn-success' : 'btn-danger']" @click="fieldDefinition.unique=!fieldDefinition.unique">
+							{{ fieldDefinition.unique ? 'YES' : 'NO' }}
+						</button>
+					</td>
+					<td><input type="number" v-model="fieldDefinition.position" class="form-control form-control-sm"></td>
+				</tr>
+			</table>
+			<b-button type="submit" variant="primary" class="mt-3" @click="saveCustomFields">Save</b-button>
+		</template>
+	</b-modal>
+	<b-modal id="modal-new-field-definition" title="Create new field definition" hide-footer>
+		<div class="mb-3">
+			Name <span class="text-secondary">(must be unique)</span>:
+			<input v-model="customField.newDefinition.name" class="form-control">
+		</div>
+		<div class="mb-3">
+			Type:
+			<b-form-select v-model="customField.newDefinition.type" :options="customField.types"></b-form-select>
+		</div>
+		<b-button type="submit" variant="primary" class="mt-3" @click="addDefinition">Create</b-button>
+	</b-modal>
 </div>`,
 	data() {
 		return {
@@ -150,7 +223,19 @@ Vue.component('cms-product-default', {
 				{value: 512, text: '512'},
 				{value: 1024, text: '1024'},
 				{value: 2048, text: '2048'}
-			]
+			],
+			customField: {
+				list: null,
+				newDefinition: {
+					name: '',
+					type: 'string'
+				},
+				types: [
+					{value: 'string', text: 'Single line text'},
+					{value: 'text', text: 'Multi line text'},
+					{value: 'int', text: 'Number (int)'}
+				]
+			}
 		}
 	},
 	created() {
@@ -168,6 +253,16 @@ Vue.component('cms-product-default', {
 					this.count = req.data.count;
 					this.items = req.data.items;
 					this.paginator = req.data.paginator;
+				});
+		},
+		syncCustomFields(flush = false) {
+			if (this.customField.list !== null && flush === false) {
+				return;
+			}
+			this.customField.list = null;
+			axiosApi.get('cms-product-field')
+				.then(req => {
+					this.customField.list = req.data.items;
 				});
 		},
 		syncPaginator() {
@@ -206,6 +301,21 @@ Vue.component('cms-product-default', {
 				position: position
 			}).then(req => {
 				this.sync();
+			});
+		},
+		addDefinition() {
+			axiosApi.post('cms-product-field/add-definition', {
+				name: this.customField.newDefinition.name,
+				type: this.customField.newDefinition.type
+			}).then(req => {
+				this.syncCustomFields(true);
+			});
+		},
+		saveCustomFields() {
+			axiosApi.post('cms-product-field/save', {
+				fields: this.customField.list
+			}).then(req => {
+				this.syncCustomFields(true);
 			});
 		}
 	}
