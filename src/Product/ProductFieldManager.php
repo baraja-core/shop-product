@@ -54,7 +54,7 @@ final class ProductFieldManager
 
 
 	/**
-	 * @return array<string, array{id: int|null, name: string, 'type' => string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, 'required' => bool}>
+	 * @return array<string, array{id: int|null, name: string, type: string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, required: bool}>
 	 */
 	public function getFieldsInfo(Product $product): array
 	{
