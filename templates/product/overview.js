@@ -119,7 +119,7 @@ Vue.component('cms-product-overview', {
 					<div v-if="product.smartDescriptions.length === 0" class="text-center text-secondary my-3">
 						<i>Here is not smart description.</i>
 					</div>
-					<table v-else class="table table-sm">
+					<table v-else class="table table-sm cms-table-no-border-top">
 						<tr>
 							<th>Description</th>
 							<th width="200">Media</th>
@@ -128,10 +128,12 @@ Vue.component('cms-product-overview', {
 						</tr>
 						<tr v-for="smartDescription in product.smartDescriptions">
 							<td>
-								<p v-if="smartDescription.color === null" class="text-danger">Please choose color!</p>
 								<div class="card px-3 py-2"
 									:style="'background:' + (smartDescription.color ? smartDescription.color : '#eee')"
 									v-html="smartDescription.html"></div>
+								<div v-if="smartDescription.color === null" class="text-right">
+									<small class="text-danger">no color</small>
+								</div>
 							</td>
 							<td>
 								<template v-if="smartDescription.image !== null">
