@@ -59,7 +59,7 @@ class ProductCategory
 	private $mainProducts;
 
 	/** @var Product[]|Collection */
-	#[ORM\ManyToMany(targetEntity: ProductCategory::class, mappedBy: 'products')]
+	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'categories')]
 	private $products;
 
 
