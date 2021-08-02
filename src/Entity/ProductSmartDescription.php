@@ -11,29 +11,29 @@ use Baraja\Localization\Translation;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product_description")
  * @method Translation getDescription(?string $locale = null)
  * @method void setDescription(string $content, ?string $locale = null)
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product_description')]
 class ProductSmartDescription
 {
 	use Identifier;
 	use TranslateObject;
 
-	/** @ORM\ManyToOne(targetEntity="Product", inversedBy="smartDescriptions") */
+	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'smartDescriptions')]
 	private Product $product;
 
-	/** @ORM\Column(type="translate") */
+	#[ORM\Column(type: 'translate')]
 	private Translation $description;
 
-	/** @ORM\Column(type="string", length=128, nullable=true) */
+	#[ORM\Column(type: 'string', length: 128, nullable: true)]
 	private ?string $image = null;
 
-	/** @ORM\Column(type="string", length=8, nullable=true) */
+	#[ORM\Column(type: 'string', length: 8, nullable: true)]
 	private ?string $color = null;
 
-	/** @ORM\Column(type="smallint") */
+	#[ORM\Column(type: 'smallint')]
 	private int $position = 0;
 
 

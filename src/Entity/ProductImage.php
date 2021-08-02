@@ -12,35 +12,31 @@ use Baraja\Url\Url;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product_image")
  * @method Translation|null getTitle(?string $locale = null)
  * @method void setTitle(?string $content = null, ?string $locale = null)
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product_image')]
 class ProductImage
 {
 	use IdentifierUnsigned;
 	use TranslateObject;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Product", inversedBy="images", cascade={"persist"})
-	 * @ORM\JoinColumn(name="product_id", referencedColumnName="id", onDelete="CASCADE")
-	 */
+	#[ORM\ManyToOne(targetEntity: Product::class, cascade: ['persist'], inversedBy: 'images')]
+	#[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
 	private Product $product;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="ProductVariant", cascade={"persist"})
-	 * @ORM\JoinColumn(name="variant_id", referencedColumnName="id", onDelete="CASCADE")
-	 */
+	#[ORM\ManyToOne(targetEntity: ProductVariant::class, cascade: ['persist'])]
+	#[ORM\JoinColumn(name: 'variant_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
 	private ?ProductVariant $variant;
 
-	/** @ORM\Column(type="string") */
+	#[ORM\Column(type: 'string')]
 	private string $source;
 
-	/** @ORM\Column(type="translate", nullable=true) */
+	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $title = null;
 
-	/** @ORM\Column(type="integer") */
+	#[ORM\Column(type: 'integer')]
 	private int $position = 0;
 
 

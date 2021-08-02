@@ -8,18 +8,16 @@ namespace Baraja\Shop\Product\Entity;
 use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(name="shop__related_product")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__related_product')]
 class RelatedProduct
 {
 	use IdentifierUnsigned;
 
-	/** @ORM\ManyToOne(targetEntity="Product", inversedBy="productRelatedBasic") */
+	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'productRelatedBasic')]
 	private Product $product;
 
-	/** @ORM\ManyToOne(targetEntity="Product", inversedBy="productRelatedRelated") */
+	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'productRelatedRelated')]
 	private Product $relatedProduct;
 
 

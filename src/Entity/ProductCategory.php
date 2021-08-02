@@ -14,58 +14,52 @@ use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product_category")
  * @method Translation getName(?string $locale = null)
  * @method void setName(string $content, ?string $locale = null)
  * @method Translation|null getDescription(?string $locale = null)
  * @method void setDescription(?string $content = null, ?string $locale = null)
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product_category')]
 class ProductCategory
 {
 	use Identifier;
 	use TranslateObject;
 
-	/** @ORM\ManyToOne(targetEntity="ProductCategory", inversedBy="child") */
+	#[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'child')]
 	private ?self $parent = null;
 
-	/**
-	 * @var self[]|Collection
-	 * @ORM\OneToMany(targetEntity="ProductCategory", mappedBy="parent")
-	 */
+	/** @var self[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class)]
 	private $child;
 
-	/** @ORM\Column(type="translate") */
+	#[ORM\Column(type: 'translate')]
 	private Translation $name;
 
-	/** @ORM\Column(type="string", length=64, unique=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
 
-	/** @ORM\Column(type="string", length=64, unique=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $slug;
 
-	/** @ORM\Column(type="translate", nullable=true) */
+	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $description = null;
 
-	/** @ORM\Column(type="integer") */
+	#[ORM\Column(type: 'integer')]
 	private int $position = 0;
 
-	/** @ORM\Column(type="boolean") */
+	#[ORM\Column(type: 'boolean')]
 	private bool $active = false;
 
-	/** @ORM\Column(type="integer", nullable=true) */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private ?int $heurekaCategoryId = null;
 
-	/**
-	 * @var Product[]|Collection
-	 * @ORM\OneToMany(targetEntity="Product", mappedBy="mainCategory")
-	 */
+	/** @var Product[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'mainCategory', targetEntity: Product::class)]
 	private $mainProducts;
 
-	/**
-	 * @var Product[]|Collection
-	 * @ORM\ManyToMany(targetEntity="ProductCategory", mappedBy="products")
-	 */
+	/** @var Product[]|Collection */
+	#[ORM\ManyToMany(targetEntity: ProductCategory::class, mappedBy: 'products')]
 	private $products;
 
 

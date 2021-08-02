@@ -14,29 +14,27 @@ use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product_label")
  * @method Translation getName(?string $locale = null)
  * @method void setName(string $content, ?string $locale = null)
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product_label')]
 class ProductLabel
 {
 	use Identifier;
 	use TranslateObject;
 
-	/** @ORM\Column(type="translate") */
+	#[ORM\Column(type: 'translate')]
 	private Translation $name;
 
-	/** @ORM\Column(type="string", length=64, unique=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
 
-	/** @ORM\Column(type="string", length=7) */
+	#[ORM\Column(type: 'string', length: 7)]
 	private string $color;
 
-	/**
-	 * @var Product[]|Collection
-	 * @ORM\ManyToMany(targetEntity="Product", mappedBy="labels")
-	 */
+	/** @var Product[]|Collection */
+	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'labels')]
 	private $products;
 
 

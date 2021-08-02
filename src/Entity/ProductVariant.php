@@ -9,33 +9,31 @@ use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product_variant")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product_variant')]
 class ProductVariant
 {
 	use IdentifierUnsigned;
 
-	/** @ORM\ManyToOne(targetEntity="Product", inversedBy="variants") */
+	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'variants')]
 	private Product $product;
 
-	/** @ORM\Column(type="string", length=64) */
+	#[ORM\Column(type: 'string', length: 64)]
 	private string $relationHash;
 
-	/** @ORM\Column(type="string", unique=true, length=64, nullable=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true, nullable: true)]
 	private ?string $ean = null;
 
-	/** @ORM\Column(type="string", unique=true, length=64, nullable=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true, nullable: true)]
 	private ?string $code = null;
 
-	/** @ORM\Column(type="float", nullable=true) */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private ?float $price = null;
 
-	/** @ORM\Column(type="float", nullable=true) */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private ?float $priceAddition = null;
 
-	/** @ORM\Column(type="boolean") */
+	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = false;
 
 

@@ -17,115 +17,100 @@ use Nette\Utils\Floats;
 use Nette\Utils\Strings;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product")
  * @method Translation getName(?string $locale = null)
  * @method void setName(string $content, ?string $locale = null)
  * @method Translation|null getShortDescription(?string $locale = null)
  * @method void setShortDescription(?string $content = null, ?string $locale = null)
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product')]
 class Product
 {
 	use Identifier;
 	use TranslateObject;
 
-	/** @ORM\Column(type="translate") */
+	#[ORM\Column(type: 'translate')]
 	private Translation $name;
 
-	/** @ORM\Column(type="string", length=64, unique=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
 
-	/** @ORM\Column(type="string", length=64, unique=true, nullable=true) */
+	#[ORM\Column(type: 'string', length: 64, unique: true, nullable: true)]
 	private ?string $ean;
 
-	/** @ORM\Column(type="string", length=80, unique=true) */
+	#[ORM\Column(type: 'string', length: 80, unique: true)]
 	private string $slug;
 
-	/** @ORM\Column(type="integer", nullable=true, unique=true) */
+	#[ORM\Column(type: 'integer', unique: true, nullable: true)]
 	private ?int $oldId = null;
 
-	/** @ORM\ManyToOne(targetEntity="ProductImage") */
+	#[ORM\ManyToOne(targetEntity: ProductImage::class)]
 	private ?ProductImage $mainImage;
 
-	/**
-	 * @var ProductImage[]|Collection
-	 * @ORM\OneToMany(targetEntity="ProductImage", mappedBy="product")
-	 */
+	/** @var ProductImage[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class)]
 	private $images;
 
-	/** @ORM\Column(type="translate", nullable=true) */
+	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $shortDescription;
 
-	/**
-	 * @deprecated since 2021-03-10
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	/** @deprecated since 2021-03-10 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private ?string $description = null;
 
-	/** @ORM\Column(type="float") */
+	#[ORM\Column(type: 'float')]
 	private float $price;
 
-	/** @ORM\Column(type="float", nullable=true) */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private ?float $standardPricePercentage = null;
 
-	/** @ORM\Column(type="integer") */
+	#[ORM\Column(type: 'integer')]
 	private int $position = 0;
 
-	/** @ORM\Column(type="boolean") */
+	#[ORM\Column(type: 'boolean')]
 	private bool $active = false;
 
-	/** @ORM\Column(type="boolean") */
+	#[ORM\Column(type: 'boolean')]
 	private bool $showInFeed = true;
 
-	/** @ORM\Column(type="boolean") */
+	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = true;
 
-	/** @ORM\Column(type="smallint", nullable=true) */
+	#[ORM\Column(type: 'smallint', nullable: true)]
 	private ?int $vat = null;
 
-	/** @ORM\ManyToOne(targetEntity="ProductCategory", inversedBy="mainProducts") */
+	#[ORM\ManyToOne(targetEntity: ProductCategory::class, inversedBy: 'mainProducts')]
 	private ?ProductCategory $mainCategory;
 
-	/**
-	 * @var ProductCategory[]|Collection
-	 * @ORM\ManyToMany(targetEntity="ProductCategory", inversedBy="products")
-	 */
+	#[ORM\ManyToOne(targetEntity: ProductManufacturer::class)]
+	private ?ProductManufacturer $manufacturer = null;
+
+	/** @var ProductCategory[]|Collection */
+	#[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
 	private $categories;
 
-	/**
-	 * @var ProductLabel[]|Collection
-	 * @ORM\ManyToMany(targetEntity="ProductLabel", inversedBy="products")
-	 */
+	/** @var ProductLabel[]|Collection */
+	#[ORM\ManyToMany(targetEntity: ProductLabel::class, inversedBy: 'products')]
 	private $labels;
 
-	/**
-	 * @var ProductSmartDescription[]|Collection
-	 * @ORM\OneToMany(targetEntity="ProductSmartDescription", mappedBy="product")
-	 */
+	/** @var ProductSmartDescription[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductSmartDescription::class)]
 	private $smartDescriptions;
 
-	/**
-	 * @var ProductParameter[]|Collection
-	 * @ORM\OneToMany(targetEntity="ProductParameter", mappedBy="product")
-	 */
+	/** @var ProductParameter[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductParameter::class)]
 	private $parameters;
 
-	/**
-	 * @var ProductVariant[]|Collection
-	 * @ORM\OneToMany(targetEntity="ProductVariant", mappedBy="product")
-	 */
+	/** @var ProductVariant[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductVariant::class)]
 	private $variants;
 
-	/**
-	 * @var RelatedProduct[]|Collection
-	 * @ORM\OneToMany(targetEntity="RelatedProduct", mappedBy="product")
-	 */
+	/** @var RelatedProduct[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'product', targetEntity: RelatedProduct::class)]
 	private $productRelatedBasic;
 
-	/**
-	 * @var RelatedProduct[]|Collection
-	 * @ORM\OneToMany(targetEntity="RelatedProduct", mappedBy="relatedProduct")
-	 */
+	/** @var RelatedProduct[]|Collection */
+	#[ORM\OneToMany(mappedBy: 'relatedProduct', targetEntity: RelatedProduct::class)]
 	private $productRelatedRelated;
 
 
@@ -374,6 +359,18 @@ class Product
 	public function setMainCategory(?ProductCategory $mainCategory): void
 	{
 		$this->mainCategory = $mainCategory;
+	}
+
+
+	public function getManufacturer(): ?ProductManufacturer
+	{
+		return $this->manufacturer;
+	}
+
+
+	public function setManufacturer(?ProductManufacturer $manufacturer): void
+	{
+		$this->manufacturer = $manufacturer;
 	}
 
 

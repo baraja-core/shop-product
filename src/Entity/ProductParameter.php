@@ -9,27 +9,23 @@ use Baraja\Doctrine\Identifier\Identifier;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(name="shop__product_parameter")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'shop__product_parameter')]
 class ProductParameter
 {
 	use Identifier;
 
-	/** @ORM\ManyToOne(targetEntity="Product", inversedBy="parameters") */
+	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'parameters')]
 	private Product $product;
 
-	/** @ORM\Column(type="string") */
+	#[ORM\Column(type: 'string')]
 	private string $name;
 
-	/**
-	 * @var string[]
-	 * @ORM\Column(type="simple_array", name="`values`")
-	 */
+	/** @var string[] */
+	#[ORM\Column(name: '`values`', type: 'simple_array')]
 	private array $values;
 
-	/** @ORM\Column(type="boolean") */
+	#[ORM\Column(type: 'boolean')]
 	private bool $variant;
 
 
