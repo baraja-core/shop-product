@@ -34,7 +34,7 @@ final class ProductExtension extends CompilerExtension
 			->setFactory(ProductManager::class);
 
 		$builder->addAccessorDefinition($this->prefix('productManagerAccessor'))
-			->setAutowired(ProductManagerAccessor::class);
+			->setImplement(ProductManagerAccessor::class);
 
 		$builder->addDefinition($this->prefix('productFieldManager'))
 			->setFactory(ProductFieldManager::class);
