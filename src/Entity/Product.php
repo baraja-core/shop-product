@@ -49,6 +49,7 @@ class Product
 
 	/** @var ProductImage[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class)]
+	#[ORM\OrderBy(['position' => 'DESC'])]
 	private $images;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
@@ -87,6 +88,7 @@ class Product
 
 	/** @var ProductCategory[]|Collection */
 	#[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
+	#[ORM\OrderBy(['position' => 'DESC'])]
 	private $categories;
 
 	/** @var ProductLabel[]|Collection */
@@ -95,6 +97,7 @@ class Product
 
 	/** @var ProductSmartDescription[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductSmartDescription::class)]
+	#[ORM\OrderBy(['position' => 'DESC'])]
 	private $smartDescriptions;
 
 	/** @var ProductParameter[]|Collection */
