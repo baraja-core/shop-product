@@ -30,6 +30,12 @@ final class ProductExtension extends CompilerExtension
 		PluginComponentExtension::defineBasicServices($builder);
 		OrmAnnotationsExtension::addAnnotationPathToManager($builder, 'Baraja\Shop\Product\Entity', __DIR__ . '/Entity');
 
+		$builder->addDefinition($this->prefix('productManager'))
+			->setFactory(ProductManager::class);
+
+		$builder->addAccessorDefinition($this->prefix('productManagerAccessor'))
+			->setAutowired(ProductManagerAccessor::class);
+
 		$builder->addDefinition($this->prefix('productFieldManager'))
 			->setFactory(ProductFieldManager::class);
 
