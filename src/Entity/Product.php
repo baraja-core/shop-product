@@ -21,6 +21,8 @@ use Nette\Utils\Strings;
  * @method void setName(string $content, ?string $locale = null)
  * @method Translation|null getShortDescription(?string $locale = null)
  * @method void setShortDescription(?string $content = null, ?string $locale = null)
+ * @method Translation|null getDescription(?string $locale = null)
+ * @method void setDescription(?string $content = null, ?string $locale = null)
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'shop__product')]
@@ -41,7 +43,7 @@ class Product
 	#[ORM\Column(type: 'string', length: 80, unique: true)]
 	private string $slug;
 
-	#[ORM\Column(type: 'integer', unique: true, nullable: true)]
+	#[ORM\Column(type: 'integer', unique: true, nullable: true, options: ['unsigned' => true])]
 	private ?int $oldId = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductImage::class)]
@@ -55,17 +57,16 @@ class Product
 	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $shortDescription;
 
-	/** @deprecated since 2021-03-10 */
-	#[ORM\Column(type: 'text', nullable: true)]
-	private ?string $description = null;
+	#[ORM\Column(type: 'translate', nullable: true)]
+	private ?Translation $description = null;
 
-	#[ORM\Column(type: 'float')]
+	#[ORM\Column(type: 'float', options: ['unsigned' => true])]
 	private float $price;
 
-	#[ORM\Column(type: 'float', nullable: true)]
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
 	private ?float $standardPricePercentage = null;
 
-	#[ORM\Column(type: 'integer')]
+	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;
 
 	#[ORM\Column(type: 'boolean')]
@@ -77,7 +78,7 @@ class Product
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = true;
 
-	#[ORM\Column(type: 'smallint', nullable: true)]
+	#[ORM\Column(type: 'smallint', nullable: true, options: ['unsigned' => true])]
 	private ?int $vat = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductCategory::class, inversedBy: 'mainProducts')]
@@ -85,6 +86,18 @@ class Product
 
 	#[ORM\ManyToOne(targetEntity: ProductManufacturer::class)]
 	private ?ProductManufacturer $manufacturer = null;
+
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
+	private ?float $sizeWidth = null;
+
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
+	private ?float $sizeLength = null;
+
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
+	private ?float $sizeThickness = null;
+
+	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
+	private ?int $weight = null;
 
 	/** @var ProductCategory[]|Collection */
 	#[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
@@ -461,5 +474,81 @@ class Product
 	public function getVariants()
 	{
 		return $this->variants;
+	}
+
+
+	public function getMaximalSize(): ?float
+	{
+		$max = max([$this->sizeWidth ?? -1.0, $this->sizeLength ?? -1.0, $this->sizeThickness ?? -1.0]);
+
+		return $max > 0 ? $max : null;
+	}
+
+
+	public function getMinimalSize(): ?float
+	{
+		$min = min([$this->sizeWidth ?? -1.0, $this->sizeLength ?? -1.0, $this->sizeThickness ?? -1.0]);
+
+		return $min > 0 ? $min : null;
+	}
+
+
+	public function getSizeWidth(): ?float
+	{
+		return $this->sizeWidth;
+	}
+
+
+	public function setSizeWidth(?float $value): void
+	{
+		if ($value !== null && $value <= 0) {
+			throw new \InvalidArgumentException('Size can not be negative, but "' . $value . '" given.');
+		}
+		$this->sizeWidth = $value;
+	}
+
+
+	public function getSizeLength(): ?float
+	{
+		return $this->sizeLength;
+	}
+
+
+	public function setSizeLength(?float $value): void
+	{
+		if ($value !== null && $value <= 0) {
+			throw new \InvalidArgumentException('Size can not be negative, but "' . $value . '" given.');
+		}
+		$this->sizeLength = $value;
+	}
+
+
+	public function getSizeThickness(): ?float
+	{
+		return $this->sizeThickness;
+	}
+
+
+	public function setSizeThickness(?float $value): void
+	{
+		if ($value !== null && $value <= 0) {
+			throw new \InvalidArgumentException('Size can not be negative, but "' . $value . '" given.');
+		}
+		$this->sizeThickness = $value;
+	}
+
+
+	public function getWeight(): ?int
+	{
+		return $this->weight;
+	}
+
+
+	public function setWeight(?int $value): void
+	{
+		if ($value !== null && $value <= 0) {
+			throw new \InvalidArgumentException('Weight can not be negative, but "' . $value . '" given.');
+		}
+		$this->weight = $value;
 	}
 }
