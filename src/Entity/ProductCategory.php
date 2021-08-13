@@ -45,13 +45,13 @@ class ProductCategory
 	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $description = null;
 
-	#[ORM\Column(type: 'integer')]
+	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;
 
 	#[ORM\Column(type: 'boolean')]
 	private bool $active = false;
 
-	#[ORM\Column(type: 'integer', nullable: true)]
+	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
 	private ?int $heurekaCategoryId = null;
 
 	/** @var Product[]|Collection */

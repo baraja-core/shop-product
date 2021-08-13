@@ -39,13 +39,13 @@ class ProductFieldDefinition
 	#[ORM\Column(type: 'boolean')]
 	private bool $required = false;
 
-	#[ORM\Column(type: 'integer', nullable: true)]
+	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
 	private ?int $length = null;
 
 	#[ORM\Column(name: '`unique`', type: 'boolean')]
 	private bool $unique = false;
 
-	#[ORM\Column(type: 'integer')]
+	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;
 
 	#[ORM\Column(type: 'string', length: 500, nullable: true)]

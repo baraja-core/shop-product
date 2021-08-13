@@ -27,10 +27,10 @@ class ProductVariant
 	#[ORM\Column(type: 'string', length: 64, unique: true, nullable: true)]
 	private ?string $code = null;
 
-	#[ORM\Column(type: 'float', nullable: true)]
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
 	private ?float $price = null;
 
-	#[ORM\Column(type: 'float', nullable: true)]
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
 	private ?float $priceAddition = null;
 
 	#[ORM\Column(type: 'boolean')]
