@@ -258,6 +258,7 @@ Vue.component('cms-product-overview', {
 				slug: this.product.slug,
 				active: this.product.active,
 				shortDescription: this.product.shortDescription,
+				description: this.product.description,
 				price: this.product.price,
 				standardPricePercentage: this.product.standardPricePercentage,
 				vat: this.product.vat,
