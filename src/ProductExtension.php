@@ -75,6 +75,17 @@ final class ProductExtension extends CompilerExtension
 			'params' => ['id'],
 		]]);
 		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productStock',
+			'name' => 'cms-product-stock',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/stock.js',
+			'position' => 70,
+			'tab' => 'Stock',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
 			'key' => 'productMedia',
 			'name' => 'cms-product-media',
 			'implements' => ProductPlugin::class,

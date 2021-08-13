@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product;
 
 
 use Baraja\Doctrine\EntityManager;
+use Baraja\DynamicConfiguration\Configuration;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Doctrine\ORM\NonUniqueResultException;
@@ -15,6 +16,7 @@ final class ProductManager
 {
 	public function __construct(
 		private EntityManager $entityManager,
+		private Configuration $configuration,
 	) {
 	}
 
@@ -72,5 +74,23 @@ final class ProductManager
 				->getQuery()
 				->getResult()
 		);
+	}
+
+
+	public function getWeight(Product $product): int
+	{
+		return $product->getWeight() ?? $this->getDefaultWeight();
+	}
+
+
+	public function getDefaultWeight(): int
+	{
+		$value = $this->configuration->get('default-weight', 'shop');
+		if ($value === null) {
+			$value = 300;
+			$this->configuration->save('default-weight', (string) $value, 'shop');
+		}
+
+		return (int) $value;
 	}
 }

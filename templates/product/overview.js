@@ -105,6 +105,10 @@ Vue.component('cms-product-overview', {
 					Short description:
 					<textarea v-model="product.shortDescription" class="form-control" rows="8"></textarea>
 				</div>
+				<div class="col-6">
+					Regular description:
+					<textarea v-model="product.description" class="form-control" rows="8"></textarea>
+				</div>
 			</div>
 			<div class="row mt-3">
 				<div class="col-12">

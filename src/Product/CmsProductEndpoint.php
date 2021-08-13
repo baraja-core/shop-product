@@ -161,6 +161,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			'slug' => $product->getSlug(),
 			'active' => $product->isActive(),
 			'shortDescription' => (string) $product->getShortDescription(),
+			'description' => (string) $product->getDescription(),
 			'price' => $product->getPrice(),
 			'vat' => $product->getVat(),
 			'standardPricePercentage' => $product->getStandardPricePercentage(),
@@ -217,6 +218,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		string $slug,
 		bool $active,
 		?string $shortDescription,
+		?string $description,
 		int $price,
 		int $vat,
 		?float $standardPricePercentage,
@@ -231,6 +233,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product->setSlug($slug);
 		$product->setActive($active);
 		$product->setShortDescription($shortDescription);
+		$product->setDescription($description);
 		$product->setPrice($price);
 		$product->setVat($vat);
 		$product->setStandardPricePercentage($standardPricePercentage);
@@ -785,6 +788,37 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$variant = $this->entityManager->getRepository(ProductVariant::class)->find($id);
 		$this->entityManager->remove($variant);
 		$this->entityManager->flush();
+		$this->sendOk();
+	}
+
+
+	public function actionStock(int $id): void
+	{
+		$product = $this->getProductById($id);
+
+		$this->sendJson([
+			'weight' => $product->getWeight(),
+			'size' => [
+				'width' => $product->getSizeWidth(),
+				'length' => $product->getSizeLength(),
+				'thickness' => $product->getSizeThickness(),
+				'min' => $product->getMinimalSize(),
+				'max' => $product->getMaximalSize(),
+			],
+		]);
+	}
+
+
+	public function postStock(int $id, ?int $weight, ?float $width, ?float $length, ?float $thickness): void
+	{
+		$product = $this->getProductById($id);
+		$product->setWeight($weight);
+		$product->setSizeWidth($width);
+		$product->setSizeLength($length);
+		$product->setSizeThickness($thickness);
+
+		$this->entityManager->flush();
+		$this->flashMessage('Stock settings has been saved.', self::FLASH_MESSAGE_SUCCESS);
 		$this->sendOk();
 	}
 
