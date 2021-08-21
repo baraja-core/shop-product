@@ -116,6 +116,12 @@ class ProductCategory
 	}
 
 
+	public function setParent(?self $parent): void
+	{
+		$this->parent = $parent;
+	}
+
+
 	/**
 	 * @return self[]|Collection
 	 */
