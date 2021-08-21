@@ -17,6 +17,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 {
 	public function __construct(
 		private EntityManager $entityManager,
+		private ProductCategoryManagerAccessor $categoryManager,
 		private ?CategoryManager $heurekaCategoryManager = null,
 	) {
 	}
@@ -46,8 +47,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 						return null;
 					}
 
-					return $this->heurekaCategoryManager->getCategory($heurekaCategoryId)
-							->getName()
+					return $this->heurekaCategoryManager->getCategory($heurekaCategoryId)->getName()
 						. ' (' . $heurekaCategoryId . ')';
 				})(
 					$category['heurekaCategoryId']
@@ -67,7 +67,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function actionOverview(int $id): void
 	{
 		try {
-			$category = $this->getCategory($id);
+			$category = $this->categoryManager->get()->getCategoryById($id);
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Category "' . $id . '" does not exist.');
 		}
@@ -102,7 +102,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function actionProducts(int $id): void
 	{
 		try {
-			$category = $this->getCategory($id);
+			$category = $this->categoryManager->get()->getCategoryById($id);
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Category "' . $id . '" does not exist.');
 		}
@@ -123,30 +123,14 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	}
 
 
-	public function postCreateCategory(string $name, ?string $code = null): void
+	public function postCreateCategory(string $name, ?string $code = null, ?int $parentId = null): void
 	{
-		$category = new ProductCategory($name, $code ?: $name);
-		$this->entityManager->persist($category);
-		$this->entityManager->flush();
+		$category = $this->categoryManager->get()->createCategory($name, $code, $parentId);
 		$this->flashMessage('Category has been created.', self::FLASH_MESSAGE_SUCCESS);
 		$this->sendJson(
 			[
 				'id' => $category->getId(),
 			]
 		);
-	}
-
-
-	/**
-	 * @throws NoResultException|NonUniqueResultException
-	 */
-	private function getCategory(int $id): ProductCategory
-	{
-		return $this->entityManager->getRepository(ProductCategory::class)
-			->createQueryBuilder('category')
-			->where('category.id = :id')
-			->setParameter('id', $id)
-			->getQuery()
-			->getSingleResult();
 	}
 }
