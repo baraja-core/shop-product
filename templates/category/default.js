@@ -8,49 +8,37 @@ Vue.component('cms-product-category-default', {
 			<b-button variant="primary" v-b-modal.modal-new-category>New category</b-button>
 		</div>
 	</div>
-	<div v-if="items === null" class="text-center py-5">
+	<div v-if="dataExist === null" class="text-center py-5">
 		<b-spinner></b-spinner>
 	</div>
 	<b-card v-else>
-		<div v-if="items.length === 0" class="text-center my-5">
+		<div v-if="dataExist === false" class="text-center my-5">
 			Category list is empty.
 			<div class="mt-5">
 				<b-button variant="primary" v-b-modal.modal-new-category>Create first category</b-button>
 			</div>
 		</div>
 		<template v-else>
-			<table class="table table-sm">
-				<tr>
-					<th>Name</th>
-					<th>Parent</th>
-					<th width="150">Code</th>
-					<th v-if="heurekaAvailable" width="100">Heureka ID</th>
-				</tr>
-				<tr v-for="item in items">
-					<td>
-						<a :href="link('ProductCategory:detail', { id: item.id })">{{ item.name }}</a>
-					</td>
-					<td>{{ item.parent ? item.parent.name : '' }}</td>
-					<td><code>{{ item.code }}</code></td>
-					<td v-if="heurekaAvailable">{{ item.heurekaCategoryId }}</td>
-				</tr>
-			</table>
+			<cms-product-category-tree :parent-id="null"></cms-product-category-tree>
 		</template>
 	</b-card>
 	<b-modal id="modal-new-category" title="New category" hide-footer>
 		<b-form @submit="createNewCategory">
-			Name:
+			<label>Name:</label>
 			<input v-model="newCategory.name" class="form-control">
+			<label class="mt-3">Parent:</label>
+			<b-form-select v-model="newCategory.parentId" :options="tree"></b-form-select>
 			<b-button type="submit" variant="primary" class="mt-3">Create</b-button>
 		</b-form>
 	</b-modal>
 </div>`,
 	data() {
 		return {
-			items: null,
-			heurekaAvailable: false,
+			dataExist: null,
+			tree: null,
 			newCategory: {
-				name: ''
+				name: '',
+				parentId: null
 			}
 		}
 	},
@@ -61,8 +49,8 @@ Vue.component('cms-product-category-default', {
 		sync: function () {
 			axiosApi.get(`cms-product-category`)
 				.then(req => {
-					this.items = req.data.items;
-					this.heurekaAvailable = req.data.heurekaAvailable;
+					this.dataExist = req.data.dataExist;
+					this.tree = req.data.tree;
 				});
 		},
 		createNewCategory(evt) {
@@ -72,10 +60,64 @@ Vue.component('cms-product-category-default', {
 				return;
 			}
 			axiosApi.post('cms-product-category/create-category', {
-				name: this.newCategory.name
+				name: this.newCategory.name,
+				parentId: this.newCategory.parentId,
 			}).then(req => {
 				this.sync();
 			});
+		}
+	}
+});
+
+Vue.component('cms-product-category-tree', {
+	props: ['parentId'],
+	template: `<div :style="parentId !== null ? 'padding-left:32px' : ''">
+	<div v-if="items === null" class="my-3">
+		<b-spinner small></b-spinner>
+	</div>
+	<table v-else class="table table-sm m-0 cms-table-no-border-top">
+		<tr v-if="parentId === null">
+			<th></th>
+			<th>Name</th>
+			<th>Code</th>
+		</tr>
+		<template v-for="(item, key) in items">
+			<tr>
+				<td width="20" class="px-0" :style="parentId !== null && key === 0 ? 'border-top:0' : ''">
+					<span v-if="item.hasChildren" style="cursor:pointer">
+						<b-icon-chevron-down v-if="openChildren[item.id]" @click="openChildren[item.id]=false"></b-icon-chevron-down>
+						<b-icon-chevron-right v-else @click="openChildren[item.id]=true"></b-icon-chevron-right>
+					</span>
+				</td>
+				<td :style="parentId !== null && key === 0 ? 'border-top:0' : ''">
+					<a :href="link('ProductCategory:detail', { id: item.id })">{{ item.name }}</a>
+				</td>
+				<td width="230" :style="parentId !== null && key === 0 ? 'border-top:0' : ''"><code>{{ item.code }}</code></td>
+			</tr>
+			<tr v-if="openChildren[item.id]">
+				<td colspan="5" class="p-0">
+					<cms-product-category-tree :parentId="item.id"></cms-product-category-tree>
+				</td>
+			</tr>
+		</template>
+	</table>
+</div>`,
+	data() {
+		return {
+			items: null,
+			openChildren: []
+		}
+	},
+	mounted() {
+		this.sync();
+	},
+	methods: {
+		sync() {
+			axiosApi.get(`cms-product-category/default-tree?parentId=` + this.parentId)
+				.then(req => {
+					this.items = req.data.items;
+					this.openChildren = req.data.openChildren;
+				});
 		}
 	}
 });
