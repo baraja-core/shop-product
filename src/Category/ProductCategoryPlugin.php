@@ -7,6 +7,7 @@ namespace Baraja\Shop\Product\Category;
 
 use Baraja\Doctrine\EntityManager;
 use Baraja\Plugin\BasePlugin;
+use Baraja\Plugin\SimpleComponent\Breadcrumb;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -38,6 +39,15 @@ final class ProductCategoryPlugin extends BasePlugin
 				->getSingleResult();
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->error('Product category "' . $id . '" doest not exist.');
+		}
+
+		foreach ($category->getPath() as $parentId => $parentName) {
+			$this->addBreadcrumb(
+				new Breadcrumb(
+					label: $parentName,
+					href: $this->link('ProductCategory:detail', ['id' => $parentId]),
+				)
+			);
 		}
 
 		$this->setTitle('(' . $id . ') ' . $category->getName());

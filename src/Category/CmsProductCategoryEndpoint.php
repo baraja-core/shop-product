@@ -63,28 +63,48 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 
 		$this->sendJson(
 			[
-				'id' => $category->getId(),
-				'name' => (string) $category->getName(),
-				'parent' => function () use ($category): ?array {
-					$parent = $category->getParent();
-					if ($parent !== null) {
-						return [
-							'id' => $parent->getId(),
-							'name' => (string) $parent->getName(),
-						];
-					}
-
-					return null;
-				},
-				'code' => $category->getCode(),
-				'slug' => $category->getSlug(),
-				'description' => (string) $category->getDescription(),
-				'heureka' => [
-					'id' => $category->getHeurekaCategoryId(),
-					'isAvailable' => class_exists(CategoryManager::class),
+				'category' => [
+					'id' => $category->getId(),
+					'name' => (string) $category->getName(),
+					'parentId' => $category->getParentId(),
+					'code' => $category->getCode(),
+					'slug' => $category->getSlug(),
+					'description' => (string) $category->getDescription(),
+					'heureka' => [
+						'id' => $category->getHeurekaCategoryId(),
+						'isAvailable' => class_exists(CategoryManager::class),
+					],
 				],
+				'tree' => $this->formatBootstrapSelectArray(
+					[null => '- root -'] + $this->categoryManager->get()->getTree()
+				),
 			]
 		);
+	}
+
+
+	public function postSave(
+		int $id,
+		string $name,
+		?int $parentId,
+		string $description,
+	): void {
+		try {
+			$category = $this->categoryManager->get()->getCategoryById($id);
+		} catch (NoResultException | NonUniqueResultException) {
+			$this->sendError('Category "' . $id . '" does not exist.');
+		}
+
+		$category->setName($name);
+		$category->setDescription($description);
+
+		if ($parentId !== null) {
+			$category->setParent($this->categoryManager->get()->getCategoryById($parentId));
+		}
+
+		$this->entityManager->flush();
+		$this->flashMessage('Category has been updated.', self::FLASH_MESSAGE_SUCCESS);
+		$this->sendOk();
 	}
 
 

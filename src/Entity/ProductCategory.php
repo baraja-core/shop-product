@@ -110,6 +110,22 @@ class ProductCategory
 	}
 
 
+	/**
+	 * @return array<int, string>
+	 */
+	public function getPath(): array
+	{
+		$return = [];
+		$parent = $this;
+		do {
+			$return[(int) $parent->getId()] = (string) $parent->getName();
+			$parent = $parent->getParent();
+		} while ($parent !== null);
+
+		return array_reverse($return, true);
+	}
+
+
 	public function getParent(): ?self
 	{
 		return $this->parent;
