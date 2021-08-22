@@ -100,6 +100,8 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 
 		if ($parentId !== null) {
 			$category->setParent($this->categoryManager->get()->getCategoryById($parentId));
+		} else {
+			$category->setParent(null);
 		}
 
 		$this->entityManager->flush();
