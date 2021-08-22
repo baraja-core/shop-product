@@ -35,9 +35,13 @@ final class ProductCategoryManager
 	}
 
 
+	/**
+	 * @return array<int, string>
+	 */
 	public function getTree(): array
 	{
 		$cat = new SelectboxTree;
+		/** @var array<array('id' => int|string, 'name' => string, 'parent_id' => int|string|null)> $categories */
 		$categories = $this->entityManager->getConnection()
 			->executeQuery($cat->sqlBuilder('shop__product_category', orderCol: 'position'))
 			->fetchAllAssociative();
@@ -84,7 +88,7 @@ final class ProductCategoryManager
 
 
 	/**
-	 * @return array<int, array{id: int, name: string, code: string, position: int, hasChildren: bool, heurekaCategoryId: int|null}>
+	 * @return array<int, array{id: int, name: string, code: string, hasChildren: bool}>
 	 */
 	public function getFeed(?int $parentId): array
 	{
