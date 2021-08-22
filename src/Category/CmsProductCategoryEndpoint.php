@@ -8,7 +8,6 @@ namespace Baraja\Shop\Product\Category;
 use Baraja\Doctrine\EntityManager;
 use Baraja\Heureka\CategoryManager;
 use Baraja\Shop\Product\Entity\Product;
-use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\StructuredApi\BaseEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -18,47 +17,37 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function __construct(
 		private EntityManager $entityManager,
 		private ProductCategoryManagerAccessor $categoryManager,
-		private ?CategoryManager $heurekaCategoryManager = null,
 	) {
 	}
 
 
 	public function actionDefault(): void
 	{
-		$categories = $this->entityManager->getRepository(ProductCategory::class)
-			->createQueryBuilder('category')
-			->select('PARTIAL category.{id, name, code, heurekaCategoryId}')
-			->addSelect('PARTIAL parent.{id, name}')
-			->leftJoin('category.parent', 'parent')
-			->orderBy('parent.name', 'ASC')
-			->addOrderBy('category.name', 'ASC')
-			->getQuery()
-			->getArrayResult();
+		$rootCategories = $this->categoryManager->get()->getCategoriesByParent();
 
-		$return = [];
-		foreach ($categories as $category) {
-			$return[] = [
-				'id' => $category['id'],
-				'name' => $category['name'],
-				'parent' => $category['parent'],
-				'code' => $category['code'],
-				'heurekaCategoryId' => (function (?int $heurekaCategoryId): ?string {
-					if ($this->heurekaCategoryManager === null || $heurekaCategoryId === null) {
-						return null;
-					}
-
-					return $this->heurekaCategoryManager->getCategory($heurekaCategoryId)->getName()
-						. ' (' . $heurekaCategoryId . ')';
-				})(
-					$category['heurekaCategoryId']
+		$this->sendJson(
+			[
+				'dataExist' => $rootCategories !== [],
+				'tree' => $this->formatBootstrapSelectArray(
+					[null => '- root -'] + $this->categoryManager->get()->getTree()
 				),
-			];
+			]
+		);
+	}
+
+
+	public function actionDefaultTree(?int $parentId = null): void
+	{
+		$return = $this->categoryManager->get()->getFeed($parentId);
+		$openChildren = [];
+		foreach ($return as $category) {
+			$openChildren[$category['id']] = false;
 		}
 
 		$this->sendJson(
 			[
-				'items' => $return,
-				'heurekaAvailable' => class_exists(CategoryManager::class),
+				'items' => array_values($return),
+				'openChildren' => $openChildren,
 			]
 		);
 	}

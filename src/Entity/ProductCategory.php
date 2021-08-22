@@ -122,6 +122,12 @@ class ProductCategory
 	}
 
 
+	public function getParentId(): ?int
+	{
+		return $this->parent === null ? null : $this->parent->getId();
+	}
+
+
 	/**
 	 * @return self[]|Collection
 	 */
@@ -153,6 +159,30 @@ class ProductCategory
 			throw new \InvalidArgumentException('Product category slug and product name can not be empty.');
 		}
 		$this->slug = $slug;
+	}
+
+
+	public function getPosition(): int
+	{
+		return $this->position;
+	}
+
+
+	public function setPosition(int $position): void
+	{
+		$this->position = $position;
+	}
+
+
+	public function isActive(): bool
+	{
+		return $this->active;
+	}
+
+
+	public function setActive(bool $active): void
+	{
+		$this->active = $active;
 	}
 
 
