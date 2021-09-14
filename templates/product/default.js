@@ -50,16 +50,16 @@ Vue.component('cms-product-default', {
 						</b-pagination>
 					</div>
 				</div>
-				<table class="table table-sm">
+				<table class="table table-sm cms-table-no-border-top">
 					<tr>
-						<th width="100">Image</th>
+						<th width="100" class="pl-0">Image</th>
 						<th>Name</th>
 						<th width="150">Category</th>
 						<th width="80">Position</th>
 						<th width="100">Price</th>
 					</tr>
 					<tr v-for="item in items">
-						<td>
+						<td class="py-0 pl-0">
 							<a :href="link('Product:detail', { id: item.id })">
 								<template v-if="item.mainImage">
 									<img :src="basePath + '/product-image/' + item.mainImage.source">
@@ -71,12 +71,12 @@ Vue.component('cms-product-default', {
 						</td>
 						<td>
 							<div>
-								<a :href="link('Product:detail', { id: item.id })">{{ item.name }}</a>
 								<span @click="makeActive(item.id)" style="cursor:pointer">
-									<span v-if="item.active" class="badge badge-success">Active</span>
-									<span v-else class="badge badge-danger">Hidden </span>
+									<span v-if="item.active" v-b-tooltip title="Product is active.">🟢</span>
+									<span v-else v-b-tooltip title="Product is hidden.">🔴</span>
 								</span>
-								<span v-if="item.soldOut" class="badge badge-warning">Sold&nbsp;out</span>
+								<span v-if="item.soldOut" v-b-tooltip title="Product has been sold out.">💰</span>
+								<a :href="link('Product:detail', { id: item.id })">{{ item.name }}</a>
 							</div>
 							<div>
 								Code: <code>{{ item.code }}</code> | EAN: <code>{{ item.ean }}</code>
@@ -96,12 +96,12 @@ Vue.component('cms-product-default', {
 						<td>{{ item.price }}&nbsp;Kč</td>
 					</tr>
 				</table>
-				<div class="text-right">
+				<div class="text-center">
 					<b-pagination
 						v-model="paginator.page"
 						:per-page="paginator.itemsPerPage"
 						@change="syncPaginator()"
-						:total-rows="paginator.itemCount" align="right" size="sm">
+						:total-rows="paginator.itemCount" align="center" size="sm">
 					</b-pagination>
 				</div>
 			</template>

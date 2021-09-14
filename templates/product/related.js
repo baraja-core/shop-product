@@ -11,7 +11,7 @@ Vue.component('cms-product-related', {
 			<div v-if="list.length === 0" class="text-center my-5">
 				There are no related products.
 			</div>
-			<table v-else class="table table-sm">
+			<table v-else class="table table-sm cms-table-no-border-top">
 				<tr>
 					<th>Product</th>
 					<th>Main category</th>

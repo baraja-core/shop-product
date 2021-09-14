@@ -25,9 +25,9 @@ Vue.component('cms-product-variants', {
 			</div>
 			<div v-else class="mt-3">
 				<h4>Variant parameters</h4>
-				<table class="table table-sm">
+				<table class="table table-sm cms-table-no-border-top">
 					<tr v-for="(variantParameterValues, variantParameterLabel) in variantParameters">
-						<th width="150">{{ variantParameterLabel }}</th>
+						<td width="150"><b>{{ variantParameterLabel }}</b></td>
 						<td>
 							<span v-for="variantParameterValue in variantParameterValues" class="badge badge-secondary mx-1">
 								{{ variantParameterValue }}
@@ -41,7 +41,7 @@ Vue.component('cms-product-variants', {
 			</div>
 			<div v-else class="mt-3">
 				<h4>Variants ({{ variantCount }})</h4>
-				<table class="table table-sm">
+				<table class="table table-sm cms-table-no-border-top">
 					<tr>
 						<th>Variant</th>
 						<th width="150"><span v-b-tooltip.hover title="Please indicate if the EAN is different from the base product. If it is the same, it is inherited automatically.">EAN</span></th>
@@ -49,8 +49,8 @@ Vue.component('cms-product-variants', {
 						<th width="100">Main<br>price</th>
 						<th width="100">Additional<br>price</th>
 						<th width="100">Selling<br>price</th>
-						<th width="150">Availability</th>
-						<th width="100"></th>
+						<th width="120">Availability</th>
+						<th width="60"></th>
 					</tr>
 					<tr v-for="variant in list">
 						<td>
@@ -80,7 +80,7 @@ Vue.component('cms-product-variants', {
 							</b-form-checkbox>
 						</td>
 						<td class="text-right">
-							<b-button variant="danger" @click="remove(variant.id)" size="sm" class="py-0">Remove</b-button>
+							<b-button variant="outline-danger" @click="remove(variant.id)" size="sm" class="py-0">🗑️</b-button>
 						</td>
 					</tr>
 				</table>

@@ -8,19 +8,19 @@ Vue.component('cms-product-parameter', {
 			<h4>Parameters</h4>
 			<template v-if="parameters.length > 0">
 				<b-form @submit="saveChanges">
-					<table class="table table-sm">
+					<table class="table table-sm cms-table-no-border-top">
 						<tr>
 							<th>Parameter</th>
 							<th>Values</th>
 							<th>Is variant?</th>
-							<th></th>
+							<th width="60"></th>
 						</tr>
 						<tr v-for="parameter in parameters">
 							<td><input v-model="parameter.name" class="form-control"></td>
 							<td><b-form-tags v-model="parameter.values" separator=",;"></b-form-tags></td>
 							<td><input type="checkbox" v-model="parameter.variant"></td>
-							<td>
-								<b-button variant="danger" size="sm" class="px-1 py-0" @click="deleteParameter(parameter.id)">remove</b-button>
+							<td class="text-right">
+								<b-button variant="outline-danger" size="sm" class="py-0" @click="deleteParameter(parameter.id)">🗑️</b-button>
 							</td>
 						</tr>
 					</table>

@@ -7,7 +7,7 @@ Vue.component('cms-product-overview', {
 	<div v-else class="container-fluid">
 		<b-form @submit="save">
 			<div class="row">
-				<div class="col-sm-2">
+				<div class="col" style="max-width:200px">
 					<template v-if="product.mainImage === null">
 						<img src="https://cdn.baraja.cz/icon/no-product-image.jpg" class="w-100" alt="No product image" style="max-width:200px;max-height:200px">
 					</template>
@@ -111,6 +111,12 @@ Vue.component('cms-product-overview', {
 				</div>
 			</div>
 			<div class="row mt-3">
+				<div class="col">
+					<b-button type="submit" variant="primary">Save</b-button>
+				</div>
+			</div>
+			<hr>
+			<div class="row mt-3">
 				<div class="col-12">
 					<div class="row">
 						<div class="col">
@@ -123,15 +129,12 @@ Vue.component('cms-product-overview', {
 					<div v-if="product.smartDescriptions.length === 0" class="text-center text-secondary my-3">
 						<i>Here is not smart description.</i>
 					</div>
-					<table v-else class="table table-sm cms-table-no-border-top">
-						<tr>
-							<th>Description</th>
-							<th width="200">Media</th>
-							<th width="80">Position</th>
-							<th width="64"></th>
-						</tr>
+					<table v-else class="w-100 cms-table-no-border-top">
 						<tr v-for="smartDescription in product.smartDescriptions">
-							<td>
+							<td width="30" valign="top">
+								{{ smartDescription.position }}
+							</td>
+							<td valign="top">
 								<div class="card px-3 py-2"
 									:style="'background:' + (smartDescription.color ? smartDescription.color : '#eee')"
 									v-html="smartDescription.html"></div>
@@ -139,15 +142,12 @@ Vue.component('cms-product-overview', {
 									<small class="text-danger">no color</small>
 								</div>
 							</td>
-							<td>
+							<td class="text-center" width="120" valign="top">
 								<template v-if="smartDescription.image !== null">
 									<img :src="basePath + '/' + smartDescription.image">
 								</template>
 							</td>
-							<td>
-								{{ smartDescription.position }}
-							</td>
-							<td class="text-right">
+							<td class="text-right" width="64" valign="top">
 								<b-button variant="secondary" size="sm" class="px-1 py-0"
 									@click="editDescription(smartDescription)"
 									v-b-modal.modal-edit-description>edit</b-button>
@@ -157,16 +157,10 @@ Vue.component('cms-product-overview', {
 					</table>
 				</div>
 			</div>
-			<div class="row mt-3">
-				<div class="col">
-					<b-button type="submit" variant="primary">Save</b-button>
-				</div>
-			</div>
 		</b-form>
 	</div>
 	<b-modal id="modal-add-description" title="New smart description" size="lg" hide-footer>
 		<b-form @submit="createNewDescription">
-			Description:
 			<textarea v-model="newSmartDescription.description" class="form-control" rows="12"></textarea>
 			<div class="row my-3">
 				<div class="col">
@@ -183,7 +177,6 @@ Vue.component('cms-product-overview', {
 	</b-modal>
 	<b-modal id="modal-edit-description" title="Edit smart description" size="lg" hide-footer>
 		<b-form @submit="saveEditDescription">
-			Description:
 			<textarea v-model="editSmartDescription.description" class="form-control" rows="12"></textarea>
 			<div class="row my-3">
 				<div class="col">

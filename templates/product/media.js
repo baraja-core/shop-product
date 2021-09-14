@@ -36,7 +36,7 @@ Vue.component('cms-product-media', {
 			<b-button variant="primary" @click="save">Save changes</b-button>
 			<table class="table table-sm mt-2">
 				<tr v-for="image in images" :class="{ 'table-secondary': image.id === mainImageId }">
-					<td width="200">
+					<td width="200" class="py-0 pl-0">
 						<img :src="basePath + '/product-image/' + image.source" class="w-100">
 					</td>
 					<td>
@@ -46,7 +46,7 @@ Vue.component('cms-product-media', {
 							</label>
 						</div>
 						<div class="mt-1">
-							<input v-model="image.title" class="form-control" placeholder="Zadejte alternativní popisek">
+							<input v-model="image.title" class="form-control" placeholder="Enter an alternative label">
 							<div class="row mt-2">
 								<div class="col-sm-4">
 									Position:<br>
@@ -60,7 +60,7 @@ Vue.component('cms-product-media', {
 						</div>
 					</td>
 					<td class="text-right">
-						<b-button variant="danger" size="sm" @click="deleteImage(image.id)">x</b-button>
+						<b-button variant="outline-danger" size="sm" @click="deleteImage(image.id)">🗑️</b-button>
 					</td>
 				</tr>
 			</table>
@@ -116,7 +116,7 @@ Vue.component('cms-product-media', {
 			});
 		},
 		deleteImage(id) {
-			if (confirm('Opravdu chcete smazat tento obrázek?')) {
+			if (confirm('Do you really want to delete this medium?')) {
 				axiosApi.get(`cms-product/delete-image?id=${id}`)
 					.then(req => {
 						this.sync();
