@@ -20,6 +20,9 @@ class RelatedProduct
 	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'productRelatedRelated')]
 	private Product $relatedProduct;
 
+	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+	private int $position = 0;
+
 
 	public function __construct(Product $product, Product $relatedProduct)
 	{
@@ -37,5 +40,17 @@ class RelatedProduct
 	public function getRelatedProduct(): Product
 	{
 		return $this->relatedProduct;
+	}
+
+
+	public function getPosition(): int
+	{
+		return $this->position;
+	}
+
+
+	public function setPosition(int $position): void
+	{
+		$this->position = $position;
 	}
 }
