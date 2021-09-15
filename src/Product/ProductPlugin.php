@@ -76,5 +76,13 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 		} catch (InvalidLinkException) {
 			// Silence is golden.
 		}
+		$this->addButton(
+			new Button(
+				variant: Button::VARIANT_SECONDARY,
+				label: 'Clone',
+				action: Button::ACTION_MODAL,
+				target: 'modal-clone-product',
+			)
+		);
 	}
 }

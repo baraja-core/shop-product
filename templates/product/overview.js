@@ -202,6 +202,34 @@ Vue.component('cms-product-overview', {
 			</b-button>
 		</b-form>
 	</b-modal>
+	<b-modal id="modal-clone-product" title="Clone this product" @shown="clonePrepare" hide-footer>
+		<b-alert variant="warning" :show="true">
+			<b>Before you start:</b><br>
+			Product code and slug must be unique.
+		</b-alert>
+		<b-form @submit="saveClone">
+			<div>
+				Name:
+				<b-form-input v-model="formClone.name"></b-form-input>
+			</div>
+			<div class="mt-3">
+				Code:
+				<b-form-input v-model="formClone.code"></b-form-input>
+			</div>
+			<div class="mt-3">
+				Slug:
+				<b-form-input v-model="formClone.slug"></b-form-input>
+			</div>
+			<b-button type="submit" variant="primary" class="mt-3">
+				<template v-if="formClone.loading">
+					<b-spinner small></b-spinner>
+				</template>
+				<template v-else>
+					Clone
+				</template>
+			</b-button>
+		</b-form>
+	</b-modal>
 	</cms-card>`,
 	data() {
 		return {
@@ -218,6 +246,12 @@ Vue.component('cms-product-overview', {
 				color: null,
 				file: null,
 				uploading: false
+			},
+			formClone: {
+				loading: false,
+				name: '',
+				code: '',
+				slug: ''
 			},
 			smartColors: [
 				{value: null, text: '--- select ---'},
@@ -312,6 +346,28 @@ Vue.component('cms-product-overview', {
 					this.sync();
 				});
 			}
+		},
+		clonePrepare() {
+			this.formClone.name = this.product.name;
+			this.formClone.code = this.product.code;
+			this.formClone.slug = this.product.slug;
+		},
+		saveClone(evt) {
+			evt.preventDefault();
+			this.formClone.loading = true;
+			axiosApi.post('cms-product/clone', {
+				id: this.id,
+				name: this.formClone.name,
+				code: this.formClone.code,
+				slug: this.formClone.slug
+			}).then(req => {
+				this.formClone.loading = false;
+				if (req.data.id) {
+					window.location.href = link('Product:detail', {
+						id: req.data.id
+					});
+				}
+			});
 		}
 	}
 });

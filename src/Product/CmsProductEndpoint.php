@@ -23,7 +23,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Http\FileUpload;
 use Nette\Http\Request;
-use Nette\Utils\FileSystem;
 use Nette\Utils\Paginator;
 use Nette\Utils\Random;
 use Nette\Utils\Strings;
@@ -35,6 +34,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		private CommonMarkRenderer $renderer,
 		private Search $search,
 		private ProductFieldManager $productFieldManager,
+		private ProductManagerAccessor $productManager,
 	) {
 	}
 
@@ -53,7 +53,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$selection->andWhere('product.id IN (:searchIds)')
 				->setParameter(
 					'searchIds',
-					$this->search->search($query, [
+					$this->search->search(
+						$query, [
 						Product::class => [
 							'name',
 							'code',
@@ -62,7 +63,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 							'price',
 							'smartDescriptions.description',
 						],
-					], useAnalytics: false)->getIds()
+					], useAnalytics: false
+					)->getIds()
 				);
 		}
 
@@ -82,19 +84,23 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$mainImage = $item['mainImage'];
 			if ($mainImage !== null) {
 				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 100, 'h' => 100]);
-				$item['shortDescription'] = Strings::truncate(strip_tags($this->renderer->render($item['shortDescription'])), 128);
+				$item['shortDescription'] = Strings::truncate(
+					strip_tags($this->renderer->render($item['shortDescription'])), 128
+				);
 			}
 			$return[] = $item;
 		}
 
-		$this->sendJson([
-			'count' => $count,
-			'items' => $return,
-			'paginator' => (new Paginator)
-				->setItemCount($count)
-				->setItemsPerPage($limit)
-				->setPage($page),
-		]);
+		$this->sendJson(
+			[
+				'count' => $count,
+				'items' => $return,
+				'paginator' => (new Paginator)
+					->setItemCount($count)
+					->setItemsPerPage($limit)
+					->setPage($page),
+			]
+		);
 	}
 
 
@@ -105,8 +111,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Product "' . $id . '" does not exist.');
 		}
-		$product->setActive(!$product->isActive());
-		$this->entityManager->flush();
+		$this->productManager->get()->setActive($product, !$product->isActive());
 		$this->sendOk();
 	}
 
@@ -118,25 +123,23 @@ final class CmsProductEndpoint extends BaseEndpoint
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->sendError('Product "' . $id . '" does not exist.');
 		}
-
-		$product->setPosition($position);
-		$this->entityManager->flush();
+		$this->productManager->get()->setPosition($product, $position);
 		$this->sendOk();
 	}
 
 
 	public function postCreateProduct(string $name, string $code, int $price): void
 	{
-		if (!$name || !$code || !$price) {
-			$this->sendError('Please enter all fields.');
+		try {
+			$product = $this->productManager->get()->create($name, $code, $price);
+		} catch (\InvalidArgumentException $e) {
+			$this->sendError($e->getMessage());
 		}
-
-		$product = new Product($name, $code, $price);
-		$this->entityManager->persist($product);
-		$this->entityManager->flush();
-		$this->sendJson([
-			'id' => $product->getId(),
-		]);
+		$this->sendJson(
+			[
+				'id' => $product->getId(),
+			]
+		);
 	}
 
 
@@ -154,57 +157,71 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->executeQuery($cat->sqlBuilder('shop__product_category'))
 			->fetchAllAssociative();
 
-		$this->sendJson([
-			'id' => $product->getId(),
-			'name' => (string) $product->getName(),
-			'code' => $product->getCode(),
-			'ean' => $product->getEan(),
-			'slug' => $product->getSlug(),
-			'active' => $product->isActive(),
-			'shortDescription' => (string) $product->getShortDescription(),
-			'description' => (string) $product->getDescription(),
-			'price' => $product->getPrice(),
-			'vat' => $product->getVat(),
-			'standardPricePercentage' => $product->getStandardPricePercentage(),
-			'url' => $this->linkSafe('Front:Product:detail', [
+		$this->sendJson(
+			[
+				'id' => $product->getId(),
+				'name' => (string) $product->getName(),
+				'code' => $product->getCode(),
+				'ean' => $product->getEan(),
 				'slug' => $product->getSlug(),
-			]),
-			'soldOut' => $product->isSoldOut(),
-			'mainImage' => (static function (?ProductImage $image): ?array {
-				if ($image === null) {
-					return null;
-				}
+				'active' => $product->isActive(),
+				'shortDescription' => (string) $product->getShortDescription(),
+				'description' => (string) $product->getDescription(),
+				'price' => $product->getPrice(),
+				'vat' => $product->getVat(),
+				'standardPricePercentage' => $product->getStandardPricePercentage(),
+				'url' => $this->linkSafe(
+					'Front:Product:detail', [
+						'slug' => $product->getSlug(),
+					]
+				),
+				'soldOut' => $product->isSoldOut(),
+				'mainImage' => (static function (?ProductImage $image): ?array
+				{
+					if ($image === null) {
+						return null;
+					}
 
-				return $image->toArray();
-			})($product->getMainImage()),
-			'mainCategoryId' => (static fn(?ProductCategory $category): ?int => $category === null ? null : $category->getId())($product->getMainCategory()),
-			'customFields' => $this->productFieldManager->getFieldsInfo($product),
-			'smartDescriptions' => (function (array $descriptions): array {
-				$return = [];
-				foreach ($descriptions as $description) {
-					$return[] = [
-						'id' => (int) $description['id'],
-						'description' => (string) $description['description'],
-						'html' => $this->renderer->render((string) $description['description']),
-						'image' => $description['image']
-							? ImageGenerator::from('product-image/description/' . $description['image'], ['w' => 100, 'h' => 100])
-							: null,
-						'color' => $description['color'],
-						'position' => $description['position'],
-					];
-				}
+					return $image->toArray();
+				})(
+					$product->getMainImage()
+				),
+				'mainCategoryId' => (static fn(?ProductCategory $category
+				): ?int => $category === null ? null : $category->getId())(
+					$product->getMainCategory()
+				),
+				'customFields' => $this->productFieldManager->getFieldsInfo($product),
+				'smartDescriptions' => (function (array $descriptions): array
+				{
+					$return = [];
+					foreach ($descriptions as $description) {
+						$return[] = [
+							'id' => (int) $description['id'],
+							'description' => (string) $description['description'],
+							'html' => $this->renderer->render((string) $description['description']),
+							'image' => $description['image']
+								? ImageGenerator::from(
+									'product-image/description/' . $description['image'], ['w' => 100, 'h' => 100]
+								)
+								: null,
+							'color' => $description['color'],
+							'position' => $description['position'],
+						];
+					}
 
-				return $return;
-			})($this->entityManager->getRepository(ProductSmartDescription::class)
-				->createQueryBuilder('description')
-				->where('description.product = :productId')
-				->setParameter('productId', $id)
-				->orderBy('description.position', 'ASC')
-				->getQuery()
-				->getArrayResult()
-			),
-			'categories' => $this->formatBootstrapSelectArray($cat->process($categories)),
-		]);
+					return $return;
+				})(
+					$this->entityManager->getRepository(ProductSmartDescription::class)
+						->createQueryBuilder('description')
+						->where('description.product = :productId')
+						->setParameter('productId', $id)
+						->orderBy('description.position', 'ASC')
+						->getQuery()
+						->getArrayResult()
+				),
+				'categories' => $this->formatBootstrapSelectArray($cat->process($categories)),
+			]
+		);
 	}
 
 
@@ -287,27 +304,32 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
-		$this->sendJson([
-			'images' => $images,
-			'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
-			'variants' => $this->formatBootstrapSelectArray((static function (array $variants): array {
-				$return = [];
-				$return[null] = '--- no variant ---';
-				foreach ($variants as $variant) {
-					$return[$variant['id']] = $variant['relationHash'];
-				}
+		$this->sendJson(
+			[
+				'images' => $images,
+				'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
+				'variants' => $this->formatBootstrapSelectArray(
+					(static function (array $variants): array
+					{
+						$return = [];
+						$return[null] = '--- no variant ---';
+						foreach ($variants as $variant) {
+							$return[$variant['id']] = $variant['relationHash'];
+						}
 
-				return $return;
-			})(
-				$this->entityManager->getRepository(ProductVariant::class)
-					->createQueryBuilder('v')
-					->select('PARTIAL v.{id, relationHash}')
-					->where('v.product = :productId')
-					->setParameter('productId', $id)
-					->getQuery()
-					->getArrayResult()
-			)),
-		]);
+						return $return;
+					})(
+						$this->entityManager->getRepository(ProductVariant::class)
+							->createQueryBuilder('v')
+							->select('PARTIAL v.{id, relationHash}')
+							->where('v.product = :productId')
+							->setParameter('productId', $id)
+							->getQuery()
+							->getArrayResult()
+					)
+				),
+			]
+		);
 	}
 
 
@@ -322,7 +344,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$imageEntities = $this->entityManager->getRepository(ProductImage::class)
 			->createQueryBuilder('image')
 			->where('image.id IN (:ids)')
-			->setParameter('ids', array_map(fn(array $image): int => (int) $image['id'], $images))
+			->setParameter('ids', array_map(static fn(array $image): int => (int) $image['id'], $images))
 			->getQuery()
 			->getResult();
 
@@ -365,21 +387,16 @@ final class CmsProductEndpoint extends BaseEndpoint
 		if ($image === null) {
 			$this->sendError('Please select media to upload.');
 		}
-		if ($image->isImage() === false) {
-			$this->sendError('Uploaded file must be a image.');
+		try {
+			$this->productManager->get()->addImage(
+				$product,
+				$image->getTemporaryFile(),
+				$image->getSanitizedName(),
+			);
+		} catch (\InvalidArgumentException $e) {
+			$this->sendError($e->getMessage());
 		}
 
-		$source = date('Y-m-d') . '/' . strtolower(Random::generate(8) . '-' . $image->getSanitizedName());
-		$productImage = new ProductImage($product, $source);
-		$absolutePath = $this->getParameter('wwwDir') . '/' . $productImage->getRelativePath();
-		$image->move($absolutePath);
-
-		$this->entityManager->persist($productImage);
-		if ($product->getMainImage() === null) {
-			$product->setMainImage($productImage);
-		}
-
-		$this->entityManager->flush();
 		$this->sendOk();
 	}
 
@@ -389,14 +406,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		/** @var ProductImage $image */
 		$image = $this->entityManager->getRepository(ProductImage::class)->find($id);
 
-		$mainImage = $image->getProduct()->getMainImage();
-		if ($mainImage !== null && $mainImage->getId() === $id) {
-			$image->getProduct()->setMainImage(null);
-		}
-
-		FileSystem::delete($this->getParameter('wwwDir') . '/' . $image->getRelativePath());
-		$this->entityManager->remove($image);
-		$this->entityManager->flush();
+		$this->productManager->get()->removeImage($image);
 		$this->sendOk();
 	}
 
@@ -473,9 +483,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
-		$this->sendJson([
-			'parameters' => $parameters,
-		]);
+		$this->sendJson(
+			[
+				'parameters' => $parameters,
+			]
+		);
 	}
 
 
@@ -558,9 +570,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
-		$this->sendJson([
-			'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $products),
-		]);
+		$this->sendJson(
+			[
+				'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $products),
+			]
+		);
 	}
 
 
@@ -623,9 +637,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			static fn(array $a, array $b): int => $a['score'] < $b['score'] ? 1 : -1,
 		);
 
-		$this->sendJson([
-			'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
-		]);
+		$this->sendJson(
+			[
+				'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
+			]
+		);
 	}
 
 
@@ -646,10 +662,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->getQuery()
 				->getSingleResult();
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->entityManager->persist(new RelatedProduct(
-				$this->getProductById($id),
-				$this->getProductById($relatedId)
-			));
+			$this->entityManager->persist(
+				new RelatedProduct(
+					$this->getProductById($id),
+					$this->getProductById($relatedId)
+				)
+			);
 			$this->entityManager->flush();
 		}
 
@@ -709,14 +727,16 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
-		$this->sendJson([
-			'list' => $variantList,
-			'defaultCode' => $product->getCode(),
-			'productPrice' => $product->getSalePrice(),
-			'variantParameters' => $variantParameters = $this->getVariantParameters($id),
-			'variantCount' => \count($variantList),
-			'possibleVariantCount' => (new CombinationGenerator)->countCombinations($variantParameters),
-		]);
+		$this->sendJson(
+			[
+				'list' => $variantList,
+				'defaultCode' => $product->getCode(),
+				'productPrice' => $product->getSalePrice(),
+				'variantParameters' => $variantParameters = $this->getVariantParameters($id),
+				'variantCount' => \count($variantList),
+				'possibleVariantCount' => (new CombinationGenerator)->countCombinations($variantParameters),
+			]
+		);
 	}
 
 
@@ -778,7 +798,16 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$entity->setCode($variant['code']);
 		}
 
-		$this->entityManager->flush();
+		try {
+			$this->entityManager->flush();
+			$this->flashMessage('Variants has been saved.', self::FLASH_MESSAGE_ERROR);
+		} catch (\Throwable $e) {
+			$this->flashMessage(
+				'Variants can not be saved, because some fields is duplicated. '
+				. 'Please check this error: ' . $e->getMessage(),
+				self::FLASH_MESSAGE_ERROR
+			);
+		}
 		$this->sendOk();
 	}
 
@@ -797,16 +826,18 @@ final class CmsProductEndpoint extends BaseEndpoint
 	{
 		$product = $this->getProductById($id);
 
-		$this->sendJson([
-			'weight' => $product->getWeight(),
-			'size' => [
-				'width' => $product->getSizeWidth(),
-				'length' => $product->getSizeLength(),
-				'thickness' => $product->getSizeThickness(),
-				'min' => $product->getMinimalSize(),
-				'max' => $product->getMaximalSize(),
-			],
-		]);
+		$this->sendJson(
+			[
+				'weight' => $product->getWeight(),
+				'size' => [
+					'width' => $product->getSizeWidth(),
+					'length' => $product->getSizeLength(),
+					'thickness' => $product->getSizeThickness(),
+					'min' => $product->getMinimalSize(),
+					'max' => $product->getMaximalSize(),
+				],
+			]
+		);
 	}
 
 
@@ -837,12 +868,14 @@ final class CmsProductEndpoint extends BaseEndpoint
 		}
 
 		$mainCategory = $product->getMainCategory();
-		$this->sendJson([
-			'mainCategory' => $mainCategory !== null
-				? (string) $mainCategory->getName()
-				: 'No main category',
-			'categories' => $categories,
-		]);
+		$this->sendJson(
+			[
+				'mainCategory' => $mainCategory !== null
+					? (string) $mainCategory->getName()
+					: 'No main category',
+				'categories' => $categories,
+			]
+		);
 	}
 
 
@@ -877,9 +910,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
-		$this->sendJson([
-			'items' => $return,
-		]);
+		$this->sendJson(
+			[
+				'items' => $return,
+			]
+		);
 	}
 
 
@@ -906,6 +941,23 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product->removeCategory($category);
 		$this->entityManager->flush();
 		$this->sendOk();
+	}
+
+
+	public function postClone(int $id, string $name, string $code, string $slug): void
+	{
+		try {
+			$product = $this->productManager->get()->cloneProduct($id, $name, $code, $slug);
+		} catch (\InvalidArgumentException $e) {
+			$this->flashMessage($e->getMessage(), self::FLASH_MESSAGE_ERROR);
+			$this->sendError($e->getMessage());
+		}
+		$this->flashMessage('Product "' . $product->getName() . '" has been cloned.', self::FLASH_MESSAGE_SUCCESS);
+		$this->sendJson(
+			[
+				'id' => $product->getId(),
+			]
+		);
 	}
 
 

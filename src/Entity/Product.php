@@ -441,6 +441,12 @@ class Product
 	}
 
 
+	public function addLabel(ProductLabel $label): void
+	{
+		$this->labels[] = $label;
+	}
+
+
 	/**
 	 * @return ProductSmartDescription[]|Collection
 	 */
@@ -550,5 +556,23 @@ class Product
 			throw new \InvalidArgumentException('Weight can not be negative, but "' . $value . '" given.');
 		}
 		$this->weight = $value;
+	}
+
+
+	/**
+	 * @return RelatedProduct[]|Collection
+	 */
+	public function getProductRelatedBasic()
+	{
+		return $this->productRelatedBasic;
+	}
+
+
+	/**
+	 * @return RelatedProduct[]|Collection
+	 */
+	public function getProductRelatedRelated()
+	{
+		return $this->productRelatedRelated;
 	}
 }
