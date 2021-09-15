@@ -39,7 +39,7 @@ Vue.component('cms-product-category', {
 		<div v-if="candidates === null" class="my-5 text-center">
 			<b-spinner></b-spinner>
 		</div>
-		<table v-else class="table table-sm">
+		<table v-else class="table table-sm cms-table-no-border-top">
 			<tr>
 				<th>Category</th>
 				<th></th>

@@ -29,7 +29,7 @@ Vue.component('cms-product-related', {
 						</template>
 					</td>
 					<td class="text-right">
-						<b-button variant="danger" size="sm" class="px-2 py-0" @click="deleteRelatedProduct(product.id)">remove</b-button>
+						<b-button variant="outline-danger" size="sm" class="py-0" @click="deleteRelatedProduct(product.id)"">🗑️</b-button>
 					</td>
 				</tr>
 			</table>
@@ -50,7 +50,7 @@ Vue.component('cms-product-related', {
 				<div v-if="candidates.length === 0" class="text-center my-5">
 					There are not results.
 				</div>
-				<table v-else class="table table-sm">
+				<table v-else class="table table-sm cms-table-no-border-top">
 					<tr>
 						<th>Product</th>
 						<th>Main category</th>
@@ -68,7 +68,7 @@ Vue.component('cms-product-related', {
 							</template>
 						</td>
 						<td class="text-right">
-							<b-button variant="primary" size="sm" class="px-2 py-0" @click="addRelatedProduct(candidate.id)">add</b-button>
+							<b-button variant="secondary" size="sm" class="px-2 py-0" @click="addRelatedProduct(candidate.id)">+</b-button>
 						</td>
 					</tr>
 				</table>
@@ -106,6 +106,9 @@ Vue.component('cms-product-related', {
 				});
 		},
 		deleteRelatedProduct(id) {
+			if (!confirm('Really?')) {
+				return;
+			}
 			axiosApi.get(`cms-product/delete-related?id=${this.id}&relatedId=${id}`)
 				.then(req => {
 					this.sync();

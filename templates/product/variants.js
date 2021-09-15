@@ -25,7 +25,7 @@ Vue.component('cms-product-variants', {
 			</div>
 			<div v-else class="mt-3">
 				<h4>Variant parameters</h4>
-				<table class="table table-sm cms-table-no-border-top">
+				<table class="table table-sm table-bordered">
 					<tr v-for="(variantParameterValues, variantParameterLabel) in variantParameters">
 						<td width="150"><b>{{ variantParameterLabel }}</b></td>
 						<td>
