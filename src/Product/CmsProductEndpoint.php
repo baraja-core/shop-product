@@ -54,16 +54,18 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->setParameter(
 					'searchIds',
 					$this->search->search(
-						$query, [
-						Product::class => [
-							'name',
-							'code',
-							'ean',
-							'shortDescription',
-							'price',
-							'smartDescriptions.description',
+						$query,
+						[
+							Product::class => [
+								'name',
+								'code',
+								'ean',
+								'shortDescription',
+								'price',
+								'smartDescriptions.description',
+							],
 						],
-					], useAnalytics: false
+						useAnalytics: false
 					)->getIds()
 				);
 		}
@@ -85,7 +87,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			if ($mainImage !== null) {
 				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 100, 'h' => 100]);
 				$item['shortDescription'] = Strings::truncate(
-					strip_tags($this->renderer->render($item['shortDescription'])), 128
+					strip_tags($this->renderer->render($item['shortDescription'])),
+					128
 				);
 			}
 			$return[] = $item;
@@ -171,13 +174,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'vat' => $product->getVat(),
 				'standardPricePercentage' => $product->getStandardPricePercentage(),
 				'url' => $this->linkSafe(
-					'Front:Product:detail', [
+					'Front:Product:detail',
+					[
 						'slug' => $product->getSlug(),
 					]
 				),
 				'soldOut' => $product->isSoldOut(),
-				'mainImage' => (static function (?ProductImage $image): ?array
-				{
+				'mainImage' => (static function (?ProductImage $image): ?array {
 					if ($image === null) {
 						return null;
 					}
@@ -191,8 +194,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 					$product->getMainCategory()
 				),
 				'customFields' => $this->productFieldManager->getFieldsInfo($product),
-				'smartDescriptions' => (function (array $descriptions): array
-				{
+				'smartDescriptions' => (function (array $descriptions): array {
 					$return = [];
 					foreach ($descriptions as $description) {
 						$return[] = [
@@ -201,7 +203,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 							'html' => $this->renderer->render((string) $description['description']),
 							'image' => $description['image']
 								? ImageGenerator::from(
-									'product-image/description/' . $description['image'], ['w' => 100, 'h' => 100]
+									'product-image/description/' . $description['image'],
+									['w' => 100, 'h' => 100]
 								)
 								: null,
 							'color' => $description['color'],
@@ -309,8 +312,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'images' => $images,
 				'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
 				'variants' => $this->formatBootstrapSelectArray(
-					(static function (array $variants): array
-					{
+					(static function (array $variants): array {
 						$return = [];
 						$return[null] = '--- no variant ---';
 						foreach ($variants as $variant) {

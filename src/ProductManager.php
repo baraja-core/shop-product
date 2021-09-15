@@ -154,7 +154,9 @@ final class ProductManager
 		if (is_file($path) === false) {
 			throw new \InvalidArgumentException('Given file does not exist. Path "' . $path . '" given.');
 		}
-		$type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+		$finfo = finfo_open(FILEINFO_MIME_TYPE);
+		assert(is_resource($finfo));
+		$type = finfo_file($finfo, $path);
 		if (in_array($type, ['image/gif', 'image/png', 'image/jpeg', 'image/webp'], true) === false) {
 			throw new \InvalidArgumentException('Given file must be a image. Path "' . $path . '" given.');
 		}
@@ -202,7 +204,6 @@ final class ProductManager
 
 	public function slugExist(string $slug): bool
 	{
-
 		try {
 			$this->getProductBySlug($slug);
 		} catch (NoResultException | NonUniqueResultException) {
