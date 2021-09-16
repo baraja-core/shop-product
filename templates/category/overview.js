@@ -6,31 +6,28 @@ Vue.component('cms-product-category-overview', {
 	</div>
 	<template v-else>
 		<b-form @submit="save">
-			<div class="container-fluid">
-				<div class="row">
-					<div class="col">
-						Name:
-						<b-form-input v-model="category.name"></b-form-input>
-					</div>
-					<div class="col">
-						Code:
-						<b-form-input v-model="category.code" disabled></b-form-input>
-					</div>
-					<div class="col">
-						Parent:
-						<b-form-select v-model="category.parentId" :options="tree"></b-form-select>
-					</div>
+			<div class="row">
+				<div class="col">
+					Name:
+					<b-form-input v-model="category.name"></b-form-input>
 				</div>
-				<div class="row mt-3">
-					<div class="col">
-						Description:
-						<b-form-textarea v-model="category.description" rows="5"></b-form-textarea>
-					</div>
+				<div class="col">
+					Code:
+					<b-form-input v-model="category.code" disabled></b-form-input>
 				</div>
-				<div class="row mt-3">
-					<div class="col">
-						<b-button type="submit" variant="primary" @click="save">Save</b-button>
-					</div>
+				<div class="col">
+					Parent:
+					<b-form-select v-model="category.parentId" :options="tree"></b-form-select>
+				</div>
+			</div>
+			<div class="row mt-3">
+				<div class="col">
+					<cms-editor v-model="category.description" label="Description:" rows="5"></cms-editor>
+				</div>
+			</div>
+			<div class="row mt-3">
+				<div class="col">
+					<b-button type="submit" variant="primary" @click="save">Save</b-button>
 				</div>
 			</div>
 		</b-form>

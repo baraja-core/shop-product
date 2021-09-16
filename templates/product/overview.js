@@ -102,12 +102,10 @@ Vue.component('cms-product-overview', {
 			</div>
 			<div class="row mt-3">
 				<div class="col-6">
-					Short description:
-					<textarea v-model="product.shortDescription" class="form-control" rows="8"></textarea>
+					<cms-editor v-model="product.shortDescription" rows="8" label="Short description:"></cms-editor>
 				</div>
 				<div class="col-6">
-					Regular description:
-					<textarea v-model="product.description" class="form-control" rows="8"></textarea>
+					<cms-editor v-model="product.description" rows="8" label="Regular description:"></cms-editor>
 				</div>
 			</div>
 			<div class="row mt-3">
@@ -161,7 +159,7 @@ Vue.component('cms-product-overview', {
 	</div>
 	<b-modal id="modal-add-description" title="New smart description" size="lg" hide-footer>
 		<b-form @submit="createNewDescription">
-			<textarea v-model="newSmartDescription.description" class="form-control" rows="12"></textarea>
+			<cms-editor v-model="newSmartDescription.description" rows="12"></cms-editor>
 			<div class="row my-3">
 				<div class="col">
 					Position:
@@ -177,7 +175,7 @@ Vue.component('cms-product-overview', {
 	</b-modal>
 	<b-modal id="modal-edit-description" title="Edit smart description" size="lg" hide-footer>
 		<b-form @submit="saveEditDescription">
-			<textarea v-model="editSmartDescription.description" class="form-control" rows="12"></textarea>
+			<cms-editor v-model="editSmartDescription.description" rows="12"></cms-editor>
 			<div class="row my-3">
 				<div class="col">
 					Position:
