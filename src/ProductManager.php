@@ -11,6 +11,7 @@ use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
+use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -75,6 +76,34 @@ final class ProductManager
 			->orderBy('image.position', 'DESC')
 			->getQuery()
 			->getSingleResult();
+	}
+
+
+	public function getProductByEan(string $ean): Product|ProductVariant|null
+	{
+		try {
+			return $this->entityManager->getRepository(Product::class)
+				->createQueryBuilder('product')
+				->where('product.ean = :ean')
+				->setParameter('ean', $ean)
+				->setMaxResults(1)
+				->getQuery()
+				->getSingleResult();
+		} catch (NoResultException | NonUniqueResultException) {
+			try {
+				return $this->entityManager->getRepository(ProductVariant::class)
+					->createQueryBuilder('productVariant')
+					->where('productVariant.ean = :ean')
+					->setParameter('ean', $ean)
+					->setMaxResults(1)
+					->getQuery()
+					->getSingleResult();
+			} catch (NoResultException | NonUniqueResultException) {
+				// Silence is golden.
+			}
+		}
+
+		return null;
 	}
 
 
