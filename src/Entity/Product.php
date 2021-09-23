@@ -23,6 +23,8 @@ use Nette\Utils\Strings;
  * @method void setShortDescription(?string $content = null, ?string $locale = null)
  * @method Translation|null getDescription(?string $locale = null)
  * @method void setDescription(?string $content = null, ?string $locale = null)
+ * @method Translation|null getInternalNote(?string $locale = null)
+ * @method void setInternalNote(?string $content = null, ?string $locale = null)
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'shop__product')]
@@ -59,6 +61,9 @@ class Product
 
 	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $description = null;
+
+	#[ORM\Column(type: 'translate', nullable: true)]
+	private ?Translation $internalNote = null;
 
 	#[ORM\Column(type: 'float', options: ['unsigned' => true])]
 	private float $price;
