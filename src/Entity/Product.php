@@ -185,7 +185,7 @@ class Product
 
 	public function setCode(string $code): void
 	{
-		$this->code = Strings::webalize($code);
+		$this->code = Strings::webalize($code, '_/-.');
 	}
 
 
