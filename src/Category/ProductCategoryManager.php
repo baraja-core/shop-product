@@ -100,6 +100,7 @@ final class ProductCategoryManager
 				'id' => $id,
 				'name' => (string) $category->getName(),
 				'code' => $category->getCode(),
+				'active' => $category->isActive(),
 				'hasChildren' => false,
 			];
 			$openChildren[$category->getId()] = false;
