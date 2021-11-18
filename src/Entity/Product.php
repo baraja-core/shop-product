@@ -309,7 +309,7 @@ class Product
 
 	public function setStandardPricePercentage(?float $standardPricePercentage): void
 	{
-		$isZero = static fn (float $value): bool => abs($value) < 1e-10;
+		$isZero = static fn(float $value): bool => abs($value) < 1e-10;
 		if ($standardPricePercentage !== null && $isZero($standardPricePercentage)) {
 			$standardPricePercentage = null;
 		}
