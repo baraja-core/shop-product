@@ -38,7 +38,7 @@ final class ProductCategoryPlugin extends BasePlugin
 				->getQuery()
 				->getSingleResult();
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->error('Product category "' . $id . '" doest not exist.');
+			$this->error(sprintf('Product category "%s" doest not exist.', $id));
 		}
 
 		foreach ($category->getPath() as $parentId => $parentName) {

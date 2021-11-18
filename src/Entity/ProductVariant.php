@@ -45,7 +45,7 @@ class ProductVariant
 
 
 	/**
-	 * @param string[] $parameters
+	 * @param array<string, string> $parameters
 	 */
 	public static function serializeParameters(array $parameters): string
 	{
@@ -60,7 +60,7 @@ class ProductVariant
 
 
 	/**
-	 * @return string[]
+	 * @return array<string, string>
 	 */
 	public static function unserializeParameters(string $hash): array
 	{
@@ -69,7 +69,11 @@ class ProductVariant
 			if (preg_match('/^([^=]+)=(.+)$/', $parameter, $parser)) {
 				$return[$parser[1]] = $parser[2];
 			} else {
-				throw new \InvalidArgumentException('Hash parameter "' . $parameter . '" is invalid, because hash "' . $hash . '" given.');
+				throw new \InvalidArgumentException(sprintf(
+					'Hash parameter "%s" is invalid, because hash "%s" given.',
+					$parameter,
+					$hash,
+				));
 			}
 		}
 

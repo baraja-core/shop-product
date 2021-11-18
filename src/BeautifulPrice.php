@@ -12,7 +12,7 @@ final class BeautifulPrice
 		private bool $preferEndZero = false,
 	) {
 		if ($price < 0) {
-			throw new \InvalidArgumentException('Price can not be negative, but "' . $price . '" given.');
+			throw new \InvalidArgumentException(sprintf('Price can not be negative, but "%s" given.', $price));
 		}
 	}
 

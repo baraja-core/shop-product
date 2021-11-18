@@ -18,7 +18,7 @@ use Nette\DI\Definitions\ServiceDefinition;
 final class ProductExtension extends CompilerExtension
 {
 	/**
-	 * @return string[]
+	 * @return array<int, string>
 	 */
 	public static function mustBeDefinedBefore(): array
 	{

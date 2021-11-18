@@ -110,7 +110,7 @@ final class ProductFieldManager
 	 */
 	public function setFields(Product $product, array $fields): void
 	{
-		/** @var ProductField[] $databaseFields */
+		/** @var array<int, ProductField> $databaseFields */
 		$databaseFields = $this->entityManager->getRepository(ProductField::class)
 			->createQueryBuilder('field')
 			->select('field, definition')
@@ -150,7 +150,7 @@ final class ProductFieldManager
 
 
 	/**
-	 * @return ProductFieldDefinition[]
+	 * @return array<int, ProductFieldDefinition>
 	 */
 	public function getDefinitions(bool $flush = false): array
 	{

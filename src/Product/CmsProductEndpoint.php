@@ -1009,30 +1009,39 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 
 	/**
-	 * @param string[] $values
+	 * @param array<int, string> $values
 	 */
 	private function checkParameter(string $name, array $values): void
 	{
-		$name = strtolower($name);
-		if ($name === 'barva' || $name === 'color') {
-			$notInclude = [];
-			foreach ($values as $value) {
-				$value = strtolower($value);
-				if (\in_array($value, $this->getExcludeMap(), true) === false) {
-					$notInclude[] = $value;
-				}
+		if ($this->isEnumerableParameter($name) === false) {
+			return;
+		}
+		$notInclude = [];
+		foreach ($values as $value) {
+			$value = strtolower($value);
+			if (\in_array($value, $this->getExcludeMap(), true) === false) {
+				$notInclude[] = $value;
 			}
-			if ($notInclude !== []) {
-				throw new \InvalidArgumentException(
-					'Colors "' . implode('", "', $notInclude) . '" no found. Are they created on the color settings?',
-				);
-			}
+		}
+		if ($notInclude !== []) {
+			throw new \InvalidArgumentException(
+				sprintf('Colors "%s" no found. Are they created on the color settings?', implode('", "', $notInclude)),
+			);
 		}
 	}
 
 
+	private function isEnumerableParameter(string $name): bool
+	{
+		$name = strtolower($name);
+		$items = ['barva', 'color'];
+
+		return in_array($name, $items, true);
+	}
+
+
 	/**
-	 * @return string[]
+	 * @return array<int, string>
 	 */
 	private function getExcludeMap(): array
 	{

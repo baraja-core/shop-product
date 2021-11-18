@@ -62,7 +62,7 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 
 			$this->setTitle('(' . $id . ') ' . $product->getName());
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->error('Product "' . $id . '" doest not exist.');
+			$this->error(sprintf('Product "%s" doest not exist.', $id));
 		}
 
 		try {

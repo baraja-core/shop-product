@@ -49,7 +49,7 @@ class ProductImage
 
 
 	/**
-	 * @return string[]
+	 * @return array{source: string, title: string, url: string}
 	 */
 	public function toArray(): array
 	{

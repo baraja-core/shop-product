@@ -13,7 +13,6 @@ use Baraja\Shop\Product\Validators;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Nette\Utils\Floats;
 use Nette\Utils\Strings;
 
 /**
@@ -212,7 +211,7 @@ class Product
 			$ean = Strings::webalize($ean);
 			if (Validators::validateEAN13($ean) === false) {
 				throw new \InvalidArgumentException(
-					'EAN "' . $ean . '" is not valid. Please read EAN-13 specification.'
+					sprintf('EAN "%s" is not valid. Please read EAN-13 specification.', $ean)
 					. "\n" . 'To solve this issue: Please read https://en.wikipedia.org/wiki/International_Article_Number.',
 				);
 			}
@@ -310,7 +309,8 @@ class Product
 
 	public function setStandardPricePercentage(?float $standardPricePercentage): void
 	{
-		if ($standardPricePercentage !== null && Floats::isZero($standardPricePercentage)) {
+		$isZero = static fn (float $value): bool => abs($value) < 1e-10;
+		if ($standardPricePercentage !== null && $isZero($standardPricePercentage)) {
 			$standardPricePercentage = null;
 		}
 		$this->standardPricePercentage = $standardPricePercentage;
@@ -513,7 +513,7 @@ class Product
 	public function setSizeWidth(?float $value): void
 	{
 		if ($value !== null && $value <= 0) {
-			throw new \InvalidArgumentException('Size can not be negative, but "' . $value . '" given.');
+			throw new \InvalidArgumentException(sprintf('Size can not be negative, but "%s" given.', $value));
 		}
 		$this->sizeWidth = $value;
 	}
@@ -528,7 +528,7 @@ class Product
 	public function setSizeLength(?float $value): void
 	{
 		if ($value !== null && $value <= 0) {
-			throw new \InvalidArgumentException('Size can not be negative, but "' . $value . '" given.');
+			throw new \InvalidArgumentException(sprintf('Size can not be negative, but "%s" given.', $value));
 		}
 		$this->sizeLength = $value;
 	}
@@ -543,7 +543,7 @@ class Product
 	public function setSizeThickness(?float $value): void
 	{
 		if ($value !== null && $value <= 0) {
-			throw new \InvalidArgumentException('Size can not be negative, but "' . $value . '" given.');
+			throw new \InvalidArgumentException(sprintf('Size can not be negative, but "%s" given.', $value));
 		}
 		$this->sizeThickness = $value;
 	}
@@ -558,7 +558,7 @@ class Product
 	public function setWeight(?int $value): void
 	{
 		if ($value !== null && $value <= 0) {
-			throw new \InvalidArgumentException('Weight can not be negative, but "' . $value . '" given.');
+			throw new \InvalidArgumentException(sprintf('Weight can not be negative, but "%s" given.', $value));
 		}
 		$this->weight = $value;
 	}

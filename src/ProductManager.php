@@ -13,18 +13,24 @@ use Baraja\Shop\Product\Entity\ProductParameter;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
+use Baraja\Shop\Product\FileSystem\ProductFileSystem;
+use Baraja\Shop\Product\FileSystem\ProductImageFileSystem;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Nette\Utils\FileSystem;
 use Nette\Utils\Random;
 
 final class ProductManager
 {
+	private ProductFileSystem $fileSystem;
+
+
 	public function __construct(
-		private string $wwwDir,
+		string $wwwDir,
 		private EntityManager $entityManager,
 		private Configuration $configuration,
+		?ProductFileSystem $fileSystem = null,
 	) {
+		$this->fileSystem = $fileSystem ?? new ProductImageFileSystem($wwwDir);
 	}
 
 
@@ -108,7 +114,7 @@ final class ProductManager
 
 
 	/**
-	 * @return Product[]
+	 * @return array<int, Product>
 	 */
 	public function getRelatedProducts(Product $product): array
 	{
@@ -153,7 +159,7 @@ final class ProductManager
 			throw new \InvalidArgumentException('Please enter all fields.');
 		}
 		if ($this->codeExist($code)) {
-			throw new \InvalidArgumentException('Product with code "' . $code . '" already exist.');
+			throw new \InvalidArgumentException(sprintf('Product with code "%s" already exist.', $code));
 		}
 
 		$product = new Product($name, $code, $price);
@@ -181,13 +187,13 @@ final class ProductManager
 	public function addImage(Product $product, string $path, ?string $sanitizedName = null): void
 	{
 		if (is_file($path) === false) {
-			throw new \InvalidArgumentException('Given file does not exist. Path "' . $path . '" given.');
+			throw new \InvalidArgumentException(sprintf('Given file does not exist. Path "%s" given.', $path));
 		}
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 		assert(is_resource($finfo));
 		$type = finfo_file($finfo, $path);
 		if (in_array($type, ['image/gif', 'image/png', 'image/jpeg', 'image/webp'], true) === false) {
-			throw new \InvalidArgumentException('Given file must be a image. Path "' . $path . '" given.');
+			throw new \InvalidArgumentException(sprintf('Given file must be a image. Path "%s" given.', $path));
 		}
 
 		if ($sanitizedName === null) {
@@ -195,9 +201,7 @@ final class ProductManager
 		}
 		$source = date('Y-m-d') . '/' . strtolower(Random::generate(8) . '-' . $sanitizedName);
 		$productImage = new ProductImage($product, $source);
-		$diskPath = $this->wwwDir . '/' . $productImage->getRelativePath();
-		FileSystem::copy($path, $diskPath);
-
+		$this->fileSystem->save($productImage, $path);
 		$this->entityManager->persist($productImage);
 		if ($product->getMainImage() === null) {
 			$product->setMainImage($productImage);
@@ -213,7 +217,7 @@ final class ProductManager
 			$image->getProduct()->setMainImage(null);
 		}
 
-		FileSystem::delete($this->wwwDir . '/' . $image->getRelativePath());
+		$this->fileSystem->delete($image);
 		$this->entityManager->remove($image);
 		$this->entityManager->flush();
 	}
@@ -246,10 +250,10 @@ final class ProductManager
 	public function cloneProduct(int $id, string $name, string $code, string $slug): Product
 	{
 		if ($this->codeExist($code)) {
-			throw new \InvalidArgumentException('Product with code "' . $code . '" already exist.');
+			throw new \InvalidArgumentException(sprintf('Product with code "%s" already exist.', $code));
 		}
 		if ($this->slugExist($slug)) {
-			throw new \InvalidArgumentException('Product with slug "' . $slug . '" already exist.');
+			throw new \InvalidArgumentException(sprintf('Product with slug "%s" already exist.', $slug));
 		}
 		$original = $this->getProductById($id);
 

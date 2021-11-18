@@ -82,7 +82,7 @@ class ProductCategory
 		}
 		$id = $this->getId();
 		if (is_int($id) === false) {
-			throw new \LogicException('Entity "' . static::class . '" must be flushed first.');
+			throw new \LogicException(sprintf('Entity "%s" must be flushed first.', static::class));
 		}
 
 		return $id;
@@ -98,10 +98,10 @@ class ProductCategory
 		foreach ($this->getChild() as $child) {
 			$childId = $child->getId();
 			if (is_int($childId) === false) {
-				throw new \LogicException(
-					'Entity "' . static::class . '" child ID does not exist, '
-					. 'because related entities must be flushed first.',
-				);
+				throw new \LogicException(sprintf(
+					'Entity "%s" child ID does not exist, because related entities must be flushed first.',
+					static::class,
+				));
 			}
 			$return[] = $childId;
 		}
