@@ -66,7 +66,7 @@ class ProductCategory
 	public function __construct(string $name, string $code, ?string $slug = null)
 	{
 		$this->setName(Strings::firstUpper($name));
-		$this->code = Strings::webalize($code);
+		$this->setCode($code);
 		$this->setSlug($slug ?: $code);
 		$this->child = new ArrayCollection;
 		$this->mainProducts = new ArrayCollection;
@@ -156,6 +156,16 @@ class ProductCategory
 	public function getCode(): string
 	{
 		return $this->code;
+	}
+
+
+	public function setCode(string $code): void
+	{
+		$code = Strings::webalize($code);
+		if ($code === '') {
+			$code = $this->getSlug();
+		}
+		$this->code = $code;
 	}
 
 

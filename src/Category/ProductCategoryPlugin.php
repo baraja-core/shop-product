@@ -5,18 +5,24 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Category;
 
 
-use Baraja\Doctrine\EntityManager;
 use Baraja\Plugin\BasePlugin;
 use Baraja\Plugin\SimpleComponent\Breadcrumb;
 use Baraja\Shop\Product\Entity\ProductCategory;
+use Baraja\Shop\Product\Entity\ProductCategoryRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
 final class ProductCategoryPlugin extends BasePlugin
 {
-	public function __construct(
-		private EntityManager $entityManager,
-	) {
+	private ProductCategoryRepository $productCategoryRepository;
+
+
+	public function __construct(EntityManagerInterface $entityManager)
+	{
+		/** @var ProductCategoryRepository $productCategoryRepository */
+		$productCategoryRepository = $entityManager->getRepository(ProductCategory::class);
+		$this->productCategoryRepository = $productCategoryRepository;
 	}
 
 
@@ -29,14 +35,7 @@ final class ProductCategoryPlugin extends BasePlugin
 	public function actionDetail(int $id): void
 	{
 		try {
-			/** @var ProductCategory $category */
-			$category = $this->entityManager->getRepository(ProductCategory::class)
-				->createQueryBuilder('category')
-				->where('category.id = :id')
-				->setParameter('id', $id)
-				->setMaxResults(1)
-				->getQuery()
-				->getSingleResult();
+			$category = $this->productCategoryRepository->getById($id);
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->error(sprintf('Product category "%s" doest not exist.', $id));
 		}
@@ -50,6 +49,10 @@ final class ProductCategoryPlugin extends BasePlugin
 			);
 		}
 
-		$this->setTitle('(' . $id . ') ' . $category->getName());
+		$this->setTitle(
+			'(' . $id . ') '
+			. ($category->isActive() ? '' : '[hidden] ')
+			. $category->getName()
+		);
 	}
 }

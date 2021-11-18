@@ -70,6 +70,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 					'code' => $category->getCode(),
 					'slug' => $category->getSlug(),
 					'description' => (string) $category->getDescription(),
+					'active' => $category->isActive(),
 					'heureka' => [
 						'id' => $category->getHeurekaCategoryId(),
 						'isAvailable' => class_exists(CategoryManager::class),
@@ -86,17 +87,23 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function postSave(
 		int $id,
 		string $name,
+		string $code,
+		string $slug,
 		?int $parentId,
 		string $description,
+		bool $active,
 	): void {
 		try {
 			$category = $this->categoryManager->get()->getCategoryById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Category "' . $id . '" does not exist.');
+			$this->sendError(sprintf('Category "%s" does not exist.', $id));
 		}
 
 		$category->setName($name);
+		$category->setCode($code);
+		$category->setSlug($slug);
 		$category->setDescription($description);
+		$category->setActive($active);
 
 		if ($parentId !== null) {
 			$category->setParent($this->categoryManager->get()->getCategoryById($parentId));

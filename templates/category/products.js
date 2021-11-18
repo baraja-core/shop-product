@@ -1,6 +1,6 @@
 Vue.component('cms-product-category-products', {
 	props: ['id'],
-	template: `<b-card>
+	template: `<cms-card>
 	<div v-if="products === null" class="text-center my-5">
 		<b-spinner></b-spinner>
 	</div>
@@ -21,7 +21,7 @@ Vue.component('cms-product-category-products', {
 			</tr>
 		</table>
 	</template>
-</b-card>`,
+</cms-card>`,
 	data() {
 		return {
 			products: null

@@ -71,7 +71,8 @@ final class ProductCategoryManager
 	{
 		$selector = $this->entityManager->getRepository(ProductCategory::class)
 			->createQueryBuilder('category')
-			->orderBy('category.position', 'ASC');
+			->orderBy('category.active', 'DESC')
+			->addOrderBy('category.position', 'ASC');
 
 		if ($parentId === null) {
 			$selector->where('category.parent IS NULL');

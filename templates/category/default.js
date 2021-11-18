@@ -92,7 +92,7 @@ Vue.component('cms-product-category-tree', {
 				<td :style="parentId !== null && key === 0 ? 'border-top:0' : ''">
 					<a :href="link('ProductCategory:detail', { id: item.id })">
 						<template v-if="item.active">{{ item.name }}</template>
-						<template v-else><s>{{ item.name }}</s></template>
+						<s v-else class="text-secondary">{{ item.name }}</s>
 					</a>
 					<small v-if="item.active === false" class="text-secondary">(hidden)</small>
 				</td>
