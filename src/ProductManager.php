@@ -10,8 +10,10 @@ use Baraja\DynamicConfiguration\Configuration;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
+use Baraja\Shop\Product\Entity\ProductRepository;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
+use Baraja\Shop\Product\Entity\ProductVariantRepository;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\Shop\Product\FileSystem\ProductFileSystem;
 use Baraja\Shop\Product\FileSystem\ProductImageFileSystem;
@@ -23,6 +25,10 @@ final class ProductManager
 {
 	private ProductFileSystem $fileSystem;
 
+	private ProductRepository $productRepository;
+
+	private ProductVariantRepository $productVariantRepository;
+
 
 	public function __construct(
 		string $wwwDir,
@@ -31,82 +37,56 @@ final class ProductManager
 		?ProductFileSystem $fileSystem = null,
 	) {
 		$this->fileSystem = $fileSystem ?? new ProductImageFileSystem($wwwDir);
+		/** @var ProductRepository $productRepository */
+		$productRepository = $entityManager->getRepository(Product::class);
+		/** @var ProductVariantRepository $productVariantRepository */
+		$productVariantRepository = $entityManager->getRepository(ProductVariant::class);
+		$this->productRepository = $productRepository;
+		$this->productVariantRepository = $productVariantRepository;
 	}
 
 
 	/**
+	 * @deprecated since 2021-11-18, use ProductRepository instead.
 	 * @throws NoResultException|NonUniqueResultException
 	 */
 	public function getProductById(int $id): Product
 	{
-		return $this->entityManager->getRepository(Product::class)
-			->createQueryBuilder('product')
-			->select('product, image')
-			->leftJoin('product.images', 'image')
-			->where('product.id = :id')
-			->setParameter('id', $id)
-			->orderBy('image.position', 'DESC')
-			->getQuery()
-			->getSingleResult();
+		return $this->productRepository->getById($id);
 	}
 
 
 	/**
+	 * @deprecated since 2021-11-18, use ProductRepository instead.
 	 * @throws NoResultException|NonUniqueResultException
 	 */
 	public function getProductBySlug(string $slug): Product
 	{
-		return $this->entityManager->getRepository(Product::class)
-			->createQueryBuilder('product')
-			->select('product, image')
-			->leftJoin('product.images', 'image')
-			->where('product.slug = :slug')
-			->setParameter('slug', $slug)
-			->orderBy('image.position', 'DESC')
-			->getQuery()
-			->getSingleResult();
+		return $this->productRepository->getBySlug($slug);
 	}
 
 
 	/**
+	 * @deprecated since 2021-11-18, use ProductRepository instead.
 	 * @throws NoResultException|NonUniqueResultException
 	 */
 	public function getProductByCode(string $code): Product
 	{
-		return $this->entityManager->getRepository(Product::class)
-			->createQueryBuilder('product')
-			->select('product, image')
-			->leftJoin('product.images', 'image')
-			->where('product.code = :code')
-			->setParameter('code', $code)
-			->orderBy('image.position', 'DESC')
-			->getQuery()
-			->getSingleResult();
+		return $this->productRepository->getByCode($code);
 	}
 
 
 	public function getProductByEan(string $ean): Product|ProductVariant|null
 	{
 		try {
-			return $this->entityManager->getRepository(Product::class)
-				->createQueryBuilder('product')
-				->where('product.ean = :ean')
-				->setParameter('ean', $ean)
-				->setMaxResults(1)
-				->getQuery()
-				->getSingleResult();
+			return $this->productRepository->getByEan($ean);
 		} catch (NoResultException | NonUniqueResultException) {
-			try {
-				return $this->entityManager->getRepository(ProductVariant::class)
-					->createQueryBuilder('productVariant')
-					->where('productVariant.ean = :ean')
-					->setParameter('ean', $ean)
-					->setMaxResults(1)
-					->getQuery()
-					->getSingleResult();
-			} catch (NoResultException | NonUniqueResultException) {
-				// Silence is golden.
-			}
+			// Silence is golden.
+		}
+		try {
+			return $this->productVariantRepository->getByEan($ean);
+		} catch (NoResultException | NonUniqueResultException) {
+			// Silence is golden.
 		}
 
 		return null;
@@ -226,7 +206,7 @@ final class ProductManager
 	public function codeExist(string $code): bool
 	{
 		try {
-			$this->getProductByCode($code);
+			$this->productRepository->getByCode($code);
 		} catch (NoResultException | NonUniqueResultException) {
 			return false;
 		}
@@ -238,7 +218,7 @@ final class ProductManager
 	public function slugExist(string $slug): bool
 	{
 		try {
-			$this->getProductBySlug($slug);
+			$this->productRepository->getBySlug($slug);
 		} catch (NoResultException | NonUniqueResultException) {
 			return false;
 		}
@@ -255,7 +235,7 @@ final class ProductManager
 		if ($this->slugExist($slug)) {
 			throw new \InvalidArgumentException(sprintf('Product with slug "%s" already exist.', $slug));
 		}
-		$original = $this->getProductById($id);
+		$original = $this->productRepository->getById($id);
 
 		$product = new Product($name, $code, $original->getPrice());
 		$product->setSlug($slug);

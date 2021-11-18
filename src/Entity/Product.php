@@ -25,7 +25,7 @@ use Nette\Utils\Strings;
  * @method Translation|null getInternalNote(?string $locale = null)
  * @method void setInternalNote(?string $content = null, ?string $locale = null)
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\Table(name: 'shop__product')]
 class Product
 {

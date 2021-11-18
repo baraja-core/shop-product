@@ -19,7 +19,7 @@ use Nette\Utils\Strings;
  * @method Translation|null getDescription(?string $locale = null)
  * @method void setDescription(?string $content = null, ?string $locale = null)
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProductCategoryRepository::class)]
 #[ORM\Table(name: 'shop__product_category')]
 class ProductCategory
 {

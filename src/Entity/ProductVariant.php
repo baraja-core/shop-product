@@ -9,7 +9,7 @@ use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProductVariantRepository::class)]
 #[ORM\Table(name: 'shop__product_variant')]
 class ProductVariant
 {
