@@ -38,12 +38,12 @@ Vue.component('cms-product-category-overview', {
 					<b-form-input v-model="category.slug" :disabled="options.slug"></b-form-input>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row mt-3">
 				<div class="col">
 					Parent:
 					<b-form-select v-model="category.parentId" :options="tree"></b-form-select>
 				</div>
-				<div class="col pt-2">
+				<div class="col">
 					<label>
 						Active?<br>
 						<b-form-checkbox v-model="category.active"></b-form-checkbox>
