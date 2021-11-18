@@ -32,13 +32,8 @@ final class ProductExtension extends CompilerExtension
 		PluginComponentExtension::defineBasicServices($builder);
 		OrmAnnotationsExtension::addAnnotationPathToManager($builder, 'Baraja\Shop\Product\Entity', __DIR__ . '/Entity');
 
-		if (!isset($builder->parameters['wwwDir'])) {
-			throw new \RuntimeException('Parameter "wwwDir" does not exist in project configuration.');
-		}
-
 		$builder->addDefinition($this->prefix('productManager'))
-			->setFactory(ProductManager::class)
-			->setArgument('wwwDir', $builder->parameters['wwwDir']);
+			->setFactory(ProductManager::class);
 
 		$builder->addAccessorDefinition($this->prefix('productManagerAccessor'))
 			->setImplement(ProductManagerAccessor::class);

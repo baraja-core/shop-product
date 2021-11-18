@@ -31,12 +31,11 @@ final class ProductManager
 
 
 	public function __construct(
-		string $wwwDir,
 		private EntityManager $entityManager,
 		private Configuration $configuration,
 		?ProductFileSystem $fileSystem = null,
 	) {
-		$this->fileSystem = $fileSystem ?? new ProductImageFileSystem($wwwDir);
+		$this->fileSystem = $fileSystem ?? new ProductImageFileSystem;
 		/** @var ProductRepository $productRepository */
 		$productRepository = $entityManager->getRepository(Product::class);
 		/** @var ProductVariantRepository $productVariantRepository */
