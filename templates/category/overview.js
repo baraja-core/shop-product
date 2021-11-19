@@ -5,6 +5,12 @@ Vue.component('cms-product-category-overview', {
 		<b-spinner></b-spinner>
 	</div>
 	<template v-else>
+		<b-alert :show="options.code === false || options.slug === false" variant="warning">
+			<b>Important note:</b><br>
+			If you change the category code or slug,
+			you can break connections to other components of the e-shop or break links (SEO).
+			Only make the change if you know what you're doing.
+		</b-alert>
 		<b-form @submit="save">
 			<div class="row">
 				<div class="col">
