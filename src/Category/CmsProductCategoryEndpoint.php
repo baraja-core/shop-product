@@ -103,8 +103,10 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 		$category->setCode($code);
 		$category->setSlug($slug);
 		$category->setDescription($description);
-		$category->setActive($active);
 
+		if ($category->isActive() !== $active) {
+			$this->categoryManager->get()->setActive($category, $active);
+		}
 		if ($parentId !== null) {
 			$category->setParent($this->categoryManager->get()->getCategoryById($parentId));
 		} else {

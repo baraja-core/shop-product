@@ -139,6 +139,44 @@ final class ProductCategoryManager
 	}
 
 
+	public function setActive(ProductCategory $category, bool $active): void
+	{
+		if ($active === true) {
+			foreach ($category->getAllParents() as $parent) {
+				if ($parent->isActive() === false && $parent->getId() !== $category->getId()) {
+					throw new \InvalidArgumentException(sprintf(
+						'Category "%s" (id "%s") can not be marked as active, because parent category "%s" (id "%s") is hidden.',
+						(string) $category->getName(),
+						$category->getId(),
+						(string) $parent->getName(),
+						$parent->getId(),
+					));
+				}
+			}
+			$category->setActive(true);
+			$this->entityManager->flush();
+			return;
+		}
+		foreach (array_merge($category->getMainProducts(), $category->getProducts()) as $product) {
+			if ($product->isActive()) {
+				throw new \InvalidArgumentException(sprintf(
+					'Category "%s" (id "%s") can not be marked as hidden, because contain active product "%s" (id "%s").',
+					(string) $category->getName(),
+					$category->getId(),
+					(string) $product->getName(),
+					$product->getId(),
+				));
+			}
+		}
+		foreach ($category->getAllChildren() as $child) {
+			$child->setActive(false);
+		}
+
+		$category->setActive(false);
+		$this->entityManager->flush();
+	}
+
+
 	public function recountPositions(?int $parentId = null, ?ProductCategory $newCategory = null): void
 	{
 		$categories = $this->getCategoriesByParent($parentId);

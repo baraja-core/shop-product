@@ -132,6 +132,22 @@ class ProductCategory
 	}
 
 
+	/**
+	 * @return array<int, self>
+	 */
+	public function getAllParents(): array
+	{
+		$return = [];
+		$parent = $this;
+		do {
+			$return[] = $parent;
+			$parent = $parent->getParent();
+		} while ($parent !== null);
+
+		return $return;
+	}
+
+
 	public function setParent(?self $parent): void
 	{
 		$this->parent = $parent;
@@ -150,6 +166,21 @@ class ProductCategory
 	public function getChild()
 	{
 		return $this->child;
+	}
+
+
+	/**
+	 * @return array<int, self>
+	 */
+	public function getAllChildren(): array
+	{
+		$return = [];
+		foreach ($this->getChild() as $category) {
+			$return[] = [$category];
+			$return[] = $category->getAllChildren();
+		}
+
+		return array_merge([], ...$return);
 	}
 
 
@@ -225,19 +256,19 @@ class ProductCategory
 
 
 	/**
-	 * @return Product[]|Collection
+	 * @return array<int, Product>
 	 */
-	public function getMainProducts()
+	public function getMainProducts(): array
 	{
-		return $this->mainProducts;
+		return $this->mainProducts->toArray();
 	}
 
 
 	/**
-	 * @return Product[]|Collection
+	 * @return array<int, Product>
 	 */
-	public function getProducts()
+	public function getProducts(): array
 	{
-		return $this->products;
+		return $this->products->toArray();
 	}
 }
