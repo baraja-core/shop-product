@@ -39,6 +39,9 @@ class ProductImage
 	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;
 
+	#[ORM\Column(type: 'string', length: 32, nullable: true)]
+	private ?string $tag = null;
+
 
 	public function __construct(Product $product, string $source, ?string $title = null)
 	{
@@ -118,5 +121,17 @@ class ProductImage
 	public function setPosition(int $position): void
 	{
 		$this->position = $position;
+	}
+
+
+	public function getTag(): ?string
+	{
+		return $this->tag;
+	}
+
+
+	public function setTag(?string $tag): void
+	{
+		$this->tag = $tag;
 	}
 }
