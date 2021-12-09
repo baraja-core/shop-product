@@ -65,8 +65,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 								'smartDescriptions.description',
 							],
 						],
-						useAnalytics: false
-					)->getIds()
+						useAnalytics: false,
+					)->getIds(),
 				);
 		}
 
@@ -88,7 +88,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 100, 'h' => 100]);
 				$item['shortDescription'] = Strings::truncate(
 					strip_tags($this->renderer->render($item['shortDescription'])),
-					128
+					128,
 				);
 			}
 			$return[] = $item;
@@ -102,7 +102,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 					->setItemCount($count)
 					->setItemsPerPage($limit)
 					->setPage($page),
-			]
+			],
 		);
 	}
 
@@ -141,7 +141,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'id' => $product->getId(),
-			]
+			],
 		);
 	}
 
@@ -177,7 +177,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 					'Front:Product:detail',
 					[
 						'slug' => $product->getSlug(),
-					]
+					],
 				),
 				'soldOut' => $product->isSoldOut(),
 				'mainImage' => (static function (?ProductImage $image): ?array {
@@ -187,11 +187,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 					return $image->toArray();
 				})(
-					$product->getMainImage()
+					$product->getMainImage(),
 				),
 				'mainCategoryId' => (static fn(?ProductCategory $category
 				): ?int => $category === null ? null : $category->getId())(
-					$product->getMainCategory()
+					$product->getMainCategory(),
 				),
 				'customFields' => $this->productFieldManager->getFieldsInfo($product),
 				'smartDescriptions' => (function (array $descriptions): array {
@@ -204,7 +204,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 							'image' => $description['image']
 								? ImageGenerator::from(
 									'product-image/description/' . $description['image'],
-									['w' => 100, 'h' => 100]
+									['w' => 100, 'h' => 100],
 								)
 								: null,
 							'color' => $description['color'],
@@ -220,10 +220,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 						->setParameter('productId', $id)
 						->orderBy('description.position', 'ASC')
 						->getQuery()
-						->getArrayResult()
+						->getArrayResult(),
 				),
 				'categories' => $this->formatBootstrapSelectArray($cat->process($categories)),
-			]
+			],
 		);
 	}
 
@@ -327,10 +327,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 							->where('v.product = :productId')
 							->setParameter('productId', $id)
 							->getQuery()
-							->getArrayResult()
-					)
+							->getArrayResult(),
+					),
 				),
-			]
+			],
 		);
 	}
 
@@ -488,7 +488,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'parameters' => $parameters,
-			]
+			],
 		);
 	}
 
@@ -575,7 +575,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $products),
-			]
+			],
 		);
 	}
 
@@ -599,7 +599,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->where('product.id = :productId')
 				->setParameter('productId', $id)
 				->getQuery()
-				->getArrayResult()
+				->getArrayResult(),
 		);
 		$relatedIds[] = $id;
 
@@ -642,7 +642,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
-			]
+			],
 		);
 	}
 
@@ -667,8 +667,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$this->entityManager->persist(
 				new RelatedProduct(
 					$this->getProductById($id),
-					$this->getProductById($relatedId)
-				)
+					$this->getProductById($relatedId),
+				),
 			);
 			$this->entityManager->flush();
 		}
@@ -737,7 +737,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'variantParameters' => $variantParameters = $this->getVariantParameters($id),
 				'variantCount' => \count($variantList),
 				'possibleVariantCount' => (new CombinationGenerator)->countCombinations($variantParameters),
-			]
+			],
 		);
 	}
 
@@ -807,7 +807,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$this->flashMessage(
 				'Variants can not be saved, because some fields is duplicated. '
 				. 'Please check this error: ' . $e->getMessage(),
-				self::FLASH_MESSAGE_ERROR
+				self::FLASH_MESSAGE_ERROR,
 			);
 		}
 		$this->sendOk();
@@ -838,7 +838,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 					'min' => $product->getMinimalSize(),
 					'max' => $product->getMaximalSize(),
 				],
-			]
+			],
 		);
 	}
 
@@ -876,7 +876,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 					? (string) $mainCategory->getName()
 					: 'No main category',
 				'categories' => $categories,
-			]
+			],
 		);
 	}
 
@@ -915,7 +915,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'items' => $return,
-			]
+			],
 		);
 	}
 
@@ -958,7 +958,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'id' => $product->getId(),
-			]
+			],
 		);
 	}
 

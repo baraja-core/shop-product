@@ -82,7 +82,7 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 				label: 'Clone',
 				action: Button::ACTION_MODAL,
 				target: 'modal-clone-product',
-			)
+			),
 		);
 	}
 }

@@ -117,7 +117,7 @@ final class ProductCategoryManager
 					'SELECT `parent_id` AS `id`
 					FROM `shop__product_category`
 					WHERE `parent_id` IN (' . implode(', ', array_keys($return)) . ')
-					GROUP BY `parent_id`'
+					GROUP BY `parent_id`',
 				)
 				->fetchAllAssociative();
 

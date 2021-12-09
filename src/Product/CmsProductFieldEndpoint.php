@@ -27,12 +27,12 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 				'items' => $this->entityManager->getRepository(ProductFieldDefinition::class)
 					->createQueryBuilder('definition')
 					->select(
-						'PARTIAL definition.{id, name, type, label, description, required, length, unique, position}'
+						'PARTIAL definition.{id, name, type, label, description, required, length, unique, position}',
 					)
 					->orderBy('definition.position', 'ASC')
 					->getQuery()
 					->getArrayResult(),
-			]
+			],
 		);
 	}
 

@@ -109,7 +109,7 @@ final class ProductManager
 				->orderBy('relatedProduct.position', 'DESC')
 				->setMaxResults(3)
 				->getQuery()
-				->getResult()
+				->getResult(),
 		);
 	}
 
@@ -273,16 +273,16 @@ final class ProductManager
 					product: $product,
 					name: $parameter->getName(),
 					values: $parameter->getValues(),
-					variant: $parameter->isVariant()
-				)
+					variant: $parameter->isVariant(),
+				),
 			);
 		}
 		foreach ($original->getProductRelatedBasic() as $relatedProduct) {
 			$this->entityManager->persist(
 				new RelatedProduct(
 					product: $product,
-					relatedProduct: $relatedProduct->getRelatedProduct()
-				)
+					relatedProduct: $relatedProduct->getRelatedProduct(),
+				),
 			);
 		}
 		$this->entityManager->flush();

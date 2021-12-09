@@ -299,7 +299,7 @@ class Product
 		return BeautifulPrice::from(
 			$this->isSale()
 				? ($this->standardPricePercentage / 100) * $this->getPrice()
-				: $this->getPrice()
+				: $this->getPrice(),
 		)->smartRound();
 	}
 

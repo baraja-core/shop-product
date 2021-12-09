@@ -45,14 +45,14 @@ final class ProductCategoryPlugin extends BasePlugin
 				new Breadcrumb(
 					label: $parentName,
 					href: $this->link('ProductCategory:detail', ['id' => $parentId]),
-				)
+				),
 			);
 		}
 
 		$this->setTitle(
 			'(' . $id . ') '
 			. ($category->isActive() ? '' : '[hidden] ')
-			. $category->getName()
+			. $category->getName(),
 		);
 	}
 }

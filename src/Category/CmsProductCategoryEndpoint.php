@@ -29,9 +29,9 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 			[
 				'dataExist' => $rootCategories !== [],
 				'tree' => $this->formatBootstrapSelectArray(
-					[null => '- root -'] + $this->categoryManager->get()->getTree()
+					[null => '- root -'] + $this->categoryManager->get()->getTree(),
 				),
-			]
+			],
 		);
 	}
 
@@ -48,7 +48,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 			[
 				'items' => array_values($return),
 				'openChildren' => $openChildren,
-			]
+			],
 		);
 	}
 
@@ -77,9 +77,9 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 					],
 				],
 				'tree' => $this->formatBootstrapSelectArray(
-					[null => '- root -'] + $this->categoryManager->get()->getTree()
+					[null => '- root -'] + $this->categoryManager->get()->getTree(),
 				),
-			]
+			],
 		);
 	}
 
@@ -138,7 +138,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 					->orderBy('p.position', 'DESC')
 					->getQuery()
 					->getArrayResult(),
-			]
+			],
 		);
 	}
 
@@ -150,7 +150,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'id' => $category->getId(),
-			]
+			],
 		);
 	}
 }
