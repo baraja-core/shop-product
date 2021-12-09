@@ -34,7 +34,7 @@ class ProductCategory
 
 	/** @var self[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class)]
-	private $child;
+	private Collection $child;
 
 	#[ORM\Column(type: 'translate')]
 	private Translation $name;
@@ -59,11 +59,11 @@ class ProductCategory
 
 	/** @var Product[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'mainCategory', targetEntity: Product::class)]
-	private $mainProducts;
+	private Collection $mainProducts;
 
 	/** @var Product[]|Collection */
 	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'categories')]
-	private $products;
+	private Collection $products;
 
 
 	public function __construct(string $name, string $code, ?string $slug = null)
@@ -103,7 +103,7 @@ class ProductCategory
 	 */
 	public function getAllChildIds(): array
 	{
-		$return = [(int) $this->getId()];
+		$return = [$this->getId()];
 		foreach ($this->getChild() as $child) {
 			$childId = $child->getId();
 			if (is_int($childId) === false) {
@@ -127,7 +127,7 @@ class ProductCategory
 		$return = [];
 		$parent = $this;
 		do {
-			$return[(int) $parent->getId()] = (string) $parent->getName();
+			$return[$parent->getId()] = (string) $parent->getName();
 			$parent = $parent->getParent();
 		} while ($parent !== null);
 
@@ -170,9 +170,9 @@ class ProductCategory
 
 
 	/**
-	 * @return self[]|Collection
+	 * @return Collection&iterable<self>
 	 */
-	public function getChild()
+	public function getChild(): Collection
 	{
 		return $this->child;
 	}

@@ -56,7 +56,7 @@ class Product
 	/** @var ProductImage[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class)]
 	#[ORM\OrderBy(['position' => 'DESC'])]
-	private $images;
+	private Collection $images;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $shortDescription;
@@ -109,32 +109,32 @@ class Product
 	/** @var ProductCategory[]|Collection */
 	#[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
 	#[ORM\OrderBy(['position' => 'DESC'])]
-	private $categories;
+	private Collection $categories;
 
 	/** @var ProductLabel[]|Collection */
 	#[ORM\ManyToMany(targetEntity: ProductLabel::class, inversedBy: 'products')]
-	private $labels;
+	private Collection $labels;
 
 	/** @var ProductSmartDescription[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductSmartDescription::class)]
 	#[ORM\OrderBy(['position' => 'DESC'])]
-	private $smartDescriptions;
+	private Collection $smartDescriptions;
 
 	/** @var ProductParameter[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductParameter::class)]
-	private $parameters;
+	private Collection $parameters;
 
 	/** @var ProductVariant[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductVariant::class)]
-	private $variants;
+	private Collection $variants;
 
 	/** @var RelatedProduct[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: RelatedProduct::class)]
-	private $productRelatedBasic;
+	private Collection $productRelatedBasic;
 
 	/** @var RelatedProduct[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'relatedProduct', targetEntity: RelatedProduct::class)]
-	private $productRelatedRelated;
+	private Collection $productRelatedRelated;
 
 	/** Total available quantity of this product in all warehouses. */
 	#[ORM\Column(type: 'integer')]
@@ -183,7 +183,7 @@ class Product
 		$category = $this->mainCategory;
 		do {
 			$return[] = [
-				'id' => (int) $category->getId(),
+				'id' => $category->getId(),
 				'name' => (string) $category->getName(),
 				'slug' => $category->getSlug(),
 			];
@@ -424,9 +424,9 @@ class Product
 
 
 	/**
-	 * @return ProductCategory[]|Collection
+	 * @return Collection&iterable<ProductCategory>
 	 */
-	public function getCategories()
+	public function getCategories(): Collection
 	{
 		return $this->categories;
 	}
@@ -451,9 +451,9 @@ class Product
 
 
 	/**
-	 * @return ProductLabel[]|Collection
+	 * @return Collection&iterable<ProductLabel>
 	 */
-	public function getLabels()
+	public function getLabels(): Collection
 	{
 		return $this->labels;
 	}
@@ -466,36 +466,36 @@ class Product
 
 
 	/**
-	 * @return ProductSmartDescription[]|Collection
+	 * @return Collection&iterable<ProductSmartDescription>
 	 */
-	public function getSmartDescriptions()
+	public function getSmartDescriptions(): Collection
 	{
 		return $this->smartDescriptions;
 	}
 
 
 	/**
-	 * @return ProductImage[]|Collection
+	 * @return Collection&iterable<ProductImage>
 	 */
-	public function getImages()
+	public function getImages(): Collection
 	{
 		return $this->images;
 	}
 
 
 	/**
-	 * @return ProductParameter[]|Collection
+	 * @return Collection&iterable<ProductParameter>
 	 */
-	public function getParameters()
+	public function getParameters(): Collection
 	{
 		return $this->parameters;
 	}
 
 
 	/**
-	 * @return ProductVariant[]|Collection
+	 * @return Collection&iterable<ProductVariant>
 	 */
-	public function getVariants()
+	public function getVariants(): Collection
 	{
 		return $this->variants;
 	}
@@ -578,18 +578,18 @@ class Product
 
 
 	/**
-	 * @return RelatedProduct[]|Collection
+	 * @return Collection&iterable<RelatedProduct>
 	 */
-	public function getProductRelatedBasic()
+	public function getProductRelatedBasic(): Collection
 	{
 		return $this->productRelatedBasic;
 	}
 
 
 	/**
-	 * @return RelatedProduct[]|Collection
+	 * @return Collection&iterable<RelatedProduct>
 	 */
-	public function getProductRelatedRelated()
+	public function getProductRelatedRelated(): Collection
 	{
 		return $this->productRelatedRelated;
 	}

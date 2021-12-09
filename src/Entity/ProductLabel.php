@@ -38,7 +38,7 @@ class ProductLabel
 
 	/** @var Product[]|Collection */
 	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'labels')]
-	private $products;
+	private Collection $products;
 
 
 	public function __construct(string $name, string $code, string $color)
@@ -75,9 +75,9 @@ class ProductLabel
 
 
 	/**
-	 * @return Product[]|Collection
+	 * @return Collection&iterable<Product>
 	 */
-	public function getProducts()
+	public function getProducts(): Collection
 	{
 		return $this->products;
 	}
