@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,8 +16,12 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'shop__product_field')]
 class ProductField
 {
-	use IdentifierUnsigned;
 	use TranslateObject;
+
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\ManyToOne(targetEntity: ProductFieldDefinition::class)]
 	private ProductFieldDefinition $definition;
@@ -45,6 +48,12 @@ class ProductField
 		$this->product = $product;
 		$this->setValue($value);
 		$this->insertedDate = new \DateTimeImmutable;
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

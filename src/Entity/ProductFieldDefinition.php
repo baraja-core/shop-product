@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,8 +20,12 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_field_definition')]
 class ProductFieldDefinition
 {
-	use IdentifierUnsigned;
 	use TranslateObject;
+
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $name;
@@ -61,6 +64,12 @@ class ProductFieldDefinition
 		$this->setName($name);
 		$this->setType($type);
 		$this->setLabel(Strings::firstUpper($name));
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

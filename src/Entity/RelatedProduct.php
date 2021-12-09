@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'shop__related_product')]
 class RelatedProduct
 {
-	use IdentifierUnsigned;
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'productRelatedBasic')]
 	private Product $product;
@@ -28,6 +30,12 @@ class RelatedProduct
 	{
 		$this->product = $product;
 		$this->relatedProduct = $relatedProduct;
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

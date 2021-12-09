@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -23,8 +22,12 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_category')]
 class ProductCategory
 {
-	use Identifier;
 	use TranslateObject;
+
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true)]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'child')]
 	private ?self $parent = null;
@@ -71,6 +74,12 @@ class ProductCategory
 		$this->child = new ArrayCollection;
 		$this->mainProducts = new ArrayCollection;
 		$this->products = new ArrayCollection;
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

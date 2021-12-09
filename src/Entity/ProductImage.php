@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Url\Url;
@@ -19,8 +18,12 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'shop__product_image')]
 class ProductImage
 {
-	use IdentifierUnsigned;
 	use TranslateObject;
+
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\ManyToOne(targetEntity: Product::class, cascade: ['persist'], inversedBy: 'images')]
 	#[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
@@ -48,6 +51,12 @@ class ProductImage
 		$this->product = $product;
 		$this->source = trim($source, '/');
 		$this->setTitle($title);
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

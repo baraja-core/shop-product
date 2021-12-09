@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\BeautifulPrice;
@@ -29,8 +28,12 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product')]
 class Product
 {
-	use Identifier;
 	use TranslateObject;
+
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true)]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\Column(type: 'translate')]
 	private Translation $name;
@@ -152,6 +155,12 @@ class Product
 		$this->variants = new ArrayCollection;
 		$this->productRelatedBasic = new ArrayCollection;
 		$this->productRelatedRelated = new ArrayCollection;
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

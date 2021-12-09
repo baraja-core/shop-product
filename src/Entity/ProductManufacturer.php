@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
@@ -13,7 +12,10 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_manufacturer')]
 class ProductManufacturer
 {
-	use IdentifierUnsigned;
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\Column(type: 'string', length: 64, nullable: true)]
 	private string $name;
@@ -22,6 +24,12 @@ class ProductManufacturer
 	public function __construct(string $name)
 	{
 		$this->setName($name);
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

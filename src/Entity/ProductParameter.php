@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\Identifier;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
@@ -13,7 +12,10 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_parameter')]
 class ProductParameter
 {
-	use Identifier;
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true)]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'parameters')]
 	private Product $product;
@@ -38,6 +40,12 @@ class ProductParameter
 		$this->setName($name);
 		$this->setValues($values);
 		$this->setVariant($variant);
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

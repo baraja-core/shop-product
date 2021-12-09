@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\Identifier;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -21,8 +20,12 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_label')]
 class ProductLabel
 {
-	use Identifier;
 	use TranslateObject;
+
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true)]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\Column(type: 'translate')]
 	private Translation $name;
@@ -44,6 +47,12 @@ class ProductLabel
 		$this->code = $code;
 		$this->color = $color;
 		$this->products = new ArrayCollection;
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 

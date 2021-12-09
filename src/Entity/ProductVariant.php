@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
-use Baraja\Doctrine\Identifier\IdentifierUnsigned;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
@@ -13,7 +12,10 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_variant')]
 class ProductVariant
 {
-	use IdentifierUnsigned;
+	#[ORM\Id]
+	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
+	#[ORM\GeneratedValue]
+	protected int $id;
 
 	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'variants')]
 	private Product $product;
@@ -45,6 +47,12 @@ class ProductVariant
 	{
 		$this->product = $product;
 		$this->relationHash = $relationHash;
+	}
+
+
+	public function getId(): int
+	{
+		return $this->id;
 	}
 
 
