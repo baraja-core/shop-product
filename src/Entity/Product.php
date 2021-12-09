@@ -133,6 +133,10 @@ class Product
 	#[ORM\OneToMany(mappedBy: 'relatedProduct', targetEntity: RelatedProduct::class)]
 	private $productRelatedRelated;
 
+	/** Total available quantity of this product in all warehouses. */
+	#[ORM\Column(type: 'integer')]
+	private int $warehouseAllQuantity = 0;
+
 
 	public function __construct(string $name, string $code, float $price)
 	{
@@ -579,5 +583,17 @@ class Product
 	public function getProductRelatedRelated()
 	{
 		return $this->productRelatedRelated;
+	}
+
+
+	public function getWarehouseAllQuantity(): int
+	{
+		return $this->warehouseAllQuantity;
+	}
+
+
+	public function setWarehouseAllQuantity(int $warehouseAllQuantity): void
+	{
+		$this->warehouseAllQuantity = $warehouseAllQuantity;
 	}
 }

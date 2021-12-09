@@ -36,6 +36,10 @@ class ProductVariant
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = false;
 
+	/** Total available quantity of this variant in all warehouses. */
+	#[ORM\Column(type: 'integer')]
+	private int $warehouseAllQuantity = 0;
+
 
 	public function __construct(Product $product, string $relationHash)
 	{
@@ -194,5 +198,17 @@ class ProductVariant
 			$code = Strings::webalize($code);
 		}
 		$this->code = $code;
+	}
+
+
+	public function getWarehouseAllQuantity(): int
+	{
+		return $this->warehouseAllQuantity;
+	}
+
+
+	public function setWarehouseAllQuantity(int $warehouseAllQuantity): void
+	{
+		$this->warehouseAllQuantity = $warehouseAllQuantity;
 	}
 }
