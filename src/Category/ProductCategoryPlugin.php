@@ -8,7 +8,7 @@ namespace Baraja\Shop\Product\Category;
 use Baraja\Plugin\BasePlugin;
 use Baraja\Plugin\SimpleComponent\Breadcrumb;
 use Baraja\Shop\Product\Entity\ProductCategory;
-use Baraja\Shop\Product\Entity\ProductCategoryRepository;
+use Baraja\Shop\Product\Repository\ProductCategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

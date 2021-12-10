@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\Shop\Product\Repository\RelatedProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+/** Relevant products to the product (but based on manual settings). */
+#[ORM\Entity(repositoryClass: RelatedProductRepository::class)]
 #[ORM\Table(name: 'shop__related_product')]
 class RelatedProduct
 {
@@ -59,6 +61,9 @@ class RelatedProduct
 
 	public function setPosition(int $position): void
 	{
+		if ($position < 0) {
+			$position = 0;
+		}
 		$this->position = $position;
 	}
 }

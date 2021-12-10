@@ -7,6 +7,7 @@ namespace Baraja\Shop\Product\Entity;
 
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
+use Baraja\Shop\Product\Repository\ProductCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

@@ -11,6 +11,7 @@ use Baraja\ImageGenerator\ImageGenerator;
 use Baraja\Markdown\CommonMarkRenderer;
 use Baraja\Search\Search;
 use Baraja\SelectboxTree\SelectboxTree;
+use Baraja\Shop\Product\DTO\ProductData;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\Shop\Product\Entity\ProductImage;
@@ -18,6 +19,11 @@ use Baraja\Shop\Product\Entity\ProductParameter;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
+use Baraja\Shop\Product\Repository\ProductCategoryRepository;
+use Baraja\Shop\Product\Repository\ProductImageRepository;
+use Baraja\Shop\Product\Repository\ProductRepository;
+use Baraja\Shop\Product\Repository\ProductVariantRepository;
+use Baraja\Shop\Product\Repository\RelatedProductRepository;
 use Baraja\StructuredApi\BaseEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -29,6 +35,17 @@ use Nette\Utils\Strings;
 
 final class CmsProductEndpoint extends BaseEndpoint
 {
+	private ProductRepository $productRepository;
+
+	private ProductCategoryRepository $productCategoryRepository;
+
+	private ProductVariantRepository $productVariantRepository;
+
+	private RelatedProductRepository $relatedProductRepository;
+
+	private ProductImageRepository $productImageRepository;
+
+
 	public function __construct(
 		private EntityManager $entityManager,
 		private CommonMarkRenderer $renderer,
@@ -36,6 +53,21 @@ final class CmsProductEndpoint extends BaseEndpoint
 		private ProductFieldManager $productFieldManager,
 		private ProductManagerAccessor $productManager,
 	) {
+		/** @var ProductRepository $productRepository */
+		$productRepository = $entityManager->getRepository(Product::class);
+		/** @var ProductCategoryRepository $productCategoryRepository */
+		$productCategoryRepository = $entityManager->getRepository(ProductCategory::class);
+		/** @var ProductVariantRepository $productVariantRepository */
+		$productVariantRepository = $entityManager->getRepository(ProductVariant::class);
+		/** @var RelatedProductRepository $relatedProductRepository */
+		$relatedProductRepository = $entityManager->getRepository(RelatedProduct::class);
+		/** @var ProductImageRepository $productImageRepository */
+		$productImageRepository = $entityManager->getRepository(ProductImage::class);
+		$this->productRepository = $productRepository;
+		$this->productCategoryRepository = $productCategoryRepository;
+		$this->productVariantRepository = $productVariantRepository;
+		$this->relatedProductRepository = $relatedProductRepository;
+		$this->productImageRepository = $productImageRepository;
 	}
 
 
@@ -110,9 +142,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function postActive(int $id): void
 	{
 		try {
-			$product = $this->getProductById($id);
+			$product = $this->productRepository->getById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Product "' . $id . '" does not exist.');
+			$this->sendError(sprintf('Product "%d" does not exist.', $id));
 		}
 		$this->productManager->get()->setActive($product, !$product->isActive());
 		$this->sendOk();
@@ -122,9 +154,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function postSetPosition(int $id, int $position): void
 	{
 		try {
-			$product = $this->getProductById($id);
+			$product = $this->productRepository->getById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Product "' . $id . '" does not exist.');
+			$this->sendError(sprintf('Product "%d" does not exist.', $id));
 		}
 		$this->productManager->get()->setPosition($product, $position);
 		$this->sendOk();
@@ -146,12 +178,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	public function actionOverview(int $id): void
+	public function actionOverview(int $id): ProductData
 	{
 		try {
-			$product = $this->getProductById($id);
+			$product = $this->productRepository->getById($id);
 		} catch (NoResultException | NonUniqueResultException) {
-			$this->sendError('Product "' . $id . '" does not exist.');
+			$this->sendError(sprintf('Product "%d" does not exist.', $id));
 		}
 
 		$cat = new SelectboxTree;
@@ -160,70 +192,53 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->executeQuery($cat->sqlBuilder('shop__product_category'))
 			->fetchAllAssociative();
 
-		$this->sendJson(
-			[
-				'id' => $product->getId(),
-				'name' => (string) $product->getName(),
-				'code' => $product->getCode(),
-				'ean' => $product->getEan(),
-				'slug' => $product->getSlug(),
-				'active' => $product->isActive(),
-				'shortDescription' => (string) $product->getShortDescription(),
-				'description' => (string) $product->getDescription(),
-				'price' => $product->getPrice(),
-				'vat' => $product->getVat(),
-				'standardPricePercentage' => $product->getStandardPricePercentage(),
-				'url' => $this->linkSafe(
-					'Front:Product:detail',
-					[
-						'slug' => $product->getSlug(),
-					],
-				),
-				'soldOut' => $product->isSoldOut(),
-				'mainImage' => (static function (?ProductImage $image): ?array {
-					if ($image === null) {
-						return null;
-					}
+		$mainImage = $product->getMainImage();
+		$mainCategory = $product->getMainCategory();
 
-					return $image->toArray();
-				})(
-					$product->getMainImage(),
-				),
-				'mainCategoryId' => (static fn(?ProductCategory $category
-				): ?int => $category === null ? null : $category->getId())(
-					$product->getMainCategory(),
-				),
-				'customFields' => $this->productFieldManager->getFieldsInfo($product),
-				'smartDescriptions' => (function (array $descriptions): array {
-					$return = [];
-					foreach ($descriptions as $description) {
-						$return[] = [
-							'id' => (int) $description['id'],
-							'description' => (string) $description['description'],
-							'html' => $this->renderer->render((string) $description['description']),
-							'image' => $description['image']
-								? ImageGenerator::from(
-									'product-image/description/' . $description['image'],
-									['w' => 100, 'h' => 100],
-								)
-								: null,
-							'color' => $description['color'],
-							'position' => $description['position'],
-						];
-					}
+		$smartDescriptionsData = $this->entityManager->getRepository(ProductSmartDescription::class)
+			->createQueryBuilder('description')
+			->where('description.product = :productId')
+			->setParameter('productId', $id)
+			->orderBy('description.position', 'ASC')
+			->getQuery()
+			->getArrayResult();
 
-					return $return;
-				})(
-					$this->entityManager->getRepository(ProductSmartDescription::class)
-						->createQueryBuilder('description')
-						->where('description.product = :productId')
-						->setParameter('productId', $id)
-						->orderBy('description.position', 'ASC')
-						->getQuery()
-						->getArrayResult(),
-				),
-				'categories' => $this->formatBootstrapSelectArray($cat->process($categories)),
-			],
+		$smartDescriptions = [];
+		foreach ($smartDescriptionsData as $description) {
+			$smartDescriptions[] = [
+				'id' => (int) $description['id'],
+				'description' => (string) $description['description'],
+				'html' => $this->renderer->render((string) $description['description']),
+				'image' => $description['image']
+					? ImageGenerator::from(
+						'product-image/description/' . $description['image'],
+						['w' => 100, 'h' => 100],
+					)
+					: null,
+				'color' => $description['color'],
+				'position' => $description['position'],
+			];
+		}
+
+		return new ProductData(
+			id: $product->getId(),
+			name: (string) $product->getName(),
+			code: $product->getCode(),
+			ean: $product->getEan(),
+			slug: $product->getSlug(),
+			active: $product->isActive(),
+			shortDescription: (string) $product->getShortDescription(),
+			description: (string) $product->getDescription(),
+			price: $product->getPrice(),
+			vat: $product->getVat(),
+			standardPricePercentage: $product->getStandardPricePercentage(),
+			url: $this->linkSafe('Front:Product:detail', ['slug' => $product->getSlug()]),
+			soldOut: $product->isSoldOut(),
+			mainImage: $mainImage !== null ? $mainImage->toArray() : null,
+			mainCategoryId: $mainCategory !== null ? $mainCategory->getId() : null,
+			customFields: $this->productFieldManager->getFieldsInfo($product),
+			smartDescriptions: $smartDescriptions,
+			categories: $this->formatBootstrapSelectArray($cat->process($categories))
 		);
 	}
 
@@ -247,7 +262,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		?int $mainCategoryId,
 		array $customFields,
 	): void {
-		$product = $this->getProductById($productId);
+		$product = $this->productRepository->getById($productId);
 		$product->setName($name);
 		$product->setCode($code);
 		$product->setEan($ean);
@@ -263,9 +278,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 		if ($mainCategoryId === null) {
 			$product->setMainCategory(null);
 		} else {
-			/** @var ProductCategory $mainCategory */
-			$mainCategory = $this->entityManager->getRepository(ProductCategory::class)->find($mainCategoryId);
-			$product->setMainCategory($mainCategory);
+			$product->setMainCategory(
+				$this->productCategoryRepository->getById($mainCategoryId)
+			);
 		}
 		if ($customFields !== []) {
 			$saveFields = [];
@@ -283,53 +298,31 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionImages(int $id): void
 	{
-		$product = $this->getProductById($id);
-		$productImages = $this->entityManager->getRepository(ProductImage::class)
-			->createQueryBuilder('productImage')
-			->select('productImage, PARTIAL variant.{id, relationHash}')
-			->leftJoin('productImage.variant', 'variant')
-			->where('productImage.product = :productId')
-			->setParameter('productId', $id)
-			->orderBy('productImage.position', 'DESC')
-			->getQuery()
-			->getArrayResult();
+		$product = $this->productRepository->getById($id);
+		$mainImage = $product->getMainImage();
 
 		$images = [];
-		foreach ($productImages as $productImage) {
+		foreach ($this->productImageRepository->getListByProduct($product) as $productImage) {
+			$productImageVariant = $productImage->getVariant();
 			$images[] = [
-				'id' => $productImage['id'],
-				'source' => $productImage['source'],
-				'title' => $productImage['title'] ?? null,
-				'position' => $productImage['position'],
-				'variant' => isset($productImage['variant'])
-					? $productImage['variant']['id']
-					: null,
+				'id' => $productImage->getId(),
+				'source' => $productImage->getSource(),
+				'title' => $productImage->getTitle(),
+				'position' => $productImage->getPosition(),
+				'variant' => $productImageVariant !== null ? $productImageVariant->getId() : null,
 			];
+		}
+
+		$variants = [null => '--- no variant ---'];
+		foreach ($this->productVariantRepository->getListByProduct($product) as $variant) {
+			$variants[$variant->getId()] = $variant->getRelationHash();
 		}
 
 		$this->sendJson(
 			[
 				'images' => $images,
-				'mainImageId' => ($mainImage = $product->getMainImage()) ? $mainImage->getId() : null,
-				'variants' => $this->formatBootstrapSelectArray(
-					(static function (array $variants): array {
-						$return = [];
-						$return[null] = '--- no variant ---';
-						foreach ($variants as $variant) {
-							$return[$variant['id']] = $variant['relationHash'];
-						}
-
-						return $return;
-					})(
-						$this->entityManager->getRepository(ProductVariant::class)
-							->createQueryBuilder('v')
-							->select('PARTIAL v.{id, relationHash}')
-							->where('v.product = :productId')
-							->setParameter('productId', $id)
-							->getQuery()
-							->getArrayResult(),
-					),
-				),
+				'mainImageId' => $mainImage !== null ? $mainImage->getId() : null,
+				'variants' => $variants,
 			],
 		);
 	}
@@ -340,18 +333,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 	 */
 	public function postSaveImages(int $productId, array $images, int $mainImageId): void
 	{
-		$product = $this->getProductById($productId);
-
-		/** @var ProductImage[] $imageEntities */
-		$imageEntities = $this->entityManager->getRepository(ProductImage::class)
-			->createQueryBuilder('image')
-			->where('image.id IN (:ids)')
-			->setParameter('ids', array_map(static fn(array $image): int => (int) $image['id'], $images))
-			->getQuery()
-			->getResult();
+		$product = $this->productRepository->getById($productId);
+		$ids = array_map(static fn(array $image): int => (int) $image['id'], $images);
 
 		$imageById = [];
-		foreach ($imageEntities as $imageEntityItem) {
+		foreach ($this->productImageRepository->getByIds($ids) as $imageEntityItem) {
 			$imageById[$imageEntityItem->getId()] = $imageEntityItem;
 		}
 
@@ -361,9 +347,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$imageEntity->setTitle($image['title'] ?: null);
 			$imageEntity->setPosition($image['position'] ?: 0);
 			if ($image['variant'] !== null) {
-				/** @var ProductVariant $variant */
-				$variant = $this->entityManager->getRepository(ProductVariant::class)->find($image['variant']);
-				$imageEntity->setVariant($variant);
+				$imageEntity->setVariant($this->productVariantRepository->getById($image['variant']));
 			}
 			if ($image['id'] === $mainImageId) {
 				$mainImage = $imageEntity;
@@ -384,7 +368,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		/** @var FileUpload|null $image */
 		$image = $request->getFile('mainImage');
-		$product = $this->getProductById($productId);
+		$product = $this->productRepository->getById($productId);
 
 		if ($image === null) {
 			$this->sendError('Please select media to upload.');
@@ -405,9 +389,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionDeleteImage(int $id): void
 	{
-		/** @var ProductImage $image */
-		$image = $this->entityManager->getRepository(ProductImage::class)->find($id);
-
+		$image = $this->productImageRepository->getById($id);
 		$this->productManager->get()->removeImage($image);
 		$this->sendOk();
 	}
@@ -415,7 +397,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function postAddSmartDescription(int $productId, string $description, int $position): void
 	{
-		$product = $this->getProductById($productId);
+		$product = $this->productRepository->getById($productId);
 		$desc = new ProductSmartDescription($product, $description);
 		$desc->setPosition($position);
 
@@ -464,7 +446,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function postDeleteSmartDescription(int $productId, int $descriptionId): void
 	{
-		foreach ($this->getProductById($productId)->getSmartDescriptions() as $description) {
+		foreach ($this->productRepository->getById($productId)->getSmartDescriptions() as $description) {
 			if ($description->getId() === $descriptionId) {
 				$this->entityManager->remove($description);
 				$this->entityManager->flush();
@@ -499,7 +481,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function postAddParameter(int $productId, string $name, array $values, bool $variant): void
 	{
 		$this->checkParameter($name, $values);
-		$parameter = new ProductParameter($this->getProductById($productId), $name, $values, $variant);
+		$parameter = new ProductParameter($this->productRepository->getById($productId), $name, $values, $variant);
 		$this->entityManager->persist($parameter);
 		$this->entityManager->flush();
 		$this->sendOk();
@@ -559,22 +541,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionRelated(int $id): void
 	{
-		/** @var array<int, array<string, mixed>> $products */
-		$products = $this->entityManager->getRepository(RelatedProduct::class)
-			->createQueryBuilder('r')
-			->select('PARTIAL r.{id}, PARTIAL product.{id, name}, PARTIAL mainCategory.{id, name}')
-			->leftJoin('r.relatedProduct', 'product')
-			->leftJoin('product.mainCategory', 'mainCategory')
-			->where('r.product = :productId')
-			->setParameter('productId', $id)
-			->orderBy('mainCategory.name', 'ASC')
-			->addOrderBy('product.name', 'ASC')
-			->getQuery()
-			->getArrayResult();
+		$product = $this->productRepository->getById($id);
+		$relatedList = $this->relatedProductRepository->getRelatedList($product);
 
 		$this->sendJson(
 			[
-				'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $products),
+				'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $relatedList),
 			],
 		);
 	}
@@ -582,7 +554,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionRelatedCandidates(int $id, ?string $query = null): void
 	{
-		$product = $this->getProductById($id);
+		$product = $this->productRepository->getById($id);
 		$productCategoryId = null;
 		$mainCategory = $product->getMainCategory();
 		if ($mainCategory !== null) {
@@ -653,23 +625,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$this->sendError('The product cannot be relevant to itself.');
 		}
 
-		try { // relation exist?
-			$this->entityManager->getRepository(RelatedProduct::class)
-				->createQueryBuilder('r')
-				->where('r.product = :productId')
-				->andWhere('r.relatedProduct = :relatedProductId')
-				->setParameter('productId', $id)
-				->setParameter('relatedProductId', $relatedId)
-				->setMaxResults(1)
-				->getQuery()
-				->getSingleResult();
-		} catch (NoResultException | NonUniqueResultException) {
-			$this->entityManager->persist(
-				new RelatedProduct(
-					$this->getProductById($id),
-					$this->getProductById($relatedId),
-				),
-			);
+		$product = $this->productRepository->getById($id);
+		$relatedProduct = $this->productRepository->getById($relatedId);
+		if ($this->relatedProductRepository->isRelationExist($product, $relatedProduct) === false) {
+			$this->entityManager->persist(new RelatedProduct($product, $relatedProduct));
 			$this->entityManager->flush();
 		}
 
@@ -680,17 +639,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function actionDeleteRelated(int $id, int $relatedId): void
 	{
 		try {
-			$relation = $this->entityManager->getRepository(RelatedProduct::class)
-				->createQueryBuilder('r')
-				->where('r.product = :productId')
-				->andWhere('r.relatedProduct = :relatedProductId')
-				->setParameter('productId', $id)
-				->setParameter('relatedProductId', $relatedId)
-				->setMaxResults(1)
-				->getQuery()
-				->getSingleResult();
-
-			$this->entityManager->remove($relation);
+			$product = $this->productRepository->getById($id);
+			$relatedProduct = $this->productRepository->getById($relatedId);
+			$this->entityManager->remove($this->relatedProductRepository->getRelation($product, $relatedProduct));
 			$this->entityManager->flush();
 		} catch (NoResultException | NonUniqueResultException) {
 		}
@@ -701,21 +652,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionVariants(int $id): void
 	{
-		$product = $this->getProductById($id);
-
-		/** @var ProductVariant[] $variants */
-		$variants = $this->entityManager->getRepository(ProductVariant::class)
-			->createQueryBuilder('variant')
-			->where('variant.product = :productId')
-			->setParameter('productId', $id)
-			->orderBy('variant.soldOut', 'DESC')
-			->addOrderBy('variant.price', 'DESC')
-			->addOrderBy('variant.relationHash', 'ASC')
-			->getQuery()
-			->getResult();
+		$product = $this->productRepository->getById($id);
 
 		$variantList = [];
-		foreach ($variants as $variant) {
+		foreach ($this->productVariantRepository->getListByProduct($product) as $variant) {
 			$variantList[] = [
 				'id' => $variant->getId(),
 				'relationHash' => $variant->getRelationHash(),
@@ -744,19 +684,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionGenerateVariants(int $id): void
 	{
-		$product = $this->getProductById($id);
-
-		/** @var mixed[][] $variants */
-		$variants = $this->entityManager->getRepository(ProductVariant::class)
-			->createQueryBuilder('variant')
-			->where('variant.product = :productId')
-			->setParameter('productId', $id)
-			->getQuery()
-			->getArrayResult();
-
+		$product = $this->productRepository->getById($id);
 		$variantToHash = [];
-		foreach ($variants as $variantItem) {
-			$variantToHash[$variantItem['relationHash']] = $variantItem['id'];
+		foreach ($this->productVariantRepository->getListByProduct($id) as $variantItem) {
+			$variantToHash[$variantItem->getRelationHash()] = $variantItem->getId();
 		}
 		foreach ((new CombinationGenerator)->generate($this->getVariantParameters($id)) as $variantParameters) {
 			$hash = ProductVariant::serializeParameters($variantParameters);
@@ -775,21 +706,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 	 */
 	public function postSaveVariants(int $id, array $variants): void
 	{
-		/** @var ProductVariant[] $variantEntities */
-		$variantEntities = $this->entityManager->getRepository(ProductVariant::class)
-			->createQueryBuilder('variant')
-			->where('variant.product = :productId')
-			->setParameter('productId', $id)
-			->getQuery()
-			->getResult();
-
 		$variantById = [];
-		foreach ($variantEntities as $variantEntity) {
+		foreach ($this->productVariantRepository->getListByProduct($id) as $variantEntity) {
 			$variantById[$variantEntity->getId()] = $variantEntity;
 		}
 		foreach ($variants as $variant) {
 			if (isset($variantById[$variant['id']]) === false) {
-				$this->sendError('Variant "' . $variant['id'] . '" does not exist.');
+				$this->sendError(sprintf('Variant "%d" does not exist.', $variant['id']));
 			}
 			/** @var ProductVariant $entity */
 			$entity = $variantById[$variant['id']];
@@ -816,17 +739,15 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function postRemoveVariant(int $id): void
 	{
-		/** @var ProductVariant $variant */
-		$variant = $this->entityManager->getRepository(ProductVariant::class)->find($id);
-		$this->entityManager->remove($variant);
-		$this->entityManager->flush();
+		$variant = $this->productVariantRepository->getById($id);
+		$this->productManager->get()->removeVariant($variant);
 		$this->sendOk();
 	}
 
 
 	public function actionStock(int $id): void
 	{
-		$product = $this->getProductById($id);
+		$product = $this->productRepository->getById($id);
 
 		$this->sendJson(
 			[
@@ -845,7 +766,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function postStock(int $id, ?int $weight, ?float $width, ?float $length, ?float $thickness): void
 	{
-		$product = $this->getProductById($id);
+		$product = $this->productRepository->getById($id);
 		$product->setWeight($weight);
 		$product->setSizeWidth($width);
 		$product->setSizeLength($length);
@@ -859,7 +780,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionCategories(int $id): void
 	{
-		$product = $this->getProductById($id);
+		$product = $this->productRepository->getById($id);
 
 		$categories = [];
 		foreach ($product->getCategories() as $category) {
@@ -883,38 +804,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionRelatedCategories(int $id): void
 	{
-		$product = $this->getProductById($id);
-
-		$selection = $this->entityManager->getRepository(ProductCategory::class)
-			->createQueryBuilder('category')
-			->select('PARTIAL category.{id, name}')
-			->orderBy('category.name', 'ASC');
-
-		$mainCategory = $product->getMainCategory();
-		if ($mainCategory !== null) {
-			$selection->andWhere('category.id != :mainCategoryId')
-				->setParameter('mainCategoryId', $mainCategory->getId());
-		}
-		$subCategoryIds = [];
-		foreach ($product->getCategories() as $subCategory) {
-			$subCategoryIds[] = $subCategory->getId();
-		}
-		if ($subCategoryIds !== []) {
-			$selection->andWhere('category.id NOT IN (:ids)')
-				->setParameter('ids', $subCategoryIds);
-		}
-
-		$return = [];
-		foreach ($selection->getQuery()->getArrayResult() as $category) {
-			$return[] = [
-				'id' => $category['id'],
-				'name' => $category['name'],
-			];
-		}
-
 		$this->sendJson(
 			[
-				'items' => $return,
+				'items' => $this->productCategoryRepository->getRelated(
+					$this->productRepository->getById($id)
+				),
 			],
 		);
 	}
@@ -922,10 +816,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionAddCategory(int $productId, int $categoryId): void
 	{
-		$product = $this->getProductById($productId);
-
-		/** @var ProductCategory $category */
-		$category = $this->entityManager->getRepository(ProductCategory::class)->find($categoryId);
+		$product = $this->productRepository->getById($productId);
+		$category = $this->productCategoryRepository->getById($categoryId);
 
 		$product->addCategory($category);
 		$this->entityManager->flush();
@@ -935,10 +827,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionDeleteCategory(int $productId, int $categoryId): void
 	{
-		$product = $this->getProductById($productId);
-
-		/** @var ProductCategory $category */
-		$category = $this->entityManager->getRepository(ProductCategory::class)->find($categoryId);
+		$product = $this->productRepository->getById($productId);
+		$category = $this->productCategoryRepository->getById($categoryId);
 
 		$product->removeCategory($category);
 		$this->entityManager->flush();
@@ -954,29 +844,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$this->flashMessage($e->getMessage(), self::FLASH_MESSAGE_ERROR);
 			$this->sendError($e->getMessage());
 		}
-		$this->flashMessage('Product "' . $product->getName() . '" has been cloned.', self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage(sprintf('Product "%s" has been cloned.', (string) $product->getName()), self::FLASH_MESSAGE_SUCCESS);
 		$this->sendJson(
 			[
 				'id' => $product->getId(),
 			],
 		);
-	}
-
-
-	/**
-	 * @throws NoResultException|NonUniqueResultException
-	 */
-	private function getProductById(int $id): Product
-	{
-		return $this->entityManager->getRepository(Product::class)
-			->createQueryBuilder('product')
-			->select('product, mainImage,mainCategory')
-			->leftJoin('product.mainImage', 'mainImage')
-			->leftJoin('product.mainCategory', 'mainCategory')
-			->where('product.id = :id')
-			->setParameter('id', $id)
-			->getQuery()
-			->getSingleResult();
 	}
 
 

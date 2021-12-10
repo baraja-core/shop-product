@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\Shop\Product\Repository\ProductVariantRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 

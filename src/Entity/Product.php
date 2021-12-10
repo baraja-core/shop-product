@@ -8,6 +8,7 @@ namespace Baraja\Shop\Product\Entity;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\BeautifulPrice;
+use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\Shop\Product\Validators;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

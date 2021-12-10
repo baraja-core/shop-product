@@ -7,6 +7,7 @@ namespace Baraja\Shop\Product\Entity;
 
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
+use Baraja\Shop\Product\Repository\ProductImageRepository;
 use Baraja\Url\Url;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @method Translation|null getTitle(?string $locale = null)
  * @method void setTitle(?string $content = null, ?string $locale = null)
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProductImageRepository::class)]
 #[ORM\Table(name: 'shop__product_image')]
 class ProductImage
 {

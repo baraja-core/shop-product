@@ -10,13 +10,13 @@ use Baraja\DynamicConfiguration\Configuration;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
-use Baraja\Shop\Product\Entity\ProductRepository;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
-use Baraja\Shop\Product\Entity\ProductVariantRepository;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\Shop\Product\FileSystem\ProductFileSystem;
 use Baraja\Shop\Product\FileSystem\ProductImageFileSystem;
+use Baraja\Shop\Product\Repository\ProductRepository;
+use Baraja\Shop\Product\Repository\ProductVariantRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Utils\Random;
@@ -198,6 +198,13 @@ final class ProductManager
 
 		$this->fileSystem->delete($image);
 		$this->entityManager->remove($image);
+		$this->entityManager->flush();
+	}
+
+
+	public function removeVariant(ProductVariant $variant): void
+	{
+		$this->entityManager->remove($variant);
 		$this->entityManager->flush();
 	}
 

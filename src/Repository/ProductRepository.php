@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Baraja\Shop\Product\Entity;
+namespace Baraja\Shop\Product\Repository;
 
 
+use Baraja\Shop\Product\Entity\Product;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -17,8 +18,10 @@ final class ProductRepository extends EntityRepository
 	public function getById(int $id): Product
 	{
 		return $this->createQueryBuilder('product')
-			->select('product, image')
+			->select('product, image, mainImage, mainCategory')
 			->leftJoin('product.images', 'image')
+			->leftJoin('product.mainImage', 'mainImage')
+			->leftJoin('product.mainCategory', 'mainCategory')
 			->where('product.id = :id')
 			->setParameter('id', $id)
 			->orderBy('image.position', 'DESC')
