@@ -44,16 +44,18 @@ Vue.component('cms-product-variants', {
 				<table class="table table-sm cms-table-no-border-top">
 					<tr>
 						<th>Variant</th>
-						<th width="150"><span v-b-tooltip.hover title="Please indicate if the EAN is different from the base product. If it is the same, it is inherited automatically.">EAN</span></th>
-						<th width="150">Code</th>
-						<th width="100">Main<br>price</th>
-						<th width="100">Additional<br>price</th>
-						<th width="100">Selling<br>price</th>
-						<th width="120">Availability</th>
+						<th width="150" v-b-tooltip.hover title="Please indicate if the EAN is different from the base product. If it is the same, it is inherited automatically.">EAN</th>
+						<th width="150" v-b-tooltip.hover title="Unique code">Code</th>
+						<th width="100" v-b-tooltip.hover title="Base main price (default value)">Main<br>price</th>
+						<th width="100" v-b-tooltip.hover title="Difference from the Main price">Additional<br>price</th>
+						<th width="100" v-b-tooltip.hover title="Real selling price for customers">Selling<br>price</th>
+						<th width="100" v-b-tooltip.hover title="Real number of this product in stock across all warehouses">Warehouse<br>quantity</th>
+						<th width="120" v-b-tooltip.hover title="Is the product now available for sale?">Manual<bt>availability</th>
 						<th width="60"></th>
 					</tr>
 					<tr v-for="variant in list">
 						<td>
+							<span v-if="variant.soldOut || variant.warehouseAllQuantity < 0" v-b-tooltip.hover title="This variant may not be available for sale.">⚠️</span>
 							<template v-for="(variantParameterValue, variantParameterLabel) in variant.parameters">
 								<b-badge pill variant="light" v-b-tooltip.hover :title="variantParameterLabel">{{ variantParameterValue }}</b-badge>
 							</template>
@@ -65,18 +67,21 @@ Vue.component('cms-product-variants', {
 							<input v-model="variant.code" class="form-control form-control-sm">
 						</td>
 						<td>
-							<input v-model="variant.price" class="form-control form-control-sm">
+							<input type="number" v-model="variant.price" class="form-control form-control-sm">
 						</td>
 						<td>
-							<input v-model="variant.priceAddition" class="form-control form-control-sm">
+							<input type="number" v-model="variant.priceAddition" class="form-control form-control-sm">
 						</td>
 						<td>
 							{{ (variant.price * 1) + (variant.priceAddition * 1) }}&nbsp;CZK
 						</td>
 						<td>
+							<input type="number" v-model="variant.warehouseAllQuantity" :class="{'form-control': true, 'form-control-sm': true, 'alert-success': variant.warehouseAllQuantity > 0, 'alert-warning': Math.abs(variant.warehouseAllQuantity) < 0.001, 'alert-danger': variant.warehouseAllQuantity < 0}">
+						</td>
+						<td>
 							<b-form-checkbox v-model="variant.soldOut" :value="true" :unchecked-value="false">
 								<span v-if="variant.soldOut" class="text-danger">SOLD&nbsp;OUT</span>
-								<span v-else class="text-success">In stock</span>
+								<span v-else class="text-success">Ready</span>
 							</b-form-checkbox>
 						</td>
 						<td class="text-right">

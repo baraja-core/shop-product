@@ -666,6 +666,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'priceAddition' => $variant->getPriceAddition(),
 				'realPrice' => $variant->getPrice(false),
 				'soldOut' => $variant->isSoldOut(),
+				'warehouseAllQuantity' => $variant->getWarehouseAllQuantity(),
 			];
 		}
 
@@ -721,6 +722,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$entity->setSoldOut((bool) $variant['soldOut']);
 			$entity->setEan($variant['ean']);
 			$entity->setCode($variant['code']);
+			$entity->setWarehouseAllQuantity((int) $variant['warehouseAllQuantity']);
 		}
 
 		try {
