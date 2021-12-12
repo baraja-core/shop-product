@@ -43,6 +43,7 @@ Vue.component('cms-product-variants', {
 				<h4>Variants ({{ variantCount }})</h4>
 				<table class="table table-sm cms-table-no-border-top">
 					<tr>
+						<th width="40">#</th>
 						<th>Variant</th>
 						<th width="150" v-b-tooltip.hover title="Please indicate if the EAN is different from the base product. If it is the same, it is inherited automatically.">EAN</th>
 						<th width="150" v-b-tooltip.hover title="Unique code">Code</th>
@@ -50,10 +51,11 @@ Vue.component('cms-product-variants', {
 						<th width="100" v-b-tooltip.hover title="Difference from the Main price">Additional<br>price</th>
 						<th width="100" v-b-tooltip.hover title="Real selling price for customers">Selling<br>price</th>
 						<th width="100" v-b-tooltip.hover title="Real number of this product in stock across all warehouses">Warehouse<br>quantity</th>
-						<th width="120" v-b-tooltip.hover title="Is the product now available for sale?">Manual<bt>availability</th>
+						<th width="120" v-b-tooltip.hover title="Is the product now available for sale?">Manual<br>availability</th>
 						<th width="60"></th>
 					</tr>
-					<tr v-for="variant in list">
+					<tr v-for="(variant, id) in list">
+						<td>{{ id + 1 }}</td>
 						<td>
 							<span v-if="variant.soldOut || variant.warehouseAllQuantity < 0" v-b-tooltip.hover title="This variant may not be available for sale.">⚠️</span>
 							<template v-for="(variantParameterValue, variantParameterLabel) in variant.parameters">

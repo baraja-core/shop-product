@@ -243,48 +243,31 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	/**
-	 * @param array<int, array{id: int|null, name: string, value: string|null}> $customFields
-	 */
-	public function postSave(
-		int $productId,
-		string $name,
-		string $code,
-		?string $ean,
-		string $slug,
-		bool $active,
-		?string $shortDescription,
-		?string $description,
-		int $price,
-		int $vat,
-		?float $standardPricePercentage,
-		bool $soldOut,
-		?int $mainCategoryId,
-		array $customFields,
-	): void {
-		$product = $this->productRepository->getById($productId);
-		$product->setName($name);
-		$product->setCode($code);
-		$product->setEan($ean);
-		$product->setSlug($slug);
-		$product->setActive($active);
-		$product->setShortDescription($shortDescription);
-		$product->setDescription($description);
-		$product->setPrice($price);
-		$product->setVat($vat);
-		$product->setStandardPricePercentage($standardPricePercentage);
-		$product->setSoldOut($soldOut);
+	public function postSave(ProductData $productData): void
+	{
+		$product = $this->productRepository->getById($productData->id);
+		$product->setName($productData->name);
+		$product->setCode($productData->code);
+		$product->setEan($productData->ean);
+		$product->setSlug($productData->slug);
+		$product->setActive($productData->active);
+		$product->setShortDescription($productData->shortDescription);
+		$product->setDescription($productData->description);
+		$product->setPrice($productData->price);
+		$product->setVat($productData->vat);
+		$product->setStandardPricePercentage($productData->standardPricePercentage);
+		$product->setSoldOut($productData->soldOut);
 
-		if ($mainCategoryId === null) {
+		if ($productData->mainCategoryId === null) {
 			$product->setMainCategory(null);
 		} else {
 			$product->setMainCategory(
-				$this->productCategoryRepository->getById($mainCategoryId)
+				$this->productCategoryRepository->getById($productData->mainCategoryId)
 			);
 		}
-		if ($customFields !== []) {
+		if ($productData->customFields !== []) {
 			$saveFields = [];
-			foreach ($customFields as $customField) {
+			foreach ($productData->customFields as $customField) {
 				$saveFields[$customField['name']] = $customField['value'];
 			}
 			$this->productFieldManager->setFields($product, $saveFields);

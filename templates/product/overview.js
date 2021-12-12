@@ -46,7 +46,7 @@ Vue.component('cms-product-overview', {
 							<input v-model="product.price" class="form-control">
 						</div>
 						<div class="col-1">
-							Sale&nbsp;%:
+							Sale&nbsp;%
 							<input v-model="product.standardPricePercentage" class="form-control">
 						</div>
 						<div class="col-1">
@@ -275,24 +275,10 @@ Vue.component('cms-product-overview', {
 		},
 		save(evt) {
 			evt.preventDefault();
-			axiosApi.post('cms-product/save', {
-				productId: this.id,
-				name: this.product.name,
-				code: this.product.code,
-				ean: this.product.ean,
-				slug: this.product.slug,
-				active: this.product.active,
-				shortDescription: this.product.shortDescription,
-				description: this.product.description,
-				price: this.product.price,
-				standardPricePercentage: this.product.standardPricePercentage,
-				vat: this.product.vat,
-				soldOut: this.product.soldOut,
-				mainCategoryId: this.product.mainCategoryId,
-				customFields: this.product.customFields
-			}).then(req => {
-				this.sync();
-			});
+			axiosApi.post('cms-product/save', this.product)
+				.then(() => {
+					this.sync();
+				});
 		},
 		createNewDescription(evt) {
 			evt.preventDefault();
