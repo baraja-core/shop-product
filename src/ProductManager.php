@@ -45,36 +45,6 @@ final class ProductManager
 	}
 
 
-	/**
-	 * @deprecated since 2021-11-18, use ProductRepository instead.
-	 * @throws NoResultException|NonUniqueResultException
-	 */
-	public function getProductById(int $id): Product
-	{
-		return $this->productRepository->getById($id);
-	}
-
-
-	/**
-	 * @deprecated since 2021-11-18, use ProductRepository instead.
-	 * @throws NoResultException|NonUniqueResultException
-	 */
-	public function getProductBySlug(string $slug): Product
-	{
-		return $this->productRepository->getBySlug($slug);
-	}
-
-
-	/**
-	 * @deprecated since 2021-11-18, use ProductRepository instead.
-	 * @throws NoResultException|NonUniqueResultException
-	 */
-	public function getProductByCode(string $code): Product
-	{
-		return $this->productRepository->getByCode($code);
-	}
-
-
 	public function getProductByEan(string $ean): Product|ProductVariant|null
 	{
 		try {
