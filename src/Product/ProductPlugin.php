@@ -6,10 +6,11 @@ namespace Baraja\Shop\Product;
 
 
 use Baraja\Cms\Search\SearchablePlugin;
-use Baraja\Doctrine\EntityManager;
 use Baraja\Plugin\BasePlugin;
 use Baraja\Plugin\SimpleComponent\Button;
 use Baraja\Shop\Product\Entity\Product;
+use Baraja\Shop\Product\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Application\LinkGenerator;
@@ -17,10 +18,16 @@ use Nette\Application\UI\InvalidLinkException;
 
 final class ProductPlugin extends BasePlugin implements SearchablePlugin
 {
+	private ProductRepository $productRepository;
+
+
 	public function __construct(
-		private EntityManager $entityManager,
-		private LinkGenerator $linkGenerator
+		private LinkGenerator $linkGenerator,
+		EntityManagerInterface $entityManager,
 	) {
+		$productRepository = $entityManager->getRepository(Product::class);
+		assert($productRepository instanceof ProductRepository);
+		$this->productRepository = $productRepository;
 	}
 
 
@@ -51,16 +58,8 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 	public function actionDetail(int $id): void
 	{
 		try {
-			/** @var Product $product */
-			$product = $this->entityManager->getRepository(Product::class)
-				->createQueryBuilder('product')
-				->where('product.id = :id')
-				->setParameter('id', $id)
-				->setMaxResults(1)
-				->getQuery()
-				->getSingleResult();
-
-			$this->setTitle('(' . $id . ') ' . $product->getName());
+			$product = $this->productRepository->getById($id);
+			$this->setTitle(sprintf('(%d) %s', $id, (string) $product->getName()));
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->error(sprintf('Product "%s" doest not exist.', $id));
 		}

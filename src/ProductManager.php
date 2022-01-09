@@ -36,10 +36,10 @@ final class ProductManager
 		?ProductFileSystem $fileSystem = null,
 	) {
 		$this->fileSystem = $fileSystem ?? new ProductImageFileSystem;
-		/** @var ProductRepository $productRepository */
 		$productRepository = $entityManager->getRepository(Product::class);
-		/** @var ProductVariantRepository $productVariantRepository */
+		assert($productRepository instanceof ProductRepository);
 		$productVariantRepository = $entityManager->getRepository(ProductVariant::class);
+		assert($productVariantRepository instanceof ProductVariantRepository);
 		$this->productRepository = $productRepository;
 		$this->productVariantRepository = $productVariantRepository;
 	}

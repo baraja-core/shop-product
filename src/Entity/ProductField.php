@@ -42,7 +42,7 @@ class ProductField
 	public function __construct(
 		ProductFieldDefinition $definition,
 		Product $product,
-		?string $value = null
+		?string $value = null,
 	) {
 		$this->definition = $definition;
 		$this->product = $product;

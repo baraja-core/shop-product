@@ -264,9 +264,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		if ($productData->mainCategoryId === null) {
 			$product->setMainCategory(null);
 		} else {
-			$product->setMainCategory(
-				$this->productCategoryRepository->getById($productData->mainCategoryId)
-			);
+			$product->setMainCategory($this->productCategoryRepository->getById($productData->mainCategoryId));
 		}
 		if ($productData->customFields !== []) {
 			$saveFields = [];
@@ -795,7 +793,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'items' => $this->productCategoryRepository->getRelated(
-					$this->productRepository->getById($id)
+					$this->productRepository->getById($id),
 				),
 			],
 		);
