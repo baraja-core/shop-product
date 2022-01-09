@@ -220,6 +220,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
+		/** @var array<int, array{value: int, text: string}> $categoryList */
+		$categoryList = $this->formatBootstrapSelectArray($cat->process($categories));
+
 		return new ProductData(
 			id: $product->getId(),
 			name: (string) $product->getName(),
@@ -238,7 +241,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			mainCategoryId: $mainCategory !== null ? $mainCategory->getId() : null,
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
-			categories: $this->formatBootstrapSelectArray($cat->process($categories))
+			categories: $categoryList,
 		);
 	}
 

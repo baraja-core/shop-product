@@ -23,7 +23,7 @@ final class ProductData
 		public string $shortDescription,
 		public string $description,
 		public float $price,
-		public int $vat,
+		public float $vat,
 		public ?float $standardPricePercentage,
 		public ?string $url,
 		public bool $soldOut,

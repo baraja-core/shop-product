@@ -87,8 +87,8 @@ class Product implements ProductInterface
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = true;
 
-	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
-	private ?int $vat = null;
+	#[ORM\Column(type: 'float', nullable: true)]
+	private ?float $vat = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductCategory::class, inversedBy: 'mainProducts')]
 	private ?ProductCategory $mainCategory;
@@ -416,7 +416,7 @@ class Product implements ProductInterface
 	}
 
 
-	public function getVat(float $default = 21): int
+	public function getVat(float $default = 21.0): float
 	{
 		return $this->vat ?? $default;
 	}
