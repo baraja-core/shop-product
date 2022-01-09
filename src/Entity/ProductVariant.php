@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\ProductVariantInterface;
 use Baraja\Shop\Product\Repository\ProductVariantRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
 #[ORM\Entity(repositoryClass: ProductVariantRepository::class)]
 #[ORM\Table(name: 'shop__product_variant')]
-class ProductVariant
+class ProductVariant implements ProductVariantInterface
 {
 	#[ORM\Id]
 	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
@@ -108,7 +109,7 @@ class ProductVariant
 
 	public function getLabel(): string
 	{
-		return $this->getName() . ' [' . str_replace(';', '; ', $this->getRelationHash()) . ']';
+		return sprintf('%s [%s]', $this->getName(), str_replace(';', '; ', $this->getRelationHash()));
 	}
 
 

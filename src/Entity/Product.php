@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\BeautifulPrice;
@@ -27,7 +28,7 @@ use Nette\Utils\Strings;
  */
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\Table(name: 'shop__product')]
-class Product
+class Product implements ProductInterface
 {
 	use TranslateObject;
 
@@ -86,7 +87,7 @@ class Product
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = true;
 
-	#[ORM\Column(type: 'smallint', nullable: true, options: ['unsigned' => true])]
+	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
 	private ?int $vat = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductCategory::class, inversedBy: 'mainProducts')]
@@ -162,6 +163,12 @@ class Product
 	public function getId(): int
 	{
 		return $this->id;
+	}
+
+
+	public function getLabel(): string
+	{
+		return (string) $this->getName();
 	}
 
 
@@ -409,16 +416,16 @@ class Product
 	}
 
 
-	public function getVat(int $default = 21): int
+	public function getVat(float $default = 21): int
 	{
 		return $this->vat ?? $default;
 	}
 
 
-	public function setVat(?int $vat): void
+	public function setVat(?float $vat): void
 	{
 		if ($vat !== null && $vat < 0) {
-			$vat = 0;
+			$vat = 0.0;
 		}
 		$this->vat = $vat;
 	}
