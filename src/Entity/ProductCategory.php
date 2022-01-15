@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\CategoryInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\Repository\ProductCategoryRepository;
@@ -21,7 +22,7 @@ use Nette\Utils\Strings;
  */
 #[ORM\Entity(repositoryClass: ProductCategoryRepository::class)]
 #[ORM\Table(name: 'shop__product_category')]
-class ProductCategory
+class ProductCategory implements CategoryInterface
 {
 	use TranslateObject;
 
@@ -81,6 +82,12 @@ class ProductCategory
 	public function getId(): int
 	{
 		return $this->id;
+	}
+
+
+	public function getLabel(): string
+	{
+		return (string) $this->getName();
 	}
 
 

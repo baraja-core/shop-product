@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\ImageInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\Repository\ProductImageRepository;
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity(repositoryClass: ProductImageRepository::class)]
 #[ORM\Table(name: 'shop__product_image')]
-class ProductImage
+class ProductImage implements ImageInterface
 {
 	use TranslateObject;
 
