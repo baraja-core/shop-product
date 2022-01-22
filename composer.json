@@ -11,7 +11,7 @@
 	"require": {
 		"php": "^8.0",
 		"baraja-core/ecommerce-standard": "^0.0",
-		"baraja-core/shop-currency": "^1.0",
+		"baraja-core/shop-currency": "^1.1",
 		"baraja-core/shop-price": "^1.1",
 		"baraja-core/cms": "^4.0",
 		"baraja-core/combinations": "^2.0",
