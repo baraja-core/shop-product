@@ -31,11 +31,13 @@ class ProductVariant implements ProductVariantInterface
 	#[ORM\Column(type: 'string', length: 64, unique: true, nullable: true)]
 	private ?string $code = null;
 
-	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
-	private ?float $price = null;
+	/** @var numeric-string|null */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
+	private ?string $price = null;
 
-	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
-	private ?float $priceAddition = null;
+	/** @var numeric-string|null */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
+	private ?string $priceAddition = null;
 
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = false;
@@ -119,13 +121,13 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
-	public function getRealPrice(): ?float
+	public function getRealPrice(): ?string
 	{
 		return $this->price;
 	}
 
 
-	public function getDefinedPrice(bool $useSale = true): ?float
+	public function getDefinedPrice(bool $useSale = true): ?string
 	{
 		$price = (float) $this->price;
 		$return = (abs($price) < 0.01 ? null : $price) ?? $this->product->getPrice();
@@ -137,13 +139,16 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
-	public function getPrice(bool $useSale = true): float
+	public function getPrice(bool $useSale = true): string
 	{
-		return ceil($this->getDefinedPrice($useSale) + ($this->priceAddition ?? 0));
+		return bcadd(
+			$this->getDefinedPrice($useSale),
+			$this->priceAddition ?? '0'
+		);
 	}
 
 
-	public function setPrice(?float $price): void
+	public function setPrice(?string $price): void
 	{
 		$price = $price === null || abs($price) < 0.01 ? null : $price;
 		if (abs($this->getProduct()->getPrice() - $price) < 0.01) {
@@ -153,13 +158,13 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
-	public function getPriceAddition(): ?float
+	public function getPriceAddition(): ?string
 	{
 		return $this->priceAddition;
 	}
 
 
-	public function setPriceAddition(?float $priceAddition): void
+	public function setPriceAddition(?string $priceAddition): void
 	{
 		if ($priceAddition === null || abs($priceAddition) < 0.01) {
 			$priceAddition = null;

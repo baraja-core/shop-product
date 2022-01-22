@@ -11,6 +11,7 @@ use Baraja\ImageGenerator\ImageGenerator;
 use Baraja\Markdown\CommonMarkRenderer;
 use Baraja\Search\Search;
 use Baraja\SelectboxTree\SelectboxTree;
+use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Product\DTO\ProductData;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
@@ -29,7 +30,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Nette\Http\FileUpload;
 use Nette\Http\Request;
-use Nette\Utils\Paginator;
 use Nette\Utils\Random;
 use Nette\Utils\Strings;
 
@@ -52,6 +52,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 		private Search $search,
 		private ProductFieldManager $productFieldManager,
 		private ProductManagerAccessor $productManager,
+		private CurrencyManagerAccessor $currencyManager,
+		private ProductFeedFacade $productFeedFacade,
+		private ProductPriceManager $priceManager,
 	) {
 		/** @var ProductRepository $productRepository */
 		$productRepository = $entityManager->getRepository(Product::class);
@@ -73,69 +76,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionDefault(?string $query = null, int $page = 1, int $limit = 32): void
 	{
-		$selection = $this->entityManager->getRepository(Product::class)
-			->createQueryBuilder('product')
-			->select('PARTIAL product.{id, name, code, ean, shortDescription, price, position, active, soldOut}')
-			->addSelect('PARTIAL mainImage.{id, source}')
-			->addSelect('PARTIAL mainCategory.{id, name}')
-			->leftJoin('product.mainImage', 'mainImage')
-			->leftJoin('product.mainCategory', 'mainCategory');
-
-		if ($query !== null) {
-			$selection->andWhere('product.id IN (:searchIds)')
-				->setParameter(
-					'searchIds',
-					$this->search->search(
-						$query,
-						[
-							Product::class => [
-								'name',
-								'code',
-								'ean',
-								'shortDescription',
-								'price',
-								'smartDescriptions.description',
-							],
-						],
-						useAnalytics: false,
-					)->getIds(),
-				);
-		}
-
-		$count = (int) (clone $selection)->select('COUNT(product.id)')
-			->getQuery()
-			->getSingleScalarResult();
-
-		$items = $selection->orderBy('product.active', 'DESC')
-			->addOrderBy('product.position', 'DESC')
-			->setMaxResults($limit)
-			->setFirstResult(($page - 1) * $limit)
-			->getQuery()
-			->getArrayResult();
-
-		$return = [];
-		foreach ($items as $item) {
-			$mainImage = $item['mainImage'];
-			if ($mainImage !== null) {
-				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 100, 'h' => 100]);
-				$item['shortDescription'] = Strings::truncate(
-					strip_tags($this->renderer->render($item['shortDescription'])),
-					128,
-				);
-			}
-			$return[] = $item;
-		}
-
-		$this->sendJson(
-			[
-				'count' => $count,
-				'items' => $return,
-				'paginator' => (new Paginator)
-					->setItemCount($count)
-					->setItemsPerPage($limit)
-					->setPage($page),
-			],
-		);
+		$this->sendJson($this->productFeedFacade->getFeed(
+			$query,
+			$page,
+			$limit,
+		));
 	}
 
 
@@ -701,8 +646,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			}
 			/** @var ProductVariant $entity */
 			$entity = $variantById[$variant['id']];
-			$entity->setPrice((float) $variant['price']);
-			$entity->setPriceAddition((float) $variant['priceAddition']);
+			$entity->setPrice((string) $variant['price']);
+			$entity->setPriceAddition((string) $variant['priceAddition']);
 			$entity->setSoldOut((bool) $variant['soldOut']);
 			$entity->setEan($variant['ean']);
 			$entity->setCode($variant['code']);
@@ -836,6 +781,63 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'id' => $product->getId(),
 			],
 		);
+	}
+
+
+	public function actionPriceList(int $id): void
+	{
+		$product = $this->productRepository->getById($id);
+		$mainCurrency = $this->currencyManager->get()->getMainCurrency();
+
+		$variantList = [];
+		foreach ($this->productVariantRepository->getListByProduct($product) as $variant) {
+			$variantPriceList = $this->priceManager->getPriceList($product, $variant);
+			$variantList[] = [
+				'id' => $variant->getId(),
+				'label' => $variant->getLabel(),
+				'priceList' => $this->formatPriceList($variantPriceList),
+			];
+		}
+
+		$currencies = [];
+		foreach ($this->currencyManager->get()->getCurrencies() as $currency) {
+			$currencies[] = $currency->getCode();
+		}
+
+		$this->sendJson([
+			'mainCurrency' => $mainCurrency->getCode(),
+			'productPriceList' => $this->formatPriceList(
+				$this->priceManager->getPriceList($product),
+			),
+			'productPriceListVariant' => $variantList,
+			'currencies' => $currencies,
+		]);
+	}
+
+
+	/**
+	 * @param array<string, array{
+	 *     currency: CurrencyInterface,
+	 *     price: numeric-string,
+	 *     isManual: bool
+	 * }> $list
+	 * @return array<string, array{
+	 *     currency: string,
+	 *     price: numeric-string,
+	 *     originalPrice: numeric-string,
+	 *     isManual: bool
+	 * }>
+	 */
+	private function formatPriceList(array $list): array
+	{
+		$return = [];
+		foreach ($list as $currency => $item) {
+			$item['originalPrice'] = $item['price'];
+			$item['currency'] = $currency;
+			$return[$currency] = $item;
+		}
+
+		return $return;
 	}
 
 

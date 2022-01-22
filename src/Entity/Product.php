@@ -8,7 +8,7 @@ namespace Baraja\Shop\Product\Entity;
 use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
-use Baraja\Shop\Product\BeautifulPrice;
+use Baraja\Shop\Price\Price;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\Shop\Product\Validators;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -69,11 +69,13 @@ class Product implements ProductInterface
 	#[ORM\Column(type: 'translate', nullable: true)]
 	private ?Translation $internalNote = null;
 
-	#[ORM\Column(type: 'float', options: ['unsigned' => true])]
-	private float $price;
+	/** @var numeric-string */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, options: ['unsigned' => true])]
+	private string $price;
 
-	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
-	private ?float $standardPricePercentage = null;
+	/** @var numeric-string|null */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
+	private ?string $standardPricePercentage = null;
 
 	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;
@@ -87,8 +89,9 @@ class Product implements ProductInterface
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = true;
 
-	#[ORM\Column(type: 'float', nullable: true)]
-	private ?float $vat = null;
+	/** @var numeric-string|null */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
+	private ?string $vat = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductCategory::class, inversedBy: 'mainProducts')]
 	private ?ProductCategory $mainCategory;
@@ -143,7 +146,7 @@ class Product implements ProductInterface
 	private int $warehouseAllQuantity = 0;
 
 
-	public function __construct(string $name, string $code, float $price)
+	public function __construct(string $name, string $code, string $price)
 	{
 		$this->setName($name);
 		$this->setCode($code);
@@ -284,13 +287,13 @@ class Product implements ProductInterface
 	}
 
 
-	public function getPrice(): float
+	public function getPrice(): string
 	{
-		return $this->price;
+		return Price::normalize($this->price);
 	}
 
 
-	public function setPrice(float $price): void
+	public function setPrice(string $price): void
 	{
 		$this->price = $price;
 	}
@@ -298,21 +301,24 @@ class Product implements ProductInterface
 
 	public function isSale(): bool
 	{
-		return ($this->standardPricePercentage ?: 0) > 0;
+		return $this->standardPricePercentage !== null;
 	}
 
 
-	public function getStandardPrice(): float
+	public function getStandardPrice(): string
 	{
-		return BeautifulPrice::from(
-			$this->isSale()
-				? ($this->standardPricePercentage / 100) * $this->getPrice()
-				: $this->getPrice(),
-		)->smartRound();
+		if ($this->standardPricePercentage !== null) {
+			return bcmul(
+				bcdiv($this->standardPricePercentage, '100'),
+				$this->getPrice(),
+			);
+		}
+
+		return $this->getPrice();
 	}
 
 
-	public function getSalePrice(): float
+	public function getSalePrice(): string
 	{
 		$return = $this->isSale()
 			? $this->getPrice() - $this->getStandardPrice()
@@ -322,19 +328,18 @@ class Product implements ProductInterface
 	}
 
 
-	public function getStandardPricePercentage(): ?float
+	public function getStandardPricePercentage(): ?string
 	{
 		return $this->standardPricePercentage;
 	}
 
 
-	public function setStandardPricePercentage(?float $standardPricePercentage): void
+	public function setStandardPricePercentage(?string $value): void
 	{
-		$isZero = static fn(float $value): bool => abs($value) < 1e-10;
-		if ($standardPricePercentage !== null && $isZero($standardPricePercentage)) {
-			$standardPricePercentage = null;
+		if ($value !== null && ($value === '' || $value === '0' || ((float) $value) < 0)) {
+			$value = null;
 		}
-		$this->standardPricePercentage = $standardPricePercentage;
+		$this->standardPricePercentage = $value;
 	}
 
 
@@ -416,16 +421,17 @@ class Product implements ProductInterface
 	}
 
 
-	public function getVat(float $default = 21.0): float
+	public function getVat(string $default = '21'): string
 	{
 		return $this->vat ?? $default;
 	}
 
 
-	public function setVat(?float $vat): void
+	public function setVat(?string $vat): void
 	{
-		if ($vat !== null && $vat < 0) {
-			$vat = 0.0;
+		$floatVal = (float) $vat;
+		if ($vat !== null && $floatVal < 0) {
+			$vat = '0';
 		}
 		$this->vat = $vat;
 	}
