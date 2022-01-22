@@ -160,7 +160,7 @@ class ProductVariant implements ProductVariantInterface
 		return Price::normalize(bcadd(
 			$this->getDefinedPrice($useSale),
 			$this->priceAddition ?? '0',
-			2
+			2,
 		));
 	}
 
