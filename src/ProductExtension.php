@@ -35,6 +35,9 @@ final class ProductExtension extends CompilerExtension
 		$builder->addDefinition($this->prefix('productManager'))
 			->setFactory(ProductManager::class);
 
+		$builder->addDefinition($this->prefix('productFeedFacade'))
+			->setFactory(ProductFeedFacade::class);
+
 		$builder->addAccessorDefinition($this->prefix('productManagerAccessor'))
 			->setImplement(ProductManagerAccessor::class);
 
@@ -46,6 +49,9 @@ final class ProductExtension extends CompilerExtension
 
 		$builder->addDefinition($this->prefix('productFieldManager'))
 			->setFactory(ProductFieldManager::class);
+
+		$builder->addDefinition($this->prefix('productPriceManager'))
+			->setFactory(ProductPriceManager::class);
 
 		/** @var ServiceDefinition $pluginManager */
 		$pluginManager = $this->getContainerBuilder()->getDefinitionByType(PluginManager::class);
@@ -102,6 +108,17 @@ final class ProductExtension extends CompilerExtension
 			'source' => __DIR__ . '/../templates/product/media.js',
 			'position' => 60,
 			'tab' => 'Media',
+			'params' => ['id'],
+		]]);
+		$pluginManager->addSetup('?->addComponent(?)', ['@self', [
+			'key' => 'productPriceList',
+			'name' => 'cms-product-price-list',
+			'implements' => ProductPlugin::class,
+			'componentClass' => VueComponent::class,
+			'view' => 'detail',
+			'source' => __DIR__ . '/../templates/product/priceList.js',
+			'position' => 55,
+			'tab' => 'Prices',
 			'params' => ['id'],
 		]]);
 		$pluginManager->addSetup('?->addComponent(?)', ['@self', [

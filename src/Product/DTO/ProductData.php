@@ -8,6 +8,9 @@ namespace Baraja\Shop\Product\DTO;
 final class ProductData
 {
 	/**
+	 * @param numeric-string $price
+	 * @param numeric-string $vat
+	 * @param numeric-string|null $standardPricePercentage
 	 * @param array{source: string, title: string, url: string}|null $mainImage
 	 * @param array<int, array{id: int|null, name: string, type: string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, required: bool}> $customFields
 	 * @param array<int, array{id: int, description: string, html: string, image: string|null, color: string|null, position: int}> $smartDescriptions
@@ -22,11 +25,12 @@ final class ProductData
 		public bool $active,
 		public string $shortDescription,
 		public string $description,
-		public float $price,
-		public float $vat,
-		public ?float $standardPricePercentage,
+		public string $price,
+		public string $vat,
+		public ?string $standardPricePercentage,
 		public ?string $url,
 		public bool $soldOut,
+		public string $mainCurrency,
 		public ?array $mainImage = null,
 		public ?int $mainCategoryId = null,
 		public array $customFields = [],

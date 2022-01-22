@@ -10,7 +10,7 @@ Vue.component('cms-product-variants', {
 					<b>Number of variants:</b> {{ variantCount }}
 					| <b>Expected number of variants:</b> {{ possibleVariantCount }}
 					| <b>Product code:</b> <code>{{ defaultCode }}</code>
-					| <b>Product main price:</b> <code>{{ productPrice }}&nbsp;CZK</code>
+					| <b>Product main price:</b> <code>{{ productPrice }}&nbsp;{{ mainCurrency }}</code>
 				</div>
 				<div class="col-sm-2 text-right">
 					<b-button variant="primary" size="sm" @click="generateVariants">
@@ -75,7 +75,7 @@ Vue.component('cms-product-variants', {
 							<input type="number" v-model="variant.priceAddition" class="form-control form-control-sm">
 						</td>
 						<td>
-							{{ (variant.price * 1) + (variant.priceAddition * 1) }}&nbsp;CZK
+							{{ (variant.price * 1) + (variant.priceAddition * 1) }}&nbsp;{{ mainCurrency }}
 						</td>
 						<td>
 							<input type="number" v-model="variant.warehouseAllQuantity" :class="{'form-control': true, 'form-control-sm': true, 'alert-success': variant.warehouseAllQuantity > 0, 'alert-warning': Math.abs(variant.warehouseAllQuantity) < 0.001, 'alert-danger': variant.warehouseAllQuantity < 0}">
@@ -104,6 +104,7 @@ Vue.component('cms-product-variants', {
 	</cms-card>`,
 	data() {
 		return {
+			mainCurrency: null,
 			list: null,
 			defaultCode: null,
 			productPrice: null,
@@ -122,6 +123,7 @@ Vue.component('cms-product-variants', {
 		sync() {
 			axiosApi.get(`cms-product/variants?id=${this.id}`)
 				.then(req => {
+					this.mainCurrency = req.data.mainCurrency;
 					this.list = req.data.list;
 					this.defaultCode = req.data.defaultCode;
 					this.productPrice = req.data.productPrice;

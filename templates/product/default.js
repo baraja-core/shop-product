@@ -89,11 +89,14 @@ Vue.component('cms-product-default', {
 							<template v-if="item.mainCategory">
 								{{ item.mainCategory.name }}
 							</template>
+							<template v-else>
+								<span class="text-secondary">Please select.</span>
+							</template>
 						</td>
 						<td>
 							<b-form-input type="number" v-model="item.position" min="0" max="1000" size="sm" @change="changePosition(item.id, item.position)"></b-form-input>
 						</td>
-						<td>{{ item.price }}&nbsp;Kč</td>
+						<td v-html="item.priceRender"></td>
 					</tr>
 				</table>
 				<div class="text-center">

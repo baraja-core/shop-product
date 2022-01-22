@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product\Entity;
 
 
 use Baraja\EcommerceStandard\DTO\ProductVariantInterface;
+use Baraja\Shop\Price\Price;
 use Baraja\Shop\Product\Repository\ProductVariantRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
@@ -31,11 +32,13 @@ class ProductVariant implements ProductVariantInterface
 	#[ORM\Column(type: 'string', length: 64, unique: true, nullable: true)]
 	private ?string $code = null;
 
-	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
-	private ?float $price = null;
+	/** @var numeric-string|null */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
+	private ?string $price = null;
 
-	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
-	private ?float $priceAddition = null;
+	/** @var numeric-string|null */
+	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
+	private ?string $priceAddition = null;
 
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = false;
@@ -119,49 +122,84 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
-	public function getRealPrice(): ?float
+	public function getRealPrice(): ?string
 	{
 		return $this->price;
 	}
 
 
-	public function getDefinedPrice(bool $useSale = true): ?float
+	public function getDefinedPrice(bool $useSale = true): string
 	{
-		$price = (float) $this->price;
-		$return = (abs($price) < 0.01 ? null : $price) ?? $this->product->getPrice();
+		if ($this->price === null || $this->price === '0') {
+			$return = $this->product->getPrice();
+		} else {
+			$return = $this->price;
+		}
 		if ($useSale === true && $this->product->isSale()) {
-			$return = $return - ($this->product->getStandardPricePercentage() / 100) * $return;
+			$return = bcsub(
+				$return,
+				bcmul(
+					bcdiv(
+						$this->product->getStandardPricePercentage() ?? '0',
+						'100',
+						2,
+					),
+					$return,
+					2,
+				),
+				2,
+			);
 		}
 
-		return $return;
+		return Price::normalize($return);
 	}
 
 
-	public function getPrice(bool $useSale = true): float
+	public function getPrice(bool $useSale = true): string
 	{
-		return ceil($this->getDefinedPrice($useSale) + ($this->priceAddition ?? 0));
+		return Price::normalize(bcadd(
+			$this->getDefinedPrice($useSale),
+			$this->priceAddition ?? '0',
+			2,
+		));
 	}
 
 
-	public function setPrice(?float $price): void
+	/**
+	 * @param numeric-string|null $price
+	 */
+	public function setPrice(?string $price): void
 	{
-		$price = $price === null || abs($price) < 0.01 ? null : $price;
-		if (abs($this->getProduct()->getPrice() - $price) < 0.01) {
-			$price = null;
+		if ($price !== null) {
+			if (ltrim($price, '-') < 0.01) {
+				$price = null;
+			} else {
+				$sub = bcsub($this->getProduct()->getPrice(), $price);
+				if (abs((float) $sub) < 0.01) {
+					$price = null;
+				}
+			}
 		}
 		$this->price = $price;
 	}
 
 
-	public function getPriceAddition(): ?float
+	public function getPriceAddition(): ?string
 	{
-		return $this->priceAddition;
+		if ($this->priceAddition !== null) {
+			return Price::normalize($this->priceAddition);
+		}
+
+		return null;
 	}
 
 
-	public function setPriceAddition(?float $priceAddition): void
+	/**
+	 * @param numeric-string|null $priceAddition
+	 */
+	public function setPriceAddition(?string $priceAddition): void
 	{
-		if ($priceAddition === null || abs($priceAddition) < 0.01) {
+		if ($priceAddition === null || abs((float) $priceAddition) < 0.01) {
 			$priceAddition = null;
 		}
 

@@ -9,6 +9,7 @@ use Baraja\Shop\Product\Entity\Product;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 
 final class ProductRepository extends EntityRepository
 {
@@ -73,5 +74,28 @@ final class ProductRepository extends EntityRepository
 			->setMaxResults(1)
 			->getQuery()
 			->getSingleResult();
+	}
+
+
+	/**
+	 * Prepares QueryBuilder for fast product search based on scalar input.
+	 *
+	 * @param array<int, string|int> $searchIds
+	 */
+	public function getFeedCandidates(array $searchIds = []): QueryBuilder
+	{
+		$selection = $this->createQueryBuilder('product')
+			->select('PARTIAL product.{id, name, code, ean, shortDescription, price, position, active, soldOut}')
+			->addSelect('PARTIAL mainImage.{id, source}')
+			->addSelect('PARTIAL mainCategory.{id, name}')
+			->leftJoin('product.mainImage', 'mainImage')
+			->leftJoin('product.mainCategory', 'mainCategory');
+
+		if ($searchIds !== []) {
+			$selection->andWhere('product.id IN (:searchIds)')
+				->setParameter('searchIds', $searchIds);
+		}
+
+		return $selection;
 	}
 }
