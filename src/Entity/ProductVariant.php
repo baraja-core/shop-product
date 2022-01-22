@@ -141,10 +141,10 @@ class ProductVariant implements ProductVariantInterface
 				bcmul(
 					bcdiv(
 						$this->product->getStandardPricePercentage() ?? '0',
-						'100'
+						'100',
 					),
-					$return
-				)
+					$return,
+				),
 			);
 		}
 
@@ -156,7 +156,7 @@ class ProductVariant implements ProductVariantInterface
 	{
 		return bcadd(
 			$this->getDefinedPrice($useSale),
-			$this->priceAddition ?? '0'
+			$this->priceAddition ?? '0',
 		);
 	}
 

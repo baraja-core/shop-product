@@ -98,7 +98,7 @@ final class ProductPriceManager
 	public function convertPriceToCurrency(
 		string $price,
 		CurrencyInterface $currency,
-		?CurrencyInterface $fromCurrency = null
+		?CurrencyInterface $fromCurrency = null,
 	): string {
 		$fromCurrency ??= $this->currencyManager->get()->getMainCurrency();
 
