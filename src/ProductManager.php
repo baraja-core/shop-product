@@ -111,7 +111,7 @@ final class ProductManager
 			throw new \InvalidArgumentException(sprintf('Product with code "%s" already exist.', $code));
 		}
 
-		$product = new Product($name, $code, $price);
+		$product = new Product($name, $code, (string) $price);
 		$this->entityManager->persist($product);
 		$this->entityManager->flush();
 

@@ -127,12 +127,25 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
-	public function getDefinedPrice(bool $useSale = true): ?string
+	public function getDefinedPrice(bool $useSale = true): string
 	{
-		$price = (float) $this->price;
-		$return = (abs($price) < 0.01 ? null : $price) ?? $this->product->getPrice();
+		if ($this->price === null || $this->price === '0') {
+			$return = null;
+		} else {
+			$return = $this->price;
+		}
+		$return ??= $this->product->getPrice();
 		if ($useSale === true && $this->product->isSale()) {
-			$return = $return - ($this->product->getStandardPricePercentage() / 100) * $return;
+			$return = bcsub(
+				$return,
+				bcmul(
+					bcdiv(
+						$this->product->getStandardPricePercentage() ?? '0',
+						'100'
+					),
+					$return
+				)
+			);
 		}
 
 		return $return;
@@ -148,11 +161,20 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
+	/**
+	 * @param numeric-string|null $price
+	 */
 	public function setPrice(?string $price): void
 	{
-		$price = $price === null || abs($price) < 0.01 ? null : $price;
-		if (abs($this->getProduct()->getPrice() - $price) < 0.01) {
-			$price = null;
+		if ($price !== null) {
+			if (ltrim($price, '-') < 0.01) {
+				$price = null;
+			} else {
+				$sub = bcsub($this->getProduct()->getPrice(), $price);
+				if (abs((float) $sub) < 0.01) {
+					$price = null;
+				}
+			}
 		}
 		$this->price = $price;
 	}
@@ -164,6 +186,9 @@ class ProductVariant implements ProductVariantInterface
 	}
 
 
+	/**
+	 * @param numeric-string|null $priceAddition
+	 */
 	public function setPriceAddition(?string $priceAddition): void
 	{
 		if ($priceAddition === null || abs($priceAddition) < 0.01) {

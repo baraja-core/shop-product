@@ -293,6 +293,9 @@ class Product implements ProductInterface
 	}
 
 
+	/**
+	 * @param numeric-string $price
+	 */
 	public function setPrice(string $price): void
 	{
 		$this->price = $price;
@@ -324,7 +327,7 @@ class Product implements ProductInterface
 			? $this->getPrice() - $this->getStandardPrice()
 			: $this->getPrice();
 
-		return $return < 0 ? 0 : $return;
+		return $return < 0 ? '0' : $return;
 	}
 
 
@@ -334,6 +337,9 @@ class Product implements ProductInterface
 	}
 
 
+	/**
+	 * @param numeric-string|null $value
+	 */
 	public function setStandardPricePercentage(?string $value): void
 	{
 		if ($value !== null && ($value === '' || $value === '0' || ((float) $value) < 0)) {
@@ -427,6 +433,9 @@ class Product implements ProductInterface
 	}
 
 
+	/**
+	 * @param numeric-string|null $vat
+	 */
 	public function setVat(?string $vat): void
 	{
 		$floatVal = (float) $vat;

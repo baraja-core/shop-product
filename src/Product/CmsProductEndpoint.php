@@ -817,7 +817,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	/**
 	 * @param array<string, array{
-	 *     currency: CurrencyInterface,
+	 *     currency: \Baraja\EcommerceStandard\DTO\CurrencyInterface,
 	 *     price: numeric-string,
 	 *     isManual: bool
 	 * }> $list
