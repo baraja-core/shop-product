@@ -439,7 +439,7 @@ class Product implements ProductInterface
 	 */
 	public function getVat(string $default = '21'): string
 	{
-		return $this->vat ?? $default;
+		return Price::normalize($this->vat ?? $default);
 	}
 
 

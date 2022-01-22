@@ -32,6 +32,7 @@ final class ProductData
 		public bool $soldOut,
 		public ?array $mainImage = null,
 		public ?int $mainCategoryId = null,
+		public string $mainCurrency,
 		public array $customFields = [],
 		public array $smartDescriptions = [],
 		public array $categories = [],

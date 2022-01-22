@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product\Entity;
 
 
 use Baraja\EcommerceStandard\DTO\ProductVariantInterface;
+use Baraja\Shop\Price\Price;
 use Baraja\Shop\Product\Repository\ProductVariantRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
@@ -130,11 +131,10 @@ class ProductVariant implements ProductVariantInterface
 	public function getDefinedPrice(bool $useSale = true): string
 	{
 		if ($this->price === null || $this->price === '0') {
-			$return = null;
+			$return = $this->product->getPrice();
 		} else {
 			$return = $this->price;
 		}
-		$return ??= $this->product->getPrice();
 		if ($useSale === true && $this->product->isSale()) {
 			$return = bcsub(
 				$return,
@@ -142,22 +142,26 @@ class ProductVariant implements ProductVariantInterface
 					bcdiv(
 						$this->product->getStandardPricePercentage() ?? '0',
 						'100',
+						2,
 					),
 					$return,
+					2,
 				),
+				2,
 			);
 		}
 
-		return $return;
+		return Price::normalize($return);
 	}
 
 
 	public function getPrice(bool $useSale = true): string
 	{
-		return bcadd(
+		return Price::normalize(bcadd(
 			$this->getDefinedPrice($useSale),
 			$this->priceAddition ?? '0',
-		);
+			2
+		));
 	}
 
 
@@ -182,7 +186,11 @@ class ProductVariant implements ProductVariantInterface
 
 	public function getPriceAddition(): ?string
 	{
-		return $this->priceAddition;
+		if ($this->priceAddition !== null) {
+			return Price::normalize($this->priceAddition);
+		}
+
+		return null;
 	}
 
 
@@ -191,7 +199,7 @@ class ProductVariant implements ProductVariantInterface
 	 */
 	public function setPriceAddition(?string $priceAddition): void
 	{
-		if ($priceAddition === null || abs($priceAddition) < 0.01) {
+		if ($priceAddition === null || abs((float) $priceAddition) < 0.01) {
 			$priceAddition = null;
 		}
 

@@ -184,6 +184,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			soldOut: $product->isSoldOut(),
 			mainImage: $mainImage !== null ? $mainImage->toArray() : null,
 			mainCategoryId: $mainCategory !== null ? $mainCategory->getId() : null,
+			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
 			categories: $categoryList,
@@ -591,7 +592,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'ean' => $variant->getEan(),
 				'code' => $variant->getCode(),
 				'parameters' => ProductVariant::unserializeParameters($variant->getRelationHash()),
-				'price' => $variant->getPrice(false),
+				'price' => $variant->getDefinedPrice(false),
 				'priceAddition' => $variant->getPriceAddition(),
 				'realPrice' => $variant->getPrice(false),
 				'soldOut' => $variant->isSoldOut(),
@@ -601,6 +602,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$this->sendJson(
 			[
+				'mainCurrency' => $this->currencyManager->get()->getMainCurrency()->getCode(),
 				'list' => $variantList,
 				'defaultCode' => $product->getCode(),
 				'productPrice' => $product->getSalePrice(),

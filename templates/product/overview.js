@@ -42,7 +42,7 @@ Vue.component('cms-product-overview', {
 					</div>
 					<div class="row my-3">
 						<div class="col-2">
-							Primary price (CZK):
+							Primary price ({{ mainCurrency }}):
 							<input v-model="product.price" class="form-control">
 						</div>
 						<div class="col-1">
@@ -232,6 +232,7 @@ Vue.component('cms-product-overview', {
 	data() {
 		return {
 			product: null,
+			mainCurrency: null,
 			newSmartDescription: {
 				description: '',
 				position: 0,
@@ -271,6 +272,7 @@ Vue.component('cms-product-overview', {
 			axiosApi.get(`cms-product/overview?id=${this.id}`)
 				.then(req => {
 					this.product = req.data;
+					this.mainCurrency = req.data.mainCurrency;
 				});
 		},
 		save(evt) {
