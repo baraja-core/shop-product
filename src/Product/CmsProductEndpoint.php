@@ -646,7 +646,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 			}
 			/** @var ProductVariant $entity */
 			$entity = $variantById[$variant['id']];
+			/** @phpstan-ignore-next-line */
 			$entity->setPrice((string) $variant['price']);
+			/** @phpstan-ignore-next-line */
 			$entity->setPriceAddition((string) $variant['priceAddition']);
 			$entity->setSoldOut((bool) $variant['soldOut']);
 			$entity->setEan($variant['ean']);

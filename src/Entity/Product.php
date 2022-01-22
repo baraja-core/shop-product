@@ -146,6 +146,9 @@ class Product implements ProductInterface
 	private int $warehouseAllQuantity = 0;
 
 
+	/**
+	 * @param numeric-string $price
+	 */
 	public function __construct(string $name, string $code, string $price)
 	{
 		$this->setName($name);
@@ -324,13 +327,16 @@ class Product implements ProductInterface
 	public function getSalePrice(): string
 	{
 		$return = $this->isSale()
-			? $this->getPrice() - $this->getStandardPrice()
+			? bcsub($this->getPrice(), $this->getStandardPrice())
 			: $this->getPrice();
 
 		return $return < 0 ? '0' : $return;
 	}
 
 
+	/**
+	 * @return numeric-string|null
+	 */
 	public function getStandardPricePercentage(): ?string
 	{
 		return $this->standardPricePercentage;
@@ -342,7 +348,7 @@ class Product implements ProductInterface
 	 */
 	public function setStandardPricePercentage(?string $value): void
 	{
-		if ($value !== null && ($value === '' || $value === '0' || ((float) $value) < 0)) {
+		if ($value !== null && ($value === '0' || ((float) $value) < 0)) {
 			$value = null;
 		}
 		$this->standardPricePercentage = $value;
@@ -427,6 +433,10 @@ class Product implements ProductInterface
 	}
 
 
+	/**
+	 * @param numeric-string $default
+	 * @return numeric-string
+	 */
 	public function getVat(string $default = '21'): string
 	{
 		return $this->vat ?? $default;

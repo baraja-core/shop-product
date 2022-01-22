@@ -8,6 +8,9 @@ namespace Baraja\Shop\Product\DTO;
 final class ProductData
 {
 	/**
+	 * @param numeric-string $price
+	 * @param numeric-string $vat
+	 * @param numeric-string|null $standardPricePercentage
 	 * @param array{source: string, title: string, url: string}|null $mainImage
 	 * @param array<int, array{id: int|null, name: string, type: string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, required: bool}> $customFields
 	 * @param array<int, array{id: int, description: string, html: string, image: string|null, color: string|null, position: int}> $smartDescriptions
