@@ -56,6 +56,15 @@ class ProductCategory implements CategoryInterface
 	#[ORM\Column(type: 'boolean')]
 	private bool $active = false;
 
+	#[ORM\Column(type: 'boolean')]
+	private bool $internal = false;
+
+	#[ORM\Column(type: 'boolean')]
+	private bool $b2b = false;
+
+	#[ORM\Column(type: 'boolean')]
+	private bool $deleted = false;
+
 	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
 	private ?int $heurekaCategoryId = null;
 
@@ -246,6 +255,42 @@ class ProductCategory implements CategoryInterface
 	public function setActive(bool $active): void
 	{
 		$this->active = $active;
+	}
+
+
+	public function isInternal(): bool
+	{
+		return $this->internal;
+	}
+
+
+	public function setInternal(bool $internal): void
+	{
+		$this->internal = $internal;
+	}
+
+
+	public function isB2b(): bool
+	{
+		return $this->b2b;
+	}
+
+
+	public function setB2b(bool $b2b): void
+	{
+		$this->b2b = $b2b;
+	}
+
+
+	public function isDeleted(): bool
+	{
+		return $this->deleted;
+	}
+
+
+	public function setDeleted(bool $deleted): void
+	{
+		$this->deleted = $deleted;
 	}
 
 

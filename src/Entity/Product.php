@@ -89,6 +89,15 @@ class Product implements ProductInterface
 	#[ORM\Column(type: 'boolean')]
 	private bool $soldOut = true;
 
+	#[ORM\Column(type: 'boolean')]
+	private bool $internal = false;
+
+	#[ORM\Column(type: 'boolean')]
+	private bool $b2b = false;
+
+	#[ORM\Column(type: 'boolean')]
+	private bool $deleted = false;
+
 	/** @var numeric-string|null */
 	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, nullable: true, options: ['unsigned' => true])]
 	private ?string $vat = null;
@@ -413,6 +422,42 @@ class Product implements ProductInterface
 	public function setSoldOut(bool $soldOut): void
 	{
 		$this->soldOut = $soldOut;
+	}
+
+
+	public function isInternal(): bool
+	{
+		return $this->internal;
+	}
+
+
+	public function setInternal(bool $internal): void
+	{
+		$this->internal = $internal;
+	}
+
+
+	public function isB2b(): bool
+	{
+		return $this->b2b;
+	}
+
+
+	public function setB2b(bool $b2b): void
+	{
+		$this->b2b = $b2b;
+	}
+
+
+	public function isDeleted(): bool
+	{
+		return $this->deleted;
+	}
+
+
+	public function setDeleted(bool $deleted): void
+	{
+		$this->deleted = $deleted;
 	}
 
 
