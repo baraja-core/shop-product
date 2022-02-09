@@ -330,7 +330,7 @@ class Product implements ProductInterface
 			? bcsub($this->getPrice(), $this->getStandardPrice())
 			: $this->getPrice();
 
-		return $return < 0 ? '0' : $return;
+		return $return < 0 ? '0' : Price::normalize($return);
 	}
 
 
@@ -339,7 +339,11 @@ class Product implements ProductInterface
 	 */
 	public function getStandardPricePercentage(): ?string
 	{
-		return $this->standardPricePercentage;
+		if ($this->standardPricePercentage !== null) {
+			return Price::normalize($this->standardPricePercentage);
+		}
+
+		return null;
 	}
 
 
@@ -348,8 +352,11 @@ class Product implements ProductInterface
 	 */
 	public function setStandardPricePercentage(?string $value): void
 	{
-		if ($value !== null && ($value === '0' || ((float) $value) < 0)) {
-			$value = null;
+		if ($value !== null) {
+			$value = Price::normalize($value);
+			if ($value === '0' || ((float) $value) < 0) {
+				$value = null;
+			}
 		}
 		$this->standardPricePercentage = $value;
 	}
