@@ -9,7 +9,6 @@ use Baraja\Combinations\CombinationGenerator;
 use Baraja\Doctrine\EntityManager;
 use Baraja\ImageGenerator\ImageGenerator;
 use Baraja\Markdown\CommonMarkRenderer;
-use Baraja\Search\Search;
 use Baraja\SelectboxTree\SelectboxTree;
 use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Product\DTO\ProductData;
@@ -49,7 +48,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 	public function __construct(
 		private EntityManager $entityManager,
 		private CommonMarkRenderer $renderer,
-		private Search $search,
 		private ProductFieldManager $productFieldManager,
 		private ProductManagerAccessor $productManager,
 		private CurrencyManagerAccessor $currencyManager,
@@ -183,8 +181,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			url: $this->linkSafe('Front:Product:detail', ['slug' => $product->getSlug()]),
 			soldOut: $product->isSoldOut(),
 			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
-			mainImage: $mainImage !== null ? $mainImage->toArray() : null,
-			mainCategoryId: $mainCategory !== null ? $mainCategory->getId() : null,
+			mainImage: $mainImage?->toArray(),
+			mainCategoryId: $mainCategory?->getId(),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
 			categories: $categoryList,
@@ -239,7 +237,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'source' => $productImage->getSource(),
 				'title' => $productImage->getTitle(),
 				'position' => $productImage->getPosition(),
-				'variant' => $productImageVariant !== null ? $productImageVariant->getId() : null,
+				'variant' => $productImageVariant?->getId(),
 			];
 		}
 
@@ -251,7 +249,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$this->sendJson(
 			[
 				'images' => $images,
-				'mainImageId' => $mainImage !== null ? $mainImage->getId() : null,
+				'mainImageId' => $mainImage?->getId(),
 				'variants' => $variants,
 			],
 		);

@@ -15,7 +15,6 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 {
 	public function __construct(
 		private EntityManager $entityManager,
-		private ProductFieldManager $productFieldManager,
 	) {
 	}
 

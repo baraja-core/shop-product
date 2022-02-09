@@ -22,7 +22,6 @@ final class ProductFeedFacade
 
 
 	public function __construct(
-		private EntityManagerInterface $entityManager,
 		private CurrencyManagerAccessor $currencyManager,
 		private Search $search,
 		private CommonMarkRenderer $renderer,

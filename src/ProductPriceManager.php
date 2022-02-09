@@ -25,7 +25,7 @@ final class ProductPriceManager
 
 
 	public function __construct(
-		private EntityManagerInterface $entityManager,
+		EntityManagerInterface $entityManager,
 		private CurrencyManagerAccessor $currencyManager,
 		private ExchangeRateConvertor $exchangeRateConvertor,
 	) {

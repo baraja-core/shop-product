@@ -21,15 +21,14 @@ class ProductImageFileSystem implements ProductFileSystem
 
 	public function save(ProductImage $productImage, string $tempPath): void
 	{
-		$diskPath = $this->wwwDir . '/' . $productImage->getRelativePath();
-		FileSystem::copy($tempPath, $diskPath);
+		FileSystem::copy($tempPath, $this->getAbsoluteDiskPathByProductImage($productImage));
 		FileSystem::delete($tempPath);
 	}
 
 
 	public function delete(ProductImage $productImage): void
 	{
-		FileSystem::delete($this->wwwDir . '/' . $productImage->getRelativePath());
+		FileSystem::delete($this->getAbsoluteDiskPathByProductImage($productImage));
 	}
 
 
@@ -44,5 +43,11 @@ class ProductImageFileSystem implements ProductFileSystem
 		}
 
 		return dirname($scriptFileName);
+	}
+
+
+	private function getAbsoluteDiskPathByProductImage(ProductImage $productImage): string
+	{
+		return sprintf('%s/%s', $this->wwwDir, $productImage->getRelativePath());
 	}
 }

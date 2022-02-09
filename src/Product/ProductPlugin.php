@@ -59,7 +59,7 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 	{
 		try {
 			$product = $this->productRepository->getById($id);
-			$this->setTitle(sprintf('(%d) %s', $id, (string) $product->getName()));
+			$this->setTitle(sprintf('(%d) %s', $id, $product->getLabel()));
 		} catch (NoResultException | NonUniqueResultException) {
 			$this->error(sprintf('Product "%s" doest not exist.', $id));
 		}
