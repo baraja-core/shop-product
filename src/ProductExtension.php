@@ -12,6 +12,8 @@ use Baraja\Plugin\PluginManager;
 use Baraja\Shop\Product\Category\ProductCategoryManager;
 use Baraja\Shop\Product\Category\ProductCategoryManagerAccessor;
 use Baraja\Shop\Product\Category\ProductCategoryPlugin;
+use Baraja\Shop\Product\Recommender\ProductRecommender;
+use Baraja\Shop\Product\Recommender\ProductRecommenderAccessor;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\ServiceDefinition;
 
@@ -40,6 +42,12 @@ final class ProductExtension extends CompilerExtension
 
 		$builder->addAccessorDefinition($this->prefix('productManagerAccessor'))
 			->setImplement(ProductManagerAccessor::class);
+
+		$builder->addDefinition($this->prefix('productRecommender'))
+			->setFactory(ProductRecommender::class);
+
+		$builder->addAccessorDefinition($this->prefix('productRecommenderAccessor'))
+			->setImplement(ProductRecommenderAccessor::class);
 
 		$builder->addDefinition($this->prefix('productCategoryManager'))
 			->setFactory(ProductCategoryManager::class);

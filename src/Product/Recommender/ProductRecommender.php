@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baraja\Shop\Product;
+namespace Baraja\Shop\Product\Recommender;
 
 
 use Baraja\Shop\Product\Entity\Product;
@@ -12,7 +12,6 @@ use Doctrine\ORM\EntityRepository;
 
 final class ProductRecommender
 {
-
 	public function __construct(
 		private EntityManagerInterface $entityManager,
 	) {
