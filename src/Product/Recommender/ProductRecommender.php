@@ -50,13 +50,9 @@ final class ProductRecommender
 					continue;
 				}
 				$productById[$id] = $relatedProduct;
-				if (isset($frequencyById[$id])) {
-					$frequencyById[$id]++;
-					if ($frequencyById[$id] > $highFrequency) {
-						$highFrequency = $frequencyById[$id];
-					}
-				} else {
-					$frequencyById[$id] = 1;
+				$frequencyById[$id] = isset($frequencyById[$id]) ? $frequencyById[$id] + 1 : 1;
+				if ($frequencyById[$id] > $highFrequency) {
+					$highFrequency = $frequencyById[$id];
 				}
 			}
 		}
