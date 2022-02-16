@@ -509,11 +509,11 @@ class Product implements ProductInterface
 
 
 	/**
-	 * @return Collection&iterable<ProductCategory>
+	 * @return array<int, ProductCategory>
 	 */
-	public function getCategories(): Collection
+	public function getCategories(): array
 	{
-		return $this->categories;
+		return $this->categories->toArray();
 	}
 
 
