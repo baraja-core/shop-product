@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Recommender;
 
 
+use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,15 +20,15 @@ final class ProductRecommender
 
 
 	/**
-	 * @param array<int, Product> $products
-	 * @return array<int, Product>
+	 * @param array<int, ProductInterface> $products
+	 * @return array<int, ProductInterface>
 	 */
 	public function getRelatedByCollection(array $products, int $limit = 8): array
 	{
 		if ($limit < 1) {
 			$limit = 1;
 		}
-		usort($products, static function (Product $first, Product $second): int {
+		usort($products, static function (ProductInterface $first, ProductInterface $second): int {
 			$a = $first->getPosition();
 			$b = $second->getPosition();
 
@@ -38,7 +39,7 @@ final class ProductRecommender
 			return $a < $b ? 1 : -1;
 		});
 
-		$usedIds = array_flip(array_map(static fn(Product $product): int => $product->getId(), $products));
+		$usedIds = array_flip(array_map(static fn(ProductInterface $product): int => $product->getId(), $products));
 
 		$productById = [];
 		$frequencyById = [];
@@ -77,9 +78,9 @@ final class ProductRecommender
 
 
 	/**
-	 * @return array<int, Product>
+	 * @return array<int, ProductInterface>
 	 */
-	public function getRelatedByProduct(Product $product, int $limit = 8): array
+	public function getRelatedByProduct(ProductInterface $product, int $limit = 8): array
 	{
 		if ($limit < 1) {
 			$limit = 1;
@@ -99,9 +100,9 @@ final class ProductRecommender
 
 
 	/**
-	 * @return array<int, Product>
+	 * @return array<int, ProductInterface>
 	 */
-	private function selectRelated(Product $product, int $limit): array
+	private function selectRelated(ProductInterface $product, int $limit): array
 	{
 		$repository = new EntityRepository(
 			$this->entityManager,
@@ -126,9 +127,9 @@ final class ProductRecommender
 
 
 	/**
-	 * @return array<int, Product>
+	 * @return array<int, ProductInterface>
 	 */
-	private function selectByCategory(Product $product, int $limit): array
+	private function selectByCategory(ProductInterface $product, int $limit): array
 	{
 		$repository = new EntityRepository(
 			$this->entityManager,
@@ -181,7 +182,7 @@ final class ProductRecommender
 
 
 	/**
-	 * @return array<int, Product>
+	 * @return array<int, ProductInterface>
 	 */
 	private function selectTopProducts(int $limit): array
 	{
@@ -203,10 +204,10 @@ final class ProductRecommender
 
 
 	/**
-	 * @param array<int, Product> $products
-	 * @return array<int, Product>
+	 * @param array<int, ProductInterface> $products
+	 * @return array<int, ProductInterface>
 	 */
-	private function filter(Product $product, array $products): array
+	private function filter(ProductInterface $product, array $products): array
 	{
 		$productId = $product->getId();
 		$return = [];
