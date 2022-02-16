@@ -109,7 +109,7 @@ final class ProductRecommender
 	{
 		$repository = new EntityRepository(
 			$this->entityManager,
-			$this->entityManager->getClassMetadata(RelatedProduct::class)
+			$this->entityManager->getClassMetadata(RelatedProduct::class),
 		);
 
 		/** @var array<int, RelatedProduct> $related */
@@ -136,7 +136,7 @@ final class ProductRecommender
 	{
 		$repository = new EntityRepository(
 			$this->entityManager,
-			$this->entityManager->getClassMetadata(Product::class)
+			$this->entityManager->getClassMetadata(Product::class),
 		);
 
 		$return = [];
@@ -191,7 +191,7 @@ final class ProductRecommender
 	{
 		$repository = new EntityRepository(
 			$this->entityManager,
-			$this->entityManager->getClassMetadata(Product::class)
+			$this->entityManager->getClassMetadata(Product::class),
 		);
 
 		/** @var array<int, Product> $products */
