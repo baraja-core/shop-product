@@ -238,6 +238,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 		} else {
 			$product->setMainCategory($this->productCategoryRepository->getById($productData->mainCategoryId));
 		}
+		if ($productData->brandId === null) {
+			$product->setBrand(null);
+		} else {
+			/** @var Brand $brand */
+			$brand = $this->entityManager->getRepository(Brand::class)->find($productData->brandId);
+			$product->setBrand($brand);
+		}
 		if ($productData->customFields !== []) {
 			$saveFields = [];
 			foreach ($productData->customFields as $customField) {
