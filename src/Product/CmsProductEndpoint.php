@@ -54,16 +54,16 @@ final class CmsProductEndpoint extends BaseEndpoint
 		private ProductFeedFacade $productFeedFacade,
 		private ProductPriceManager $priceManager,
 	) {
-		/** @var ProductRepository $productRepository */
 		$productRepository = $entityManager->getRepository(Product::class);
-		/** @var ProductCategoryRepository $productCategoryRepository */
 		$productCategoryRepository = $entityManager->getRepository(ProductCategory::class);
-		/** @var ProductVariantRepository $productVariantRepository */
 		$productVariantRepository = $entityManager->getRepository(ProductVariant::class);
-		/** @var RelatedProductRepository $relatedProductRepository */
 		$relatedProductRepository = $entityManager->getRepository(RelatedProduct::class);
-		/** @var ProductImageRepository $productImageRepository */
 		$productImageRepository = $entityManager->getRepository(ProductImage::class);
+		assert($productRepository instanceof ProductRepository);
+		assert($productCategoryRepository instanceof ProductCategoryRepository);
+		assert($productVariantRepository instanceof ProductVariantRepository);
+		assert($relatedProductRepository instanceof RelatedProductRepository);
+		assert($productImageRepository instanceof ProductImageRepository);
 		$this->productRepository = $productRepository;
 		$this->productCategoryRepository = $productCategoryRepository;
 		$this->productVariantRepository = $productVariantRepository;
