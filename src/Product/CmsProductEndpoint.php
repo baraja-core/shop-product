@@ -8,8 +8,10 @@ namespace Baraja\Shop\Product;
 use Baraja\Combinations\CombinationGenerator;
 use Baraja\Doctrine\EntityManager;
 use Baraja\ImageGenerator\ImageGenerator;
+use Baraja\Localization\Localization;
 use Baraja\Markdown\CommonMarkRenderer;
 use Baraja\SelectboxTree\SelectboxTree;
+use Baraja\Shop\Brand\Entity\Brand;
 use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Product\DTO\ProductData;
 use Baraja\Shop\Product\Entity\Product;
@@ -135,6 +137,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->executeQuery($cat->sqlBuilder('shop__product_category'))
 			->fetchAllAssociative();
 
+		/** @var array<int, array{id: int, name: Localization}> $brands */
+		$brands = $this->entityManager->getRepository(Brand::class)
+			->createQueryBuilder('brand')
+			->select('PARTIAL brand.{id, name}')
+			->getQuery()
+			->getArrayResult();
+
 		$mainImage = $product->getMainImage();
 		$mainCategory = $product->getMainCategory();
 
@@ -166,6 +175,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 		/** @var array<int, array{value: int, text: string}> $categoryList */
 		$categoryList = $this->formatBootstrapSelectArray($cat->process($categories));
 
+		$brandList = [
+			['value' => null, 'text' => '--- No brand ---'],
+		];
+		foreach ($brands as $brand) {
+			$brandList[$brand['id']] = (string) $brand['name'];
+		}
+
 		return new ProductData(
 			id: $product->getId(),
 			name: (string) $product->getName(),
@@ -183,9 +199,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
 			mainImage: $mainImage?->toArray(),
 			mainCategoryId: $mainCategory?->getId(),
+			brandId: $product->getBrand()?->getId(),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
 			categories: $categoryList,
+			brands: $brandList,
 		);
 	}
 

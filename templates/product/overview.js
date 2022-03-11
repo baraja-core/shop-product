@@ -18,18 +18,24 @@ Vue.component('cms-product-overview', {
 				<div class="col">
 					<div class="row">
 						<div class="col-4">
-							Name:
-							<input v-model="product.name" class="form-control">
+							<label class="w-100">
+								Name:
+								<input v-model="product.name" class="form-control">
+							</label>
 						</div>
 						<div class="col-4">
-							Unique code:
-							<input v-model="product.code" class="form-control" style="font-family:monospace">
+							<label class="w-100">
+								Unique code:
+								<input v-model="product.code" class="form-control" style="font-family:monospace">
+							</label>
 						</div>
 						<div class="col-3">
-							EAN:
-							<input v-model="product.ean" class="form-control" style="font-family:monospace">
+							<label class="w-100">
+								EAN:
+								<input v-model="product.ean" class="form-control" style="font-family:monospace">
+							</label>
 						</div>
-						<div class="col-1">
+						<div class="col-1 text-right">
 							<b-button type="submit" variant="primary" class="mt-3">
 								<template v-if="editSmartDescription.uploading">
 									<b-spinner small></b-spinner>
@@ -40,43 +46,65 @@ Vue.component('cms-product-overview', {
 							</b-button>
 						</div>
 					</div>
-					<div class="row my-3">
+					<div class="row">
 						<div class="col-2">
-							Primary price ({{ mainCurrency }}):
-							<input v-model="product.price" class="form-control">
+							<label class="w-100">
+								Primary price ({{ mainCurrency }}):
+								<input v-model="product.price" class="form-control">
+							</label>
 						</div>
 						<div class="col-1">
-							Sale&nbsp;%
-							<input v-model="product.standardPricePercentage" class="form-control">
+							<label class="w-100">
+								Sale&nbsp;%
+								<input v-model="product.standardPricePercentage" class="form-control">
+							</label>
 						</div>
 						<div class="col-1">
-							VAT:
-							<input v-model="product.vat" class="form-control">
-						</div>
-						<div class="col-3">
-							Main category:
-							<b-form-select v-model="product.mainCategoryId" :options="product.categories"></b-form-select>
-						</div>
-						<div class="col-1">
-							ID:
-							<input v-model="product.id" class="form-control" disabled>
+							<label class="w-100">
+								VAT:
+								<input v-model="product.vat" class="form-control">
+							</label>
 						</div>
 						<div class="col-4">
-							URL slug:
-							<input v-model="product.slug" class="form-control" style="font-family:monospace">
+							<label class="w-100">
+								Main category:
+								<b-form-select v-model="product.mainCategoryId" :options="product.categories"></b-form-select>
+							</label>
+						</div>
+						<div class="col-4">
+							<label class="w-100">
+								Brand:
+								<b-form-select v-model="product.brandId" :options="product.brands"></b-form-select>
+							</label>
 						</div>
 					</div>
-					<div class="row my-3">
-						<div class="col-10">
-							URL: <code><a :href="product.url" target="_blank">{{ product.url }}</a></code>
+					<div class="row">
+						<div class="col">
+							<label class="w-100">
+								URL slug:
+								<input v-model="product.slug" class="form-control" style="font-family:monospace">
+							</label>
 						</div>
-						<div class="col-1">
-							Active?<br>
-							<b-form-checkbox v-model="product.active" switch></b-form-checkbox>
+						<div class="col-2">
+							<table class="w-100">
+								<tr>
+									<th width="60">
+										<b-form-checkbox id="product__active" v-model="product.active" switch></b-form-checkbox>
+									</th>
+									<td><label for="product__active">Active?</label></td>
+								</tr>
+								<tr>
+									<th>
+										<b-form-checkbox id="product__sold-out" v-model="product.soldOut" switch></b-form-checkbox>
+									</th>
+									<td><label for="product__sold-out">Sold&nbsp;out?</label></td>
+								</tr>
+							</table>
 						</div>
-						<div class="col-1">
-							Sold&nbsp;out?<br>
-							<b-form-checkbox v-model="product.soldOut" switch></b-form-checkbox>
+					</div>
+					<div class="row">
+						<div class="col">
+							<code><a :href="product.url" target="_blank">{{ product.url }}</a></code>
 						</div>
 					</div>
 				</div>

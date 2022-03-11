@@ -15,6 +15,7 @@ final class ProductData
 	 * @param array<int, array{id: int|null, name: string, type: string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, required: bool}> $customFields
 	 * @param array<int, array{id: int, description: string, html: string, image: string|null, color: string|null, position: int}> $smartDescriptions
 	 * @param array<int, array{value: int, text: string}> $categories
+	 * @param array<int, array{value: int, text: string}> $brands
 	 */
 	public function __construct(
 		public int $id,
@@ -33,9 +34,11 @@ final class ProductData
 		public string $mainCurrency,
 		public ?array $mainImage = null,
 		public ?int $mainCategoryId = null,
+		public ?int $brandId = null,
 		public array $customFields = [],
 		public array $smartDescriptions = [],
 		public array $categories = [],
+		public array $brands = [],
 	) {
 	}
 }
