@@ -23,11 +23,11 @@ Vue.component('cms-product-overview', {
 						</div>
 						<div class="col-4">
 							Unique code:
-							<input v-model="product.code" class="form-control">
+							<input v-model="product.code" class="form-control" style="font-family:monospace">
 						</div>
 						<div class="col-3">
 							EAN:
-							<input v-model="product.ean" class="form-control">
+							<input v-model="product.ean" class="form-control" style="font-family:monospace">
 						</div>
 						<div class="col-1">
 							<b-button type="submit" variant="primary" class="mt-3">
@@ -63,7 +63,7 @@ Vue.component('cms-product-overview', {
 						</div>
 						<div class="col-4">
 							URL slug:
-							<input v-model="product.slug" class="form-control">
+							<input v-model="product.slug" class="form-control" style="font-family:monospace">
 						</div>
 					</div>
 					<div class="row my-3">
