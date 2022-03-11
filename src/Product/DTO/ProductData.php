@@ -14,8 +14,8 @@ final class ProductData
 	 * @param array{source: string, title: string, url: string}|null $mainImage
 	 * @param array<int, array{id: int|null, name: string, type: string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, required: bool}> $customFields
 	 * @param array<int, array{id: int, description: string, html: string, image: string|null, color: string|null, position: int}> $smartDescriptions
-	 * @param array<int, array{value: int, text: string}> $categories
-	 * @param array<int, array{value: int, text: string}> $brands
+	 * @param array<int, array{value: int|null, text: string}> $categories
+	 * @param array<int, array{value: int|null, text: string}> $brands
 	 */
 	public function __construct(
 		public int $id,
