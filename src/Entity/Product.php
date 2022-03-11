@@ -135,7 +135,7 @@ class Product implements ProductInterface
 
 	/** @var ProductSmartDescription[]|Collection */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductSmartDescription::class)]
-	#[ORM\OrderBy(['position' => 'DESC'])]
+	#[ORM\OrderBy(['position' => 'ASC'])]
 	private Collection $smartDescriptions;
 
 	/** @var ProductParameter[]|Collection */

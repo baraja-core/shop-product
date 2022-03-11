@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product\Repository;
 
 
 use Baraja\Shop\Product\Entity\Product;
+use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -99,5 +100,28 @@ final class ProductRepository extends EntityRepository
 		}
 
 		return $selection;
+	}
+
+
+	/**
+	 * @param Product $product
+	 * @return array<int, ProductSmartDescription>
+	 */
+	public function getSmartDescriptions(Product $product): array
+	{
+		$changed = false;
+		$return = [];
+		foreach ($product->getSmartDescriptions() as $position => $description) {
+			if ($description->getPosition() !== $position) {
+				$description->setPosition($position);
+				$changed = true;
+			}
+			$return[] = $description;
+		}
+		if ($changed) {
+			$this->_em->flush();
+		}
+
+		return $return;
 	}
 }

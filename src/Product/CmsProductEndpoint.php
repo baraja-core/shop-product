@@ -144,25 +144,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
-		$mainImage = $product->getMainImage();
-		$mainCategory = $product->getMainCategory();
-
-		/** @var array<int, ProductSmartDescription> $smartDescriptionsData */
-		$smartDescriptionsData = $this->entityManager->getRepository(ProductSmartDescription::class)
-			->createQueryBuilder('description')
-			->where('description.product = :productId')
-			->setParameter('productId', $id)
-			->orderBy('description.position', 'ASC')
-			->getQuery()
-			->getResult();
-
 		$smartDescriptions = [];
-		$smartDescriptionPositionChanged = false;
-		foreach ($smartDescriptionsData as $smartDescriptionPosition => $description) {
-			if ($description->getPosition() !== $smartDescriptionPosition) {
-				$description->setPosition($smartDescriptionPosition);
-				$smartDescriptionPositionChanged = true;
-			}
+		foreach ($this->productRepository->getSmartDescriptions($product) as $description) {
 			$smartDescriptionImage = $description->getImage();
 			$smartDescriptions[] = [
 				'id' => $description->getId(),
@@ -177,9 +160,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'color' => $description->getColor(),
 				'position' => $description->getPosition(),
 			];
-		}
-		if ($smartDescriptionPositionChanged) {
-			$this->entityManager->flush();
 		}
 
 		/** @var array<int, array{value: int, text: string}> $categoryList */
@@ -208,8 +188,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 			soldOut: $product->isSoldOut(),
 			showInFeed: $product->isShowInFeed(),
 			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
-			mainImage: $mainImage?->toArray(),
-			mainCategoryId: $mainCategory?->getId(),
+			mainImage: $product->getMainImage()?->toArray(),
+			mainCategoryId: $product->getMainCategory()?->getId(),
 			brandId: $product->getBrand()?->getId(),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
