@@ -147,29 +147,39 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$mainImage = $product->getMainImage();
 		$mainCategory = $product->getMainCategory();
 
+		/** @var array<int, ProductSmartDescription> $smartDescriptionsData */
 		$smartDescriptionsData = $this->entityManager->getRepository(ProductSmartDescription::class)
 			->createQueryBuilder('description')
 			->where('description.product = :productId')
 			->setParameter('productId', $id)
 			->orderBy('description.position', 'ASC')
 			->getQuery()
-			->getArrayResult();
+			->getResult();
 
 		$smartDescriptions = [];
-		foreach ($smartDescriptionsData as $description) {
+		$smartDescriptionPositionChanged = false;
+		foreach ($smartDescriptionsData as $smartDescriptionPosition => $description) {
+			if ($description->getPosition() !== $smartDescriptionPosition) {
+				$description->setPosition($smartDescriptionPosition);
+				$smartDescriptionPositionChanged = true;
+			}
+			$smartDescriptionImage = $description->getImage();
 			$smartDescriptions[] = [
-				'id' => (int) $description['id'],
-				'description' => (string) $description['description'],
-				'html' => $this->renderer->render((string) $description['description']),
-				'image' => $description['image']
+				'id' => $description->getId(),
+				'description' => (string) $description->getDescription(),
+				'html' => $this->renderer->render((string) $description->getDescription()),
+				'image' => $smartDescriptionImage !== null
 					? ImageGenerator::from(
-						'product-image/description/' . $description['image'],
+						sprintf('product-image/description/%s', $smartDescriptionImage),
 						['w' => 100, 'h' => 100],
 					)
 					: null,
-				'color' => $description['color'],
-				'position' => $description['position'],
+				'color' => $description->getColor(),
+				'position' => $description->getPosition(),
 			];
+		}
+		if ($smartDescriptionPositionChanged) {
+			$this->entityManager->flush();
 		}
 
 		/** @var array<int, array{value: int, text: string}> $categoryList */
