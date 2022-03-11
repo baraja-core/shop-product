@@ -79,7 +79,9 @@ Vue.component('cms-product-default', {
 								<a :href="link('Product:detail', { id: item.id })">{{ item.name }}</a>
 							</div>
 							<div>
-								Code: <code>{{ item.code }}</code> | EAN: <code>{{ item.ean }}</code>
+								Code: <code>{{ item.code }}</code>
+								<template v-if="item.ean !== null">| EAN: {{ item.ean }}</template>
+								<template v-if="item.brand !== null">| Brand: {{ item.brand.name }}</template>
 							</div>
 							<p class="text-secondary">
 								{{ item.shortDescription }}
