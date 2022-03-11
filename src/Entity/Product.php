@@ -8,6 +8,7 @@ namespace Baraja\Shop\Product\Entity;
 use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
+use Baraja\Shop\Brand\Entity\Brand;
 use Baraja\Shop\Price\Price;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\Shop\Product\Validators;
@@ -107,6 +108,9 @@ class Product implements ProductInterface
 
 	#[ORM\ManyToOne(targetEntity: ProductManufacturer::class)]
 	private ?ProductManufacturer $manufacturer = null;
+
+	#[ORM\ManyToOne(targetEntity: Brand::class)]
+	private ?Brand $brand = null;
 
 	#[ORM\Column(type: 'float', nullable: true, options: ['unsigned' => true])]
 	private ?float $sizeWidth = null;
@@ -482,6 +486,18 @@ class Product implements ProductInterface
 	public function setManufacturer(?ProductManufacturer $manufacturer): void
 	{
 		$this->manufacturer = $manufacturer;
+	}
+
+
+	public function getBrand(): ?Brand
+	{
+		return $this->brand;
+	}
+
+
+	public function setBrand(?Brand $brand): void
+	{
+		$this->brand = $brand;
 	}
 
 

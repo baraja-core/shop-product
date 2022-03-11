@@ -88,8 +88,10 @@ final class ProductRepository extends EntityRepository
 			->select('PARTIAL product.{id, name, code, ean, shortDescription, price, position, active, soldOut}')
 			->addSelect('PARTIAL mainImage.{id, source}')
 			->addSelect('PARTIAL mainCategory.{id, name}')
+			->addSelect('PARTIAL brand.{id, name}')
 			->leftJoin('product.mainImage', 'mainImage')
-			->leftJoin('product.mainCategory', 'mainCategory');
+			->leftJoin('product.mainCategory', 'mainCategory')
+			->leftJoin('product.brand', 'brand');
 
 		if ($searchIds !== []) {
 			$selection->andWhere('product.id IN (:searchIds)')
