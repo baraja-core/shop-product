@@ -31,6 +31,7 @@ final class ProductData
 		public ?string $standardPricePercentage,
 		public ?string $url,
 		public bool $soldOut,
+		public bool $showInFeed,
 		public string $mainCurrency,
 		public ?array $mainImage = null,
 		public ?int $mainCategoryId = null,

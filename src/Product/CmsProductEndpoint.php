@@ -206,6 +206,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			standardPricePercentage: $product->getStandardPricePercentage(),
 			url: $this->linkSafe('Front:Product:detail', ['slug' => $product->getSlug()]),
 			soldOut: $product->isSoldOut(),
+			showInFeed: $product->isShowInFeed(),
 			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
 			mainImage: $mainImage?->toArray(),
 			mainCategoryId: $mainCategory?->getId(),
@@ -232,6 +233,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product->setVat($productData->vat);
 		$product->setStandardPricePercentage($productData->standardPricePercentage);
 		$product->setSoldOut($productData->soldOut);
+		$product->setShowInFeed($productData->showInFeed);
 
 		if ($productData->mainCategoryId === null) {
 			$product->setMainCategory(null);

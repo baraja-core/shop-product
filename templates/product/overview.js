@@ -103,6 +103,12 @@ Vue.component('cms-product-overview', {
 									</th>
 									<td><label for="product__sold-out">Sold&nbsp;out?</label></td>
 								</tr>
+								<tr>
+									<th>
+										<b-form-checkbox id="product__show-in-feed" v-model="product.showInFeed" switch></b-form-checkbox>
+									</th>
+									<td><label for="product__show-in-feed">Show&nbsp;in&nbsp;feed?</label></td>
+								</tr>
 							</table>
 						</div>
 					</div>
