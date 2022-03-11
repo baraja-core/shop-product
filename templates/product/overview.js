@@ -5,6 +5,10 @@ Vue.component('cms-product-overview', {
 		<b-spinner></b-spinner>
 	</div>
 	<div v-else class="container-fluid">
+		<b-alert :show="product.active === false || product.soldOut === true" variant="danger">
+			<strong>Warning: This product is not visible to customers!</strong><br>
+			The product will be displayed to customers if it is active and not sold out or manually marked as sold out.
+		</b-alert>
 		<b-form @submit="save">
 			<div class="row">
 				<div class="col" style="max-width:200px">
