@@ -169,7 +169,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 			['value' => null, 'text' => '--- No brand ---'],
 		];
 		foreach ($brands as $brand) {
-			$brandList[$brand['id']] = (string) $brand['name'];
+			$brandList[] = [
+				'value' => $brand['id'],
+				'text' => (string) $brand['name'],
+			];
 		}
 
 		return new ProductData(
