@@ -8,7 +8,7 @@ namespace Baraja\Shop\Product;
 use Baraja\Combinations\CombinationGenerator;
 use Baraja\Doctrine\EntityManager;
 use Baraja\ImageGenerator\ImageGenerator;
-use Baraja\Localization\Localization;
+use Baraja\Localization\Translation;
 use Baraja\Markdown\CommonMarkRenderer;
 use Baraja\SelectboxTree\SelectboxTree;
 use Baraja\Shop\Brand\Entity\Brand;
@@ -137,7 +137,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->executeQuery($cat->sqlBuilder('shop__product_category'))
 			->fetchAllAssociative();
 
-		/** @var array<int, array{id: int, name: Localization}> $brands */
+		/** @var array<int, array{id: int, name: Translation}> $brands */
 		$brands = $this->entityManager->getRepository(Brand::class)
 			->createQueryBuilder('brand')
 			->select('PARTIAL brand.{id, name}')
