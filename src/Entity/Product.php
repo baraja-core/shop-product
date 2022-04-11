@@ -154,6 +154,10 @@ class Product implements ProductInterface
 	#[ORM\OneToMany(mappedBy: 'relatedProduct', targetEntity: RelatedProduct::class)]
 	private Collection $productRelatedRelated;
 
+	/** @var ProductSeason[]|Collection */
+	#[ORM\ManyToMany(targetEntity: ProductSeason::class, inversedBy: 'products')]
+	private Collection $productSeasons;
+
 	/** Total available quantity of this product in all warehouses. */
 	#[ORM\Column(type: 'integer')]
 	private int $warehouseAllQuantity = 0;
@@ -176,6 +180,7 @@ class Product implements ProductInterface
 		$this->variants = new ArrayCollection;
 		$this->productRelatedBasic = new ArrayCollection;
 		$this->productRelatedRelated = new ArrayCollection;
+		$this->productSeasons = new ArrayCollection;
 	}
 
 
@@ -693,6 +698,21 @@ class Product implements ProductInterface
 	public function getProductRelatedRelated(): Collection
 	{
 		return $this->productRelatedRelated;
+	}
+
+
+	/**
+	 * @return Collection<ProductSeason>
+	 */
+	public function getProductSeasons(): Collection
+	{
+		return $this->productSeasons;
+	}
+
+
+	public function addProductSeason(ProductSeason $productSeason): void
+	{
+		$this->productSeasons[] = $productSeason;
 	}
 
 
