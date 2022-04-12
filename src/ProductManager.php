@@ -141,7 +141,7 @@ final class ProductManager
 			throw new \InvalidArgumentException(sprintf('Given file does not exist. Path "%s" given.', $path));
 		}
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
-		assert(is_resource($finfo));
+		assert(is_resource($finfo) || $finfo instanceof \finfo);
 		$type = finfo_file($finfo, $path);
 		if (in_array($type, ['image/gif', 'image/png', 'image/jpeg', 'image/webp'], true) === false) {
 			throw new \InvalidArgumentException(sprintf('Given file must be a image. Path "%s" given.', $path));
