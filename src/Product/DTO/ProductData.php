@@ -12,10 +12,12 @@ final class ProductData
 	 * @param numeric-string $vat
 	 * @param numeric-string|null $standardPricePercentage
 	 * @param array{source: string, title: string, url: string}|null $mainImage
+	 * @param array<int, int> $seasonIds
 	 * @param array<int, array{id: int|null, name: string, type: string, label: non-empty-string|null, value: non-empty-string|null, description: non-empty-string|null, required: bool}> $customFields
 	 * @param array<int, array{id: int, description: string, html: string, image: string|null, color: string|null, position: int}> $smartDescriptions
 	 * @param array<int, array{value: int|null, text: string}> $categories
 	 * @param array<int, array{value: int|null, text: string}> $brands
+	 * @param array<int, array{value: int|null, text: string}> $seasons
 	 */
 	public function __construct(
 		public int $id,
@@ -36,10 +38,12 @@ final class ProductData
 		public ?array $mainImage = null,
 		public ?int $mainCategoryId = null,
 		public ?int $brandId = null,
+		public array $seasonIds = [],
 		public array $customFields = [],
 		public array $smartDescriptions = [],
 		public array $categories = [],
 		public array $brands = [],
+		public array $seasons = [],
 	) {
 	}
 }

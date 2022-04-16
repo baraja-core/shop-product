@@ -18,6 +18,7 @@ use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
+use Baraja\Shop\Product\Entity\ProductSeason;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
@@ -144,6 +145,13 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
+		/** @var array<int, array{id: int, name: Translation}> $seasons */
+		$seasons = $this->entityManager->getRepository(ProductSeason::class)
+			->createQueryBuilder('season')
+			->select('PARTIAL season.{id, name}')
+			->getQuery()
+			->getArrayResult();
+
 		$smartDescriptions = [];
 		foreach ($this->productRepository->getSmartDescriptions($product) as $description) {
 			$smartDescriptionImage = $description->getImage();
@@ -175,6 +183,14 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
+		$seasonList = [];
+		foreach ($seasons as $season) {
+			$seasonList[] = [
+				'value' => $season['id'],
+				'text' => (string) $season['name'],
+			];
+		}
+
 		return new ProductData(
 			id: $product->getId(),
 			name: (string) $product->getName(),
@@ -194,10 +210,15 @@ final class CmsProductEndpoint extends BaseEndpoint
 			mainImage: $product->getMainImage()?->toArray(),
 			mainCategoryId: $product->getMainCategory()?->getId(),
 			brandId: $product->getBrand()?->getId(),
+			seasonIds: array_map(
+				static fn (ProductSeason $season): int => $season->getId(),
+				$product->getProductSeasons()->toArray(),
+			),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
 			categories: $categoryList,
 			brands: $brandList,
+			seasons: $seasonList,
 		);
 	}
 
@@ -237,6 +258,19 @@ final class CmsProductEndpoint extends BaseEndpoint
 			}
 			$this->productFieldManager->setFields($product, $saveFields);
 		}
+		if ($productData->seasonIds === []) {
+			$seasonList = [];
+		} else {
+			/** @var array<int, ProductSeason> $seasons */
+			$seasonList = $this->entityManager->getRepository(ProductSeason::class)
+				->createQueryBuilder('season')
+				->where('season.id IN (:seasonIds)')
+				->setParameter('seasonIds', $productData->seasonIds)
+				->getQuery()
+				->getResult();
+		}
+
+		$product->setSeasonList($seasonList);
 
 		$this->entityManager->flush();
 		$this->flashMessage('Product has been saved.', 'success');
@@ -251,6 +285,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$images = [];
 		foreach ($this->productImageRepository->getListByProduct($product) as $productImage) {
+			bdump($productImage);
 			$productImageVariant = $productImage->getVariant();
 			$images[] = [
 				'id' => $productImage->getId(),

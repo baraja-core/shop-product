@@ -138,4 +138,14 @@ class ProductSeason
 	{
 		$this->products[] = $product;
 	}
+
+
+	public function removeProduct(Product $product): void
+	{
+		foreach ($this->products as $key => $productItem) {
+			if ($productItem->getId() === $product->getId()) {
+				$this->products->remove($key);
+			}
+		}
+	}
 }

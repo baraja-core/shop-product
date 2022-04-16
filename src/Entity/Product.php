@@ -716,6 +716,30 @@ class Product implements ProductInterface
 	}
 
 
+	/**
+	 * @param array<int, ProductSeason> $seasons
+	 */
+	public function setSeasonList(array $seasons): void
+	{
+		$keepIds = array_map(static fn (ProductSeason $season): int => $season->getId(), $seasons);
+		$checkedIds = [];
+
+		foreach ($this->productSeasons as $key => $season) {
+			if (in_array($season->getId(), $keepIds, true) === false) {
+				$season->removeProduct($this);
+				$this->productSeasons->remove($key);
+			}
+			$checkedIds[] = $season->getId();
+		}
+		foreach ($seasons as $season) {
+			if (in_array($season->getId(), $checkedIds, true) === false) {
+				$season->addProduct($this);
+				$this->addProductSeason($season);
+			}
+		}
+	}
+
+
 	public function getWarehouseAllQuantity(): int
 	{
 		return $this->warehouseAllQuantity;
