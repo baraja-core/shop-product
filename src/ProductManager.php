@@ -104,16 +104,14 @@ final class ProductManager
 
 	public function create(string $name, string $code, int $price): Product
 	{
-		if (!$name || !$code || !$price) {
+		if ($name === '' || $code === '') {
 			throw new \InvalidArgumentException('Please enter all fields.');
 		}
 		if ($this->codeExist($code)) {
 			throw new \InvalidArgumentException(sprintf('Product with code "%s" already exist.', $code));
 		}
 
-		$priceString = (string) $price;
-		assert(is_numeric($priceString));
-		$product = new Product($name, $code, $priceString);
+		$product = new Product($name, $code, (string) $price);
 		$this->entityManager->persist($product);
 		$this->entityManager->flush();
 
@@ -141,7 +139,7 @@ final class ProductManager
 			throw new \InvalidArgumentException(sprintf('Given file does not exist. Path "%s" given.', $path));
 		}
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
-		assert(is_resource($finfo) || $finfo instanceof \finfo);
+		/** @phpstan-ignore-next-line */
 		$type = finfo_file($finfo, $path);
 		if (in_array($type, ['image/gif', 'image/png', 'image/jpeg', 'image/webp'], true) === false) {
 			throw new \InvalidArgumentException(sprintf('Given file must be a image. Path "%s" given.', $path));

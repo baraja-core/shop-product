@@ -31,6 +31,9 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 	}
 
 
+	/**
+	 * @return class-string<Product>
+	 */
 	public function getBaseEntity(): string
 	{
 		return Product::class;

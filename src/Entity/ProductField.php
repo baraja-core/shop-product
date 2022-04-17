@@ -57,44 +57,41 @@ class ProductField
 	}
 
 
-	public static function validate(mixed $value, ProductFieldDefinition $definition): void
+	public static function validate(?string $value, ProductFieldDefinition $definition): void
 	{
 		$value = ((string) $value) ?: null;
 		try {
-			if ($value && is_numeric($value) === false && $definition->getType() === 'int') {
-				throw new \InvalidArgumentException('Value must be a number, but "' . $value . '" given.');
+			if ($value !== null && is_numeric($value) === false && $definition->getType() === 'int') {
+				throw new \InvalidArgumentException(sprintf('Value must be a number, but "%s" given.', $value));
 			}
-			if (!$value && $definition->isRequired()) {
+			if ($value === null && $definition->isRequired()) {
 				throw new \InvalidArgumentException('Value is required.');
 			}
 			$length = $definition->getLength();
-			if ($value && $length !== null && mb_strlen($value, 'UTF-8') > $length) {
-				throw new \InvalidArgumentException(
-					'Maximal allowed length is "' . $definition->getLength() . '", '
-					. 'but string "' . $value . '" (length "' . mb_strlen($value, 'UTF-8') . '") given.',
-				);
+			if ($value !== null && $length !== null && mb_strlen($value, 'UTF-8') > $length) {
+				throw new \InvalidArgumentException(sprintf(
+					'Maximal allowed length is "%d", but string "%s" (length "%d") given.',
+					$length,
+					$value,
+					mb_strlen($value, 'UTF-8'),
+				));
 			}
 			$options = $definition->getOptions() ?? [];
 			if ($options !== [] && in_array($value, $options, true) === false) {
-				throw new \InvalidArgumentException(
-					'Value "' . $value . '" is not allowed, '
-					. 'because is not in "' . implode('", "', $options) . '".',
-				);
+				throw new \InvalidArgumentException(sprintf('Value "%s" is not allowed, because is not in "%s".', $value, implode('", "', $options)));
 			}
 			$validators = $definition->getValidators();
 			foreach ($validators as $validator) {
 				try {
 					if (is_callable($validator) === false) {
-						throw new \LogicException('Validator "' . $validator . '" must be callable.');
+						throw new \LogicException(sprintf('Validator "%s" must be callable.', $validator));
 					}
 					if (!$validator((string) $value)) { // must be falsifiable
-						throw new \InvalidArgumentException(
-							$validator . ' validator: Value "' . $value . '" is not valid.',
-						);
+						throw new \InvalidArgumentException(sprintf('%s validator: Value "%s" is not valid.', $validator, $value));
 					}
 				} catch (\Throwable $e) {
 					throw new \InvalidArgumentException(
-						$validator . ' validator: Value "' . $value . '" is not valid: ' . $e->getMessage(),
+						sprintf('%s validator: Value "%s" is not valid: %s', $validator, $value, $e->getMessage()),
 						$e->getCode(),
 						$e,
 					);

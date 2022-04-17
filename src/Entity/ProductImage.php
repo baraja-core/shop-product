@@ -39,7 +39,7 @@ class ProductImage implements ImageInterface
 	private string $source;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
-	private ?Translation $title = null;
+	protected ?Translation $title = null;
 
 	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;

@@ -12,11 +12,11 @@ use Baraja\Shop\Product\Entity\ProductCategory;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
-final class ProductCategoryManager
+class ProductCategoryManager
 {
 	public function __construct(
 		private EntityManager $entityManager,
-		private ?HeurekaCategoryManager $heurekaCategoryManager = null,
+		protected ?HeurekaCategoryManager $heurekaCategoryManager = null,
 	) {
 	}
 
@@ -96,7 +96,7 @@ final class ProductCategoryManager
 		$return = [];
 		$needRecountPosition = false;
 		foreach ($this->getCategoriesByParent($parentId) as $category) {
-			$id = (int) $category->getId();
+			$id = $category->getId();
 			$return[$id] = [
 				'id' => $id,
 				'name' => (string) $category->getName(),
@@ -104,14 +104,13 @@ final class ProductCategoryManager
 				'active' => $category->isActive(),
 				'hasChildren' => false,
 			];
-			$openChildren[$category->getId()] = false;
 			if ($category->getPosition() < 1) {
 				$needRecountPosition = true;
 			}
 		}
 
 		try {
-			/** @var array<int, array{id: string}> $childrenMapper */
+			/** @var array<int, array{id: int}> $childrenMapper */
 			$childrenMapper = $this->entityManager->getConnection()
 				->executeQuery(
 					'SELECT `parent_id` AS `id`

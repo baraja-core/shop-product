@@ -211,7 +211,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			mainCategoryId: $product->getMainCategory()?->getId(),
 			brandId: $product->getBrand()?->getId(),
 			seasonIds: array_map(
-				static fn (ProductSeason $season): int => $season->getId(),
+				static fn(ProductSeason $season): int => $season->getId(),
 				$product->getProductSeasons()->toArray(),
 			),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
@@ -261,7 +261,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		if ($productData->seasonIds === []) {
 			$seasonList = [];
 		} else {
-			/** @var array<int, ProductSeason> $seasons */
+			/** @var array<int, ProductSeason> $seasonList */
 			$seasonList = $this->entityManager->getRepository(ProductSeason::class)
 				->createQueryBuilder('season')
 				->where('season.id IN (:seasonIds)')

@@ -34,10 +34,10 @@ class ProductFieldDefinition
 	private string $type;
 
 	#[ORM\Column(type: 'translate')]
-	private Translation $label;
+	protected Translation $label;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
-	private ?Translation $description = null;
+	protected ?Translation $description = null;
 
 	#[ORM\Column(type: 'boolean')]
 	private bool $required = false;

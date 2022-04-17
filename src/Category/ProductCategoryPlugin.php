@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Category;
 
 
+use Baraja\Cms\Search\SearchablePlugin;
 use Baraja\Plugin\BasePlugin;
 use Baraja\Plugin\SimpleComponent\Breadcrumb;
 use Baraja\Shop\Product\Entity\ProductCategory;
@@ -13,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
-final class ProductCategoryPlugin extends BasePlugin
+final class ProductCategoryPlugin extends BasePlugin implements SearchablePlugin
 {
 	private ProductCategoryRepository $productCategoryRepository;
 
@@ -23,6 +24,21 @@ final class ProductCategoryPlugin extends BasePlugin
 		/** @var ProductCategoryRepository $productCategoryRepository */
 		$productCategoryRepository = $entityManager->getRepository(ProductCategory::class);
 		$this->productCategoryRepository = $productCategoryRepository;
+	}
+
+
+	/**
+	 * @return class-string<ProductCategory>
+	 */
+	public function getBaseEntity(): string
+	{
+		return ProductCategory::class;
+	}
+
+
+	public function getSearchColumns(): array
+	{
+		return [':name', 'description'];
 	}
 
 

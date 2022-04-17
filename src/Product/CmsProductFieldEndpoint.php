@@ -86,9 +86,8 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 
 		foreach ($fields as $field) {
 			/** @var ProductFieldDefinition|null $definition */
-			$definition = $this->entityManager->getRepository(ProductFieldDefinition::class)
-				->find($field['id']);
-			if (!$definition) {
+			$definition = $this->entityManager->getRepository(ProductFieldDefinition::class)->find($field['id']);
+			if ($definition !== null) {
 				continue;
 			}
 			$definition->setName($field['name']);
@@ -98,7 +97,7 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 			$definition->setRequired($field['required']);
 			$definition->setLength((int) $field['length']);
 			$definition->setUnique($field['unique']);
-			$definition->setPosition((int) $field['position']);
+			$definition->setPosition($field['position']);
 		}
 		$this->entityManager->flush();
 		$this->flashMessage('Definitions has been updated.', self::FLASH_MESSAGE_SUCCESS);

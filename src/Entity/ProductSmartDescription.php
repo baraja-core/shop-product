@@ -24,11 +24,11 @@ class ProductSmartDescription
 	#[ORM\GeneratedValue]
 	protected int $id;
 
+	#[ORM\Column(type: 'translate')]
+	protected Translation $description;
+
 	#[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'smartDescriptions')]
 	private Product $product;
-
-	#[ORM\Column(type: 'translate')]
-	private Translation $description;
 
 	#[ORM\Column(type: 'string', length: 128, nullable: true)]
 	private ?string $image = null;

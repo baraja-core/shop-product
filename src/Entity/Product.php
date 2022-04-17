@@ -39,7 +39,7 @@ class Product implements ProductInterface
 	protected int $id;
 
 	#[ORM\Column(type: 'translate')]
-	private Translation $name;
+	protected Translation $name;
 
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
@@ -62,13 +62,13 @@ class Product implements ProductInterface
 	private Collection $images;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
-	private ?Translation $shortDescription;
+	protected ?Translation $shortDescription;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
-	private ?Translation $description = null;
+	protected ?Translation $description = null;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
-	private ?Translation $internalNote = null;
+	protected ?Translation $internalNote = null;
 
 	/** @var numeric-string */
 	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, options: ['unsigned' => true])]
@@ -721,7 +721,7 @@ class Product implements ProductInterface
 	 */
 	public function setSeasonList(array $seasons): void
 	{
-		$keepIds = array_map(static fn (ProductSeason $season): int => $season->getId(), $seasons);
+		$keepIds = array_map(static fn(ProductSeason $season): int => $season->getId(), $seasons);
 		$checkedIds = [];
 
 		foreach ($this->productSeasons as $key => $season) {

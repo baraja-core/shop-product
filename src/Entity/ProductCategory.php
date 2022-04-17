@@ -39,7 +39,7 @@ class ProductCategory implements CategoryInterface
 	private Collection $child;
 
 	#[ORM\Column(type: 'translate')]
-	private Translation $name;
+	protected Translation $name;
 
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
@@ -48,7 +48,7 @@ class ProductCategory implements CategoryInterface
 	private string $slug;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
-	private ?Translation $description = null;
+	protected ?Translation $description = null;
 
 	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;

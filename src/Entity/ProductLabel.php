@@ -28,7 +28,7 @@ class ProductLabel
 	protected int $id;
 
 	#[ORM\Column(type: 'translate')]
-	private Translation $name;
+	protected Translation $name;
 
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;

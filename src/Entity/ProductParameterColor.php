@@ -47,7 +47,7 @@ class ProductParameterColor
 
 	public function setColor(string $color): void
 	{
-		$color = (string) mb_strtolower(trim($color), 'UTF-8');
+		$color = mb_strtolower(trim($color), 'UTF-8');
 		if ($color === '') {
 			throw new \InvalidArgumentException('The color name can not be empty.');
 		}
