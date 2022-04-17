@@ -27,6 +27,9 @@ class ProductImage implements ImageInterface
 	#[ORM\GeneratedValue]
 	protected int $id;
 
+	#[ORM\Column(type: 'translate', nullable: true)]
+	protected ?Translation $title = null;
+
 	#[ORM\ManyToOne(targetEntity: Product::class, cascade: ['persist'], inversedBy: 'images')]
 	#[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
 	private Product $product;
@@ -37,9 +40,6 @@ class ProductImage implements ImageInterface
 
 	#[ORM\Column(type: 'string')]
 	private string $source;
-
-	#[ORM\Column(type: 'translate', nullable: true)]
-	protected ?Translation $title = null;
 
 	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;

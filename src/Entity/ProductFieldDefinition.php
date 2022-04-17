@@ -27,17 +27,17 @@ class ProductFieldDefinition
 	#[ORM\GeneratedValue]
 	protected int $id;
 
-	#[ORM\Column(type: 'string', length: 64, unique: true)]
-	private string $name;
-
-	#[ORM\Column(type: 'string', length: 16)]
-	private string $type;
-
 	#[ORM\Column(type: 'translate')]
 	protected Translation $label;
 
 	#[ORM\Column(type: 'translate', nullable: true)]
 	protected ?Translation $description = null;
+
+	#[ORM\Column(type: 'string', length: 64, unique: true)]
+	private string $name;
+
+	#[ORM\Column(type: 'string', length: 16)]
+	private string $type;
 
 	#[ORM\Column(type: 'boolean')]
 	private bool $required = false;

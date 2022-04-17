@@ -41,6 +41,15 @@ class Product implements ProductInterface
 	#[ORM\Column(type: 'translate')]
 	protected Translation $name;
 
+	#[ORM\Column(type: 'translate', nullable: true)]
+	protected ?Translation $shortDescription;
+
+	#[ORM\Column(type: 'translate', nullable: true)]
+	protected ?Translation $description = null;
+
+	#[ORM\Column(type: 'translate', nullable: true)]
+	protected ?Translation $internalNote = null;
+
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
 
@@ -60,15 +69,6 @@ class Product implements ProductInterface
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class)]
 	#[ORM\OrderBy(['position' => 'DESC'])]
 	private Collection $images;
-
-	#[ORM\Column(type: 'translate', nullable: true)]
-	protected ?Translation $shortDescription;
-
-	#[ORM\Column(type: 'translate', nullable: true)]
-	protected ?Translation $description = null;
-
-	#[ORM\Column(type: 'translate', nullable: true)]
-	protected ?Translation $internalNote = null;
 
 	/** @var numeric-string */
 	#[ORM\Column(type: 'decimal', precision: 15, scale: 4, options: ['unsigned' => true])]

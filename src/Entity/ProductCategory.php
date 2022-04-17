@@ -31,6 +31,12 @@ class ProductCategory implements CategoryInterface
 	#[ORM\GeneratedValue]
 	protected int $id;
 
+	#[ORM\Column(type: 'translate')]
+	protected Translation $name;
+
+	#[ORM\Column(type: 'translate', nullable: true)]
+	protected ?Translation $description = null;
+
 	#[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'child')]
 	private ?self $parent = null;
 
@@ -38,17 +44,11 @@ class ProductCategory implements CategoryInterface
 	#[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class)]
 	private Collection $child;
 
-	#[ORM\Column(type: 'translate')]
-	protected Translation $name;
-
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $code;
 
 	#[ORM\Column(type: 'string', length: 64, unique: true)]
 	private string $slug;
-
-	#[ORM\Column(type: 'translate', nullable: true)]
-	protected ?Translation $description = null;
 
 	#[ORM\Column(type: 'integer', options: ['unsigned' => true])]
 	private int $position = 0;
