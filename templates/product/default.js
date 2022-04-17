@@ -1,5 +1,5 @@
-Vue.component("cms-product-default", {
-  template: `<div class="container-fluid">
+Vue.component('cms-product-default', {
+	template: `<div class="container-fluid">
 	<div class="row mt-2">
 		<div class="col">
 			<h1>Products</h1>
@@ -202,138 +202,138 @@ Vue.component("cms-product-default", {
 		<b-button type="submit" variant="primary" class="mt-3" @click="addDefinition">Create</b-button>
 	</b-modal>
 </div>`,
-  data() {
-    return {
-      items: null,
-      count: null,
-      paginator: {
-        itemsPerPage: 0,
-        page: 1,
-        itemCount: 0,
-      },
-      newProduct: {
-        name: "",
-        code: "",
-        price: 0,
-      },
-      filter: {
-        query: "",
-        limit: 32,
-      },
-      limitOptions: [
-        { value: 32, text: "32" },
-        { value: 64, text: "64" },
-        { value: 128, text: "128" },
-        { value: 256, text: "256" },
-        { value: 512, text: "512" },
-        { value: 1024, text: "1024" },
-        { value: 2048, text: "2048" },
-      ],
-      customField: {
-        list: null,
-        newDefinition: {
-          name: "",
-          type: "string",
-        },
-        types: [
-          { value: "string", text: "Single line text" },
-          { value: "text", text: "Multi line text" },
-          { value: "int", text: "Number (int)" },
-        ],
-      },
-    };
-  },
-  created() {
-    this.sync();
-  },
-  methods: {
-    sync() {
-      let query = {
-        query: this.filter.query ? this.filter.query : null,
-        page: this.paginator.page,
-        limit: this.filter.limit,
-      };
-      axiosApi.get("cms-product?" + httpBuildQuery(query)).then((req) => {
-        this.count = req.data.count;
-        this.items = req.data.items;
-        this.paginator = req.data.paginator;
-      });
-    },
-    syncCustomFields(flush = false) {
-      if (this.customField.list !== null && flush === false) {
-        return;
-      }
-      this.customField.list = null;
-      axiosApi.get("cms-product-field").then((req) => {
-        this.customField.list = req.data.items;
-      });
-    },
-    syncPaginator() {
-      setTimeout(this.sync, 50);
-    },
-    createNewProduct(evt) {
-      evt.preventDefault();
-      if (
-        !this.newProduct.name ||
-        !this.newProduct.code ||
-        !this.newProduct.price
-      ) {
-        alert("Vyplňte, prosím, všechna pole.");
-        return;
-      }
-      axiosApi
-        .post("cms-product/create-product", {
-          name: this.newProduct.name,
-          code: this.newProduct.code,
-          price: this.newProduct.price,
-        })
-        .then((req) => {
-          window.location.href = link("Product:detail", {
-            id: req.data.id,
-          });
-          this.sync();
-        });
-    },
-    makeActive(id) {
-      if (!confirm("Really?")) {
-        return;
-      }
-      axiosApi
-        .post("cms-product/active", {
-          id: id,
-        })
-        .then((req) => {
-          this.sync();
-        });
-    },
-    changePosition(id, position) {
-      axiosApi
-        .post("cms-product/set-position", {
-          id: id,
-          position: position,
-        })
-        .then((req) => {
-          this.sync();
-        });
-    },
-    addDefinition() {
-      axiosApi
-        .post("cms-product-field/add-definition", {
-          name: this.customField.newDefinition.name,
-          type: this.customField.newDefinition.type,
-        })
-        .then((req) => {
-          this.syncCustomFields(true);
-        });
-    },
-    saveCustomFields() {
-      axiosApi
-        .post("cms-product-field/save", {
-          fields: this.customField.list,
-        })
-        .then((req) => {
-          this.syncCustomFields(true);
-        });
-    },
-  },
+	data() {
+		return {
+			items: null,
+			count: null,
+			paginator: {
+				itemsPerPage: 0,
+				page: 1,
+				itemCount: 0,
+			},
+			newProduct: {
+				name: '',
+				code: '',
+				price: 0,
+			},
+			filter: {
+				query: '',
+				limit: 32,
+			},
+			limitOptions: [
+				{value: 32, text: '32'},
+				{value: 64, text: '64'},
+				{value: 128, text: '128'},
+				{value: 256, text: '256'},
+				{value: 512, text: '512'},
+				{value: 1024, text: '1024'},
+				{value: 2048, text: '2048'},
+			],
+			customField: {
+				list: null,
+				newDefinition: {
+					name: '',
+					type: 'string',
+				},
+				types: [
+					{value: 'string', text: 'Single line text'},
+					{value: 'text', text: 'Multi line text'},
+					{value: 'int', text: 'Number (int)'},
+				],
+			},
+		};
+	},
+	created() {
+		this.sync();
+	},
+	methods: {
+		sync() {
+			let query = {
+				query: this.filter.query ? this.filter.query : null,
+				page: this.paginator.page,
+				limit: this.filter.limit,
+			};
+			axiosApi.get('cms-product?' + httpBuildQuery(query)).then((req) => {
+				this.count = req.data.count;
+				this.items = req.data.items;
+				this.paginator = req.data.paginator;
+			});
+		},
+		syncCustomFields(flush = false) {
+			if (this.customField.list !== null && flush === false) {
+				return;
+			}
+			this.customField.list = null;
+			axiosApi.get('cms-product-field').then((req) => {
+				this.customField.list = req.data.items;
+			});
+		},
+		syncPaginator() {
+			setTimeout(this.sync, 50);
+		},
+		createNewProduct(evt) {
+			evt.preventDefault();
+			if (
+				!this.newProduct.name ||
+				!this.newProduct.code ||
+				!this.newProduct.price
+			) {
+				alert('Vyplňte, prosím, všechna pole.');
+				return;
+			}
+			axiosApi
+				.post('cms-product/create-product', {
+					name: this.newProduct.name,
+					code: this.newProduct.code,
+					price: this.newProduct.price,
+				})
+				.then((req) => {
+					window.location.href = link('Product:detail', {
+						id: req.data.id,
+					});
+					this.sync();
+				});
+		},
+		makeActive(id) {
+			if (!confirm('Really?')) {
+				return;
+			}
+			axiosApi
+				.post('cms-product/active', {
+					id: id,
+				})
+				.then(() => {
+					this.sync();
+				});
+		},
+		changePosition(id, position) {
+			axiosApi
+				.post('cms-product/set-position', {
+					id: id,
+					position: position,
+				})
+				.then(() => {
+					this.sync();
+				});
+		},
+		addDefinition() {
+			axiosApi
+				.post('cms-product-field/add-definition', {
+					name: this.customField.newDefinition.name,
+					type: this.customField.newDefinition.type,
+				})
+				.then(() => {
+					this.syncCustomFields(true);
+				});
+		},
+		saveCustomFields() {
+			axiosApi
+				.post('cms-product-field/save', {
+					fields: this.customField.list,
+				})
+				.then(() => {
+					this.syncCustomFields(true);
+				});
+		},
+	},
 });

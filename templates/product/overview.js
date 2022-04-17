@@ -1,6 +1,6 @@
-Vue.component("cms-product-overview", {
-  props: ["id"],
-  template: `<cms-card>
+Vue.component('cms-product-overview', {
+	props: ['id'],
+	template: `<cms-card>
 	<div v-if="product === null" class="text-center my-5">
 		<b-spinner></b-spinner>
 	</div>
@@ -289,137 +289,137 @@ Vue.component("cms-product-overview", {
 		</b-form>
 	</b-modal>
 	</cms-card>`,
-  data() {
-    return {
-      product: null,
-      mainCurrency: null,
-      newSmartDescription: {
-        description: "",
-        position: 0,
-        color: null,
-      },
-      editSmartDescription: {
-        id: null,
-        description: "",
-        position: 0,
-        color: null,
-        file: null,
-        uploading: false,
-      },
-      formClone: {
-        loading: false,
-        name: "",
-        code: "",
-        slug: "",
-      },
-      smartColors: [
-        { value: null, text: "--- select ---" },
-        { value: "#F1F4F9", text: "[#F1F4F9] světle šedá" },
-        { value: "#B6B7C5", text: "[#B6B7C5] tmavě šedá" },
-        { value: "#FFBBB6", text: "[#FFBBB6] červená" },
-        { value: "#FECEB3", text: "[#FECEB3] oranžová" },
-        { value: "#FEEDB9", text: "[#FEEDB9] žlutá" },
-        { value: "#CBF1CF", text: "[#CBF1CF] zelená" },
-        { value: "#CAE2F8", text: "[#CAE2F8] modrá" },
-      ],
-    };
-  },
-  created() {
-    this.sync();
-  },
-  methods: {
-    sync() {
-      axiosApi.get(`cms-product/overview?id=${this.id}`).then((req) => {
-        this.product = req.data;
-        this.mainCurrency = req.data.mainCurrency;
-      });
-    },
-    save(evt) {
-      evt.preventDefault();
-      axiosApi.post("cms-product/save", this.product).then(() => {
-        this.sync();
-      });
-    },
-    createNewDescription(evt) {
-      evt.preventDefault();
-      axiosApi
-        .post("cms-product/add-smart-description", {
-          productId: this.id,
-          description: this.newSmartDescription.description,
-          position: this.newSmartDescription.position,
-        })
-        .then((req) => {
-          this.newSmartDescription = {
-            description: "",
-            position: 0,
-          };
-          this.sync();
-        });
-    },
-    editDescription(description) {
-      this.editSmartDescription.id = description.id;
-      this.editSmartDescription.description = description.description;
-      this.editSmartDescription.position = description.position;
-      this.editSmartDescription.color = description.color;
-      this.editSmartDescription.file = null;
-    },
-    saveEditDescription(evt) {
-      evt.preventDefault();
-      this.editSmartDescription.uploading = true;
+	data() {
+		return {
+			product: null,
+			mainCurrency: null,
+			newSmartDescription: {
+				description: '',
+				position: 0,
+				color: null,
+			},
+			editSmartDescription: {
+				id: null,
+				description: '',
+				position: 0,
+				color: null,
+				file: null,
+				uploading: false,
+			},
+			formClone: {
+				loading: false,
+				name: '',
+				code: '',
+				slug: '',
+			},
+			smartColors: [
+				{value: null, text: '--- select ---'},
+				{value: '#F1F4F9', text: '[#F1F4F9] světle šedá'},
+				{value: '#B6B7C5', text: '[#B6B7C5] tmavě šedá'},
+				{value: '#FFBBB6', text: '[#FFBBB6] červená'},
+				{value: '#FECEB3', text: '[#FECEB3] oranžová'},
+				{value: '#FEEDB9', text: '[#FEEDB9] žlutá'},
+				{value: '#CBF1CF', text: '[#CBF1CF] zelená'},
+				{value: '#CAE2F8', text: '[#CAE2F8] modrá'},
+			],
+		};
+	},
+	created() {
+		this.sync();
+	},
+	methods: {
+		sync() {
+			axiosApi.get(`cms-product/overview?id=${this.id}`).then((req) => {
+				this.product = req.data;
+				this.mainCurrency = req.data.mainCurrency;
+			});
+		},
+		save(evt) {
+			evt.preventDefault();
+			axiosApi.post('cms-product/save', this.product).then(() => {
+				this.sync();
+			});
+		},
+		createNewDescription(evt) {
+			evt.preventDefault();
+			axiosApi
+				.post('cms-product/add-smart-description', {
+					productId: this.id,
+					description: this.newSmartDescription.description,
+					position: this.newSmartDescription.position,
+				})
+				.then(() => {
+					this.newSmartDescription = {
+						description: '',
+						position: 0,
+					};
+					this.sync();
+				});
+		},
+		editDescription(description) {
+			this.editSmartDescription.id = description.id;
+			this.editSmartDescription.description = description.description;
+			this.editSmartDescription.position = description.position;
+			this.editSmartDescription.color = description.color;
+			this.editSmartDescription.file = null;
+		},
+		saveEditDescription(evt) {
+			evt.preventDefault();
+			this.editSmartDescription.uploading = true;
 
-      let formData = new FormData();
-      formData.append("id", this.editSmartDescription.id);
-      formData.append("description", this.editSmartDescription.description);
-      formData.append("color", this.editSmartDescription.color);
-      formData.append("position", this.editSmartDescription.position);
-      formData.append("image", this.editSmartDescription.file);
+			let formData = new FormData();
+			formData.append('id', this.editSmartDescription.id);
+			formData.append('description', this.editSmartDescription.description);
+			formData.append('color', this.editSmartDescription.color);
+			formData.append('position', this.editSmartDescription.position);
+			formData.append('image', this.editSmartDescription.file);
 
-      axiosApi
-        .post("cms-product/save-smart-description", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((req) => {
-          this.editSmartDescription.uploading = false;
-          this.sync();
-        });
-    },
-    deleteDescription(id) {
-      if (confirm("Do you really want to delete this smart description?")) {
-        axiosApi
-          .post("cms-product/delete-smart-description", {
-            productId: this.id,
-            descriptionId: id,
-          })
-          .then((req) => {
-            this.sync();
-          });
-      }
-    },
-    clonePrepare() {
-      this.formClone.name = this.product.name;
-      this.formClone.code = this.product.code;
-      this.formClone.slug = this.product.slug;
-    },
-    saveClone(evt) {
-      evt.preventDefault();
-      this.formClone.loading = true;
-      axiosApi
-        .post("cms-product/clone", {
-          id: this.id,
-          name: this.formClone.name,
-          code: this.formClone.code,
-          slug: this.formClone.slug,
-        })
-        .then((req) => {
-          this.formClone.loading = false;
-          if (req.data.id) {
-            window.location.href = link("Product:detail", {
-              id: req.data.id,
-            });
-          }
-        });
-    },
-  },
+			axiosApi
+				.post('cms-product/save-smart-description', formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				})
+				.then(() => {
+					this.editSmartDescription.uploading = false;
+					this.sync();
+				});
+		},
+		deleteDescription(id) {
+			if (confirm('Do you really want to delete this smart description?')) {
+				axiosApi
+					.post('cms-product/delete-smart-description', {
+						productId: this.id,
+						descriptionId: id,
+					})
+					.then(() => {
+						this.sync();
+					});
+			}
+		},
+		clonePrepare() {
+			this.formClone.name = this.product.name;
+			this.formClone.code = this.product.code;
+			this.formClone.slug = this.product.slug;
+		},
+		saveClone(evt) {
+			evt.preventDefault();
+			this.formClone.loading = true;
+			axiosApi
+				.post('cms-product/clone', {
+					id: this.id,
+					name: this.formClone.name,
+					code: this.formClone.code,
+					slug: this.formClone.slug,
+				})
+				.then((req) => {
+					this.formClone.loading = false;
+					if (req.data.id) {
+						window.location.href = link('Product:detail', {
+							id: req.data.id,
+						});
+					}
+				});
+		},
+	},
 });
