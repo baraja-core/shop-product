@@ -87,7 +87,7 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 		foreach ($fields as $field) {
 			/** @var ProductFieldDefinition|null $definition */
 			$definition = $this->entityManager->getRepository(ProductFieldDefinition::class)->find($field['id']);
-			if ($definition !== null) {
+			if ($definition === null) {
 				continue;
 			}
 			$definition->setName($field['name']);

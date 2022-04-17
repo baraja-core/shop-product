@@ -72,7 +72,7 @@ final class ProductFieldManager
 
 		$return = [];
 		foreach ($fields as $field) { // set current default values
-			$name = (string) $field['definition']['name'];
+			$name = $field['definition']['name'];
 			$return[$name] = [
 				'id' => $field['id'],
 				'name' => $name,
