@@ -18,6 +18,7 @@ use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
+use Baraja\Shop\Product\Entity\ProductParameterColor;
 use Baraja\Shop\Product\Entity\ProductSeason;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
@@ -285,7 +286,6 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$images = [];
 		foreach ($this->productImageRepository->getListByProduct($product) as $productImage) {
-			bdump($productImage);
 			$productImageVariant = $productImage->getVariant();
 			$images[] = [
 				'id' => $productImage->getId(),
@@ -330,7 +330,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$imageEntity->setTitle($image['title'] ?: null);
 			$imageEntity->setPosition($image['position'] ?: 0);
 			if ($image['variant'] !== null) {
-				$imageEntity->setVariant($this->productVariantRepository->getById($image['variant']));
+				$imageEntity->setVariant($this->productVariantRepository->getById((int) $image['variant']));
 			}
 			if ($image['id'] === $mainImageId) {
 				$mainImage = $imageEntity;
@@ -339,6 +339,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$product->setMainImage($mainImage);
 		$this->entityManager->flush();
+		$this->flashMessage('Media has been saved.', self::FlashMessageSuccess);
 		$this->sendOk();
 	}
 
@@ -450,21 +451,37 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
-		$this->sendJson(
-			[
-				'parameters' => $parameters,
-			],
-		);
+		/** @var array<int, ProductParameterColor> $parametersColors */
+		$parametersColors = $this->entityManager->getRepository(ProductParameterColor::class)->findAll();
+
+		$this->sendJson([
+			'parameters' => $parameters,
+			'colors' => array_map(static fn (ProductParameterColor $parameter): array => [
+				'id' => $parameter->getId(),
+				'value' => $parameter->getValue(),
+				'color' => $parameter->getColor(),
+				'imgPath' => $parameter->getImgPath(),
+			], $parametersColors),
+		]);
 	}
 
 
 	/**
-	 * @param string[] $values
+	 * @param array<int, string> $values
 	 */
 	public function postAddParameter(int $productId, string $name, array $values, bool $variant): void
 	{
 		$this->checkParameter($name, $values);
 		$parameter = new ProductParameter($this->productRepository->getById($productId), $name, $values, $variant);
+		$this->entityManager->persist($parameter);
+		$this->entityManager->flush();
+		$this->sendOk();
+	}
+
+
+	public function postAddColor(string $color, string $value): void
+	{
+		$parameter = new ProductParameterColor($color, $value);
 		$this->entityManager->persist($parameter);
 		$this->entityManager->flush();
 		$this->sendOk();
@@ -963,6 +980,18 @@ final class CmsProductEndpoint extends BaseEndpoint
 	 */
 	private function getExcludeMap(): array
 	{
-		return [];
+		static $cache;
+		if ($cache === null) {
+			/** @var array<int, array{id: int, color: string}> $colors */
+			$colors = $this->entityManager->getRepository(ProductParameterColor::class)
+				->createQueryBuilder('color')
+				->select('PARTIAL color.{id, color}')
+				->getQuery()
+				->getArrayResult();
+
+			$cache = array_map(static fn (array $item): string => $item['color'], $colors);
+		}
+
+		return $cache;
 	}
 }
