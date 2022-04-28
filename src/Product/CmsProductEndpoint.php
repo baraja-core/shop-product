@@ -456,7 +456,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$this->sendJson([
 			'parameters' => $parameters,
-			'colors' => array_map(static fn (ProductParameterColor $parameter): array => [
+			'colors' => array_map(static fn(ProductParameterColor $parameter): array => [
 				'id' => $parameter->getId(),
 				'value' => $parameter->getValue(),
 				'color' => $parameter->getColor(),
@@ -989,7 +989,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->getQuery()
 				->getArrayResult();
 
-			$cache = array_map(static fn (array $item): string => $item['color'], $colors);
+			$cache = array_map(static fn(array $item): string => $item['color'], $colors);
 		}
 
 		return $cache;
