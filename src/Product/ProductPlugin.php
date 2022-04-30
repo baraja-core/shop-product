@@ -86,5 +86,13 @@ final class ProductPlugin extends BasePlugin implements SearchablePlugin
 				target: 'modal-clone-product',
 			),
 		);
+		$this->addButton(
+			new Button(
+				variant: Button::VARIANT_PRIMARY,
+				label: 'Add to collection',
+				action: Button::ACTION_MODAL,
+				target: 'modal-add-to-collection',
+			),
+		);
 	}
 }

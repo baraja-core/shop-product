@@ -16,6 +16,7 @@ use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Product\DTO\ProductData;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
+use Baraja\Shop\Product\Entity\ProductCollectionItem;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
 use Baraja\Shop\Product\Entity\ProductParameterColor;
@@ -24,6 +25,7 @@ use Baraja\Shop\Product\Entity\ProductSmartDescription;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\Shop\Product\Repository\ProductCategoryRepository;
+use Baraja\Shop\Product\Repository\ProductCollectionItemRepository;
 use Baraja\Shop\Product\Repository\ProductImageRepository;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\Shop\Product\Repository\ProductVariantRepository;
@@ -48,6 +50,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	private ProductImageRepository $productImageRepository;
 
+	private ProductCollectionItemRepository $productCollectionItemRepository;
+
 
 	public function __construct(
 		private EntityManager $entityManager,
@@ -63,16 +67,19 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$productVariantRepository = $entityManager->getRepository(ProductVariant::class);
 		$relatedProductRepository = $entityManager->getRepository(RelatedProduct::class);
 		$productImageRepository = $entityManager->getRepository(ProductImage::class);
+		$productCollectionItemRepository = $entityManager->getRepository(ProductCollectionItem::class);
 		assert($productRepository instanceof ProductRepository);
 		assert($productCategoryRepository instanceof ProductCategoryRepository);
 		assert($productVariantRepository instanceof ProductVariantRepository);
 		assert($relatedProductRepository instanceof RelatedProductRepository);
 		assert($productImageRepository instanceof ProductImageRepository);
+		assert($productCollectionItemRepository instanceof ProductCollectionItemRepository);
 		$this->productRepository = $productRepository;
 		$this->productCategoryRepository = $productCategoryRepository;
 		$this->productVariantRepository = $productVariantRepository;
 		$this->relatedProductRepository = $relatedProductRepository;
 		$this->productImageRepository = $productImageRepository;
+		$this->productCollectionItemRepository = $productCollectionItemRepository;
 	}
 
 
@@ -171,26 +178,45 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
+		$collectionItems = array_map(
+			static fn(ProductCollectionItem $item): array => [
+				'id' => $item->getId(),
+				'relevantProduct' => [
+					'id' => $item->getRelevantProduct()->getId(),
+					'label' => $item->getRelevantProduct()->getLabel(),
+					'price' => $item->getRelevantProduct()->getPrice(),
+				],
+				'relevantVariant' => $item->getRelevantProductVariant() !== null
+					? [
+						'id' => $item->getRelevantProductVariant()->getId(),
+						'label' => $item->getRelevantProductVariant()->getLabel(),
+						'price' => $item->getRelevantProductVariant()->getPrice(),
+					] : null,
+			],
+			$this->productCollectionItemRepository->getByProduct($product),
+		);
+
 		/** @var array<int, array{value: int, text: string}> $categoryList */
 		$categoryList = $this->formatBootstrapSelectArray($cat->process($categories));
 
-		$brandList = [
-			['value' => null, 'text' => '--- No brand ---'],
-		];
-		foreach ($brands as $brand) {
-			$brandList[] = [
-				'value' => $brand['id'],
-				'text' => (string) $brand['name'],
-			];
-		}
+		$brandList = array_merge(
+			[0 => ['value' => null, 'text' => '--- No brand ---']],
+			array_map(
+				static fn(array $brand): array => [
+					'value' => $brand['id'],
+					'text' => (string) $brand['name'],
+				],
+				$brands,
+			),
+		);
 
-		$seasonList = [];
-		foreach ($seasons as $season) {
-			$seasonList[] = [
+		$seasonList = array_map(
+			static fn(array $season): array => [
 				'value' => $season['id'],
 				'text' => (string) $season['name'],
-			];
-		}
+			],
+			$seasons,
+		);
 
 		return new ProductData(
 			id: $product->getId(),
@@ -199,6 +225,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			ean: $product->getEan(),
 			slug: $product->getSlug(),
 			active: $product->isActive(),
+			collectionItems: $collectionItems,
 			shortDescription: (string) $product->getShortDescription(),
 			description: (string) $product->getDescription(),
 			price: $product->getPrice(),
@@ -544,22 +571,95 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product = $this->productRepository->getById($id);
 		$relatedList = $this->relatedProductRepository->getRelatedList($product);
 
-		$this->sendJson(
-			[
-				'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $relatedList),
-			],
+		$this->sendJson([
+			'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $relatedList),
+		]);
+	}
+
+
+	public function actionRelatedCollectionProducts(int $id, ?string $query = null): void
+	{
+		/** @var array<int, array{id: int}> $collectionItems */
+		$collectionItems = $this->entityManager->getRepository(ProductCollectionItem::class)
+			->createQueryBuilder('pci')
+			->select('PARTIAL pci.{id}, PARTIAL baseProduct.{id}, PARTIAL relevantProduct.{id}')
+			->join('pci.baseProduct', 'baseProduct')
+			->join('pci.relevantProduct', 'relevantProduct')
+			->getQuery()
+			->getArrayResult();
+
+		$relatedIds = [];
+		$relatedIds = array_merge($relatedIds, array_map(static fn(array $item): int => $item['baseProduct']['id'], $collectionItems));
+		$relatedIds = array_merge($relatedIds, array_map(static fn(array $item): int => $item['relevantProduct']['id'], $collectionItems));
+		$relatedIds[] = $id;
+
+		$selection = $this->entityManager->getRepository(Product::class)
+			->createQueryBuilder('product')
+			->select('PARTIAL product.{id, name}, PARTIAL mainCategory.{id, name}')
+			->leftJoin('product.mainCategory', 'mainCategory')
+			->andWhere('product.id NOT IN (:relatedIds)')
+			->setParameter('relatedIds', $relatedIds)
+			->orderBy('mainCategory.name', 'ASC')
+			->addOrderBy('product.name', 'ASC')
+			->setMaxResults(128);
+
+		if ($query !== null) {
+			$selection->andWhere('product.name LIKE :query')
+				->setParameter('query', '%' . $query . '%');
+		}
+
+		$this->sendJson([
+			'items' => $selection->getQuery()->getArrayResult(),
+		]);
+	}
+
+
+	public function actionAddProductToCollection(int $id, int $productId, ?int $variantId = null): void
+	{
+		$product = $this->productRepository->getById($id);
+		$item = new ProductCollectionItem(
+			baseProduct: $product,
+			relevantProduct: $this->productRepository->getById($productId),
+			relevantProductVariant: $variantId !== null ? $this->productVariantRepository->getById($variantId) : null,
 		);
+		$positions = array_map(
+			static fn(ProductCollectionItem $item): int => $item->getPosition(),
+			$this->productCollectionItemRepository->getByProduct($product),
+		);
+		$item->setPosition($positions !== [] ? max($positions) + 1 : 0);
+
+		$this->entityManager->persist($item);
+		$this->entityManager->flush();
+		$this->flashMessage('Product has been added.', self::FlashMessageSuccess);
+		$this->sendOk();
+	}
+
+
+	public function actionDeleteCollectionItem(int $id): void
+	{
+		$item = $this->productCollectionItemRepository->find($id);
+		assert($item instanceof ProductCollectionItem);
+		$this->entityManager->remove($item);
+
+		$position = 1;
+		foreach ($this->productCollectionItemRepository->getByProduct($item->getBaseProduct()) as $collectionItem) {
+			if ($collectionItem->getId() === $id) {
+				continue;
+			}
+			$collectionItem->setPosition($position++);
+		}
+
+		$this->entityManager->flush();
+		$this->flashMessage('Collection item has been removed.', self::FlashMessageSuccess);
+		$this->sendOk();
 	}
 
 
 	public function actionRelatedCandidates(int $id, ?string $query = null): void
 	{
 		$product = $this->productRepository->getById($id);
-		$productCategoryId = null;
 		$mainCategory = $product->getMainCategory();
-		if ($mainCategory !== null) {
-			$productCategoryId = $mainCategory->getId();
-		}
+		$productCategoryId = $mainCategory !== null ? $mainCategory->getId() : null;
 
 		$relatedIds = array_map(
 			static fn(array $item): int => (int) $item['id'],
@@ -611,11 +711,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 			static fn(array $a, array $b): int => $a['score'] < $b['score'] ? 1 : -1,
 		);
 
-		$this->sendJson(
-			[
-				'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
-			],
-		);
+		$this->sendJson([
+			'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
+		]);
 	}
 
 
