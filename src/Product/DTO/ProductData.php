@@ -8,7 +8,7 @@ namespace Baraja\Shop\Product\DTO;
 final class ProductData
 {
 	/**
-	 * @param array<int, array{}> $collectionItems
+	 * @param array<int, array{id: int, relevantProduct: array{id: int, label: string, price: numeric-string}, relevantVariant: array{id: int, label: string, price: numeric-string}|null}> $collectionItems
 	 * @param numeric-string $price
 	 * @param numeric-string $vat
 	 * @param numeric-string|null $standardPricePercentage

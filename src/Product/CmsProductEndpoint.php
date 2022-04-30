@@ -579,7 +579,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function actionRelatedCollectionProducts(int $id, ?string $query = null): void
 	{
-		/** @var array<int, array{id: int}> $collectionItems */
+		/** @var array<int, array{id: int, baseProduct: array{id: int}, relevantProduct: array{id: int}}> $collectionItems */
 		$collectionItems = $this->entityManager->getRepository(ProductCollectionItem::class)
 			->createQueryBuilder('pci')
 			->select('PARTIAL pci.{id}, PARTIAL baseProduct.{id}, PARTIAL relevantProduct.{id}')
