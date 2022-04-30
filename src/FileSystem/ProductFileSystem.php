@@ -12,4 +12,6 @@ interface ProductFileSystem
 	public function save(ProductImage $productImage, string $tempPath): void;
 
 	public function delete(ProductImage $productImage): void;
+
+	public function getPublicDir(): string;
 }
