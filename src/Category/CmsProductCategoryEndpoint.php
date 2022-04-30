@@ -161,7 +161,6 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function postUploadImage(): void
 	{
 		$request = $this->container->getByType(Request::class);
-		assert($request instanceof Request);
 		$categoryId = (int) $request->getPost('categoryId');
 		$imageType = (string) $request->getPost('type');
 
@@ -175,7 +174,6 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 		if ($image === null) {
 			$this->sendError('Please select media to upload.');
 		}
-		assert($image instanceof FileUpload);
 
 		$path = $image->getTemporaryFile();
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -185,15 +183,10 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 			throw new \InvalidArgumentException(sprintf('Given file must be a image. Path "%s" given.', $path));
 		}
 
-		$sanitizedName = $image->getSanitizedName();
-		if ($sanitizedName === null) {
-			$sanitizedName = basename($path);
-		}
-
 		$source = sprintf(
 			'category-image/%s/%s',
 			date('Y-m-d'),
-			strtolower(Random::generate(8) . '-' . $sanitizedName),
+			strtolower(Random::generate(8) . '-' . $image->getSanitizedName()),
 		);
 
 		if ($imageType === 'thumbnail') {

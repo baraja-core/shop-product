@@ -373,11 +373,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function postUploadImage(): void
 	{
-		/** @var Request $request */
 		$request = $this->container->getByType(Request::class);
 		$productId = (int) $request->getPost('productId');
 
-		/** @var FileUpload|null $image */
 		$image = $request->getFile('mainImage');
 		$product = $this->productRepository->getById($productId);
 
