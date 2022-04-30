@@ -40,7 +40,7 @@ class ProductCategory implements CategoryInterface
 	#[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'child')]
 	private ?self $parent = null;
 
-	/** @var self[]|Collection */
+	/** @var Collection<self> */
 	#[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class)]
 	private Collection $child;
 
@@ -68,11 +68,11 @@ class ProductCategory implements CategoryInterface
 	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
 	private ?int $heurekaCategoryId = null;
 
-	/** @var Product[]|Collection */
+	/** @var Collection<Product> */
 	#[ORM\OneToMany(mappedBy: 'mainCategory', targetEntity: Product::class)]
 	private Collection $mainProducts;
 
-	/** @var Product[]|Collection */
+	/** @var Collection<Product> */
 	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'categories')]
 	private Collection $products;
 
