@@ -12,7 +12,6 @@ use Baraja\Shop\Product\FileSystem\ProductImageFileSystem;
 use Baraja\StructuredApi\BaseEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Nette\Http\FileUpload;
 use Nette\Http\Request;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Random;
