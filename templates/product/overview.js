@@ -136,12 +136,7 @@ Vue.component('cms-product-overview', {
 										>Remove</span>
 									</div>
 								</div>
-								<b-form-select
-									v-model="product.seasonIds"
-									:options="product.seasons"
-									:select-size="product.seasons.length === 0 ? 2 : (product.seasons.length < 5 ? product.seasons.length : 4)"
-									multiple
-								></b-form-select>
+								<b-form-checkbox-group v-model="product.seasonIds" :options="product.seasons" />
 							</label>
 						</div>
 					</div>
