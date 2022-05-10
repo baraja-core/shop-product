@@ -197,6 +197,11 @@ Vue.component('cms-product-overview', {
 				</div>
 			</div>
 			<div class="row mt-3">
+				<div class="col">
+					<b-form-checkbox-group v-model="product.tagIds" :options="product.tags" />
+				</div>
+			</div>
+			<div class="row mt-3">
 				<div class="col-6">
 					<cms-editor v-model="product.shortDescription" rows="8" label="Short description:"></cms-editor>
 				</div>

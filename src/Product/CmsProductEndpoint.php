@@ -22,6 +22,7 @@ use Baraja\Shop\Product\Entity\ProductParameter;
 use Baraja\Shop\Product\Entity\ProductParameterColor;
 use Baraja\Shop\Product\Entity\ProductSeason;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
+use Baraja\Shop\Product\Entity\ProductTag;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\Shop\Product\Repository\ProductCategoryRepository;
@@ -218,6 +219,21 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$seasons,
 		);
 
+		/** @var array<int, array{id: int, name: Translation}> $allTags */
+		$allTags = $this->entityManager->getRepository(ProductTag::class)
+			->createQueryBuilder('tag')
+			->select('PARTIAL tag.{id, name}')
+			->getQuery()
+			->getArrayResult();
+
+		$tagList = [];
+		foreach ($allTags as $tag) {
+			$tagList[] = [
+				'value' => $tag['id'],
+				'text' => (string) $tag['name'],
+			];
+		}
+
 		return new ProductData(
 			id: $product->getId(),
 			name: (string) $product->getName(),
@@ -242,11 +258,16 @@ final class CmsProductEndpoint extends BaseEndpoint
 				static fn(ProductSeason $season): int => $season->getId(),
 				$product->getProductSeasons()->toArray(),
 			),
+			tagIds: array_map(
+				static fn(ProductTag $tag): int => $tag->getId(),
+				$product->getTags()->toArray(),
+			),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
 			categories: $categoryList,
 			brands: $brandList,
 			seasons: $seasonList,
+			tags: $tagList,
 		);
 	}
 
@@ -297,8 +318,20 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->getQuery()
 				->getResult();
 		}
-
 		$product->setSeasonList($seasonList);
+
+		if ($productData->tagIds === []) {
+			$tagList = [];
+		} else {
+			/** @var array<int, ProductTag> $tagList */
+			$tagList = $this->entityManager->getRepository(ProductTag::class)
+				->createQueryBuilder('tag')
+				->where('tag.id IN (:ids)')
+				->setParameter('ids', $productData->tagIds)
+				->getQuery()
+				->getResult();
+		}
+		$product->setTagList($tagList);
 
 		$this->entityManager->flush();
 		$this->flashMessage('Product has been saved.', 'success');
