@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -21,6 +22,8 @@ use Nette\Utils\Strings;
 #[ORM\Table(name: 'shop__product_tag')]
 class ProductTag
 {
+	use TranslateObject;
+
 	#[ORM\Id]
 	#[ORM\Column(type: 'integer', unique: true)]
 	#[ORM\GeneratedValue]
