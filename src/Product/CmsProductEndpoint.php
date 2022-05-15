@@ -171,7 +171,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'image' => $smartDescriptionImage !== null
 					? ImageGenerator::from(
 						sprintf('product-image/description/%s', $smartDescriptionImage),
-						['w' => 100, 'h' => 100],
+						['w' => 200, 'h' => 200],
 					)
 					: null,
 				'color' => $description->getColor(),
@@ -234,6 +234,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
+		$mainImage = $product->getMainImage()?->toArray();
+		if ($mainImage !== null) {
+			$mainImage['url'] = ImageGenerator::from($mainImage['url'], ['w' => 200, 'h' => 200]);
+		}
+
 		return new ProductData(
 			id: $product->getId(),
 			name: (string) $product->getName(),
@@ -251,7 +256,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			soldOut: $product->isSoldOut(),
 			showInFeed: $product->isShowInFeed(),
 			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
-			mainImage: $product->getMainImage()?->toArray(),
+			mainImage: $mainImage,
 			mainCategoryId: $product->getMainCategory()?->getId(),
 			brandId: $product->getBrand()?->getId(),
 			seasonIds: array_map(
@@ -350,6 +355,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$images[] = [
 				'id' => $productImage->getId(),
 				'source' => $productImage->getSource(),
+				'thumbnail' => ImageGenerator::from($productImage->getSource(), ['w' => 200, 'h' => 200]),
 				'title' => $productImage->getTitle(),
 				'position' => $productImage->getPosition(),
 				'variant' => $productImageVariant?->getId(),

@@ -40,7 +40,9 @@ Vue.component('cms-product-media', {
 			<table class="table table-sm mt-2">
 				<tr v-for="image in images" :class="{ 'table-secondary': image.id === mainImageId }">
 					<td width="200" class="py-0 pl-0">
-						<img :src="basePath + '/product-image/' + image.source" class="w-100">
+						<a :href="basePath + '/product-image/' + image.source" target="_blank">
+							<img :src="basePath + '/product-image/' + image.thumbnail">
+						</a>
 					</td>
 					<td>
 						<div>

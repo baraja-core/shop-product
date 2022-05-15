@@ -81,7 +81,7 @@ final class ProductFeedFacade
 			$item['priceRender'] = (new Price($item['price'], $mainCurrency))->render(true);
 			$mainImage = $item['mainImage'];
 			if ($mainImage !== null) {
-				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 100, 'h' => 100]);
+				$item['mainImage']['source'] = ImageGenerator::from($mainImage['source'], ['w' => 200, 'h' => 200]);
 				$item['shortDescription'] = Strings::truncate(
 					strip_tags($this->renderer->render($item['shortDescription'])),
 					128,
