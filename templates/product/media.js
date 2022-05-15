@@ -15,7 +15,7 @@ Vue.component('cms-product-media', {
 						<div class="col">
 							<b-form-file v-model="upload.file" accept="image/*"></b-form-file>
 							<div v-if="maxUploadFileSize">
-							  <small>Max upload file size: <code>{{ maxUploadFileSize }}</code>.</small>
+								<small>Max upload file size: <code>{{ maxUploadFileSize }}</code>.</small>
 							</div>
 						</div>
 						<div class="col-sm-3">
