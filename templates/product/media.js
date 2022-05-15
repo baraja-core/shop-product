@@ -14,6 +14,9 @@ Vue.component('cms-product-media', {
 					<div class="row">
 						<div class="col">
 							<b-form-file v-model="upload.file" accept="image/*"></b-form-file>
+							<div v-if="maxUploadFileSize">
+							  <small>Max upload file size: <code>{{ maxUploadFileSize }}</code>.</small>
+							</div>
 						</div>
 						<div class="col-sm-3">
 							<b-button variant="primary" type="submit" class="w-100">
@@ -73,6 +76,7 @@ Vue.component('cms-product-media', {
 			images: null,
 			mainImageId: null,
 			variants: [],
+			maxUploadFileSize: null,
 			upload: {
 				file: null,
 				loading: false
@@ -89,6 +93,7 @@ Vue.component('cms-product-media', {
 					this.images = req.data.images;
 					this.mainImageId = req.data.mainImageId;
 					this.variants = req.data.variants;
+					this.maxUploadFileSize = req.data.maxUploadFileSize;
 				});
 		},
 		save() {

@@ -136,7 +136,7 @@ final class ProductManager
 	public function addImage(Product $product, string $path, string $sanitizedName): void
 	{
 		if (is_file($path) === false) {
-			throw new \InvalidArgumentException(sprintf('Given file does not exist. Path "%s" given.', $path));
+			throw new \RuntimeException(sprintf('Given file does not exist. Path "%s" given.', $path));
 		}
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 		/** @phpstan-ignore-next-line */

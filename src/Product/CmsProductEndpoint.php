@@ -361,13 +361,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$variants[$variant->getId()] = $variant->getRelationHash();
 		}
 
-		$this->sendJson(
-			[
-				'images' => $images,
-				'mainImageId' => $mainImage?->getId(),
-				'variants' => $variants,
-			],
-		);
+		$this->sendJson([
+			'images' => $images,
+			'mainImageId' => $mainImage?->getId(),
+			'variants' => $variants,
+			'maxUploadFileSize' => ini_get('upload_max_filesize'),
+		]);
 	}
 
 
@@ -404,22 +403,27 @@ final class CmsProductEndpoint extends BaseEndpoint
 	}
 
 
-	public function postUploadImage(): void
+	public function postUploadImage(int $productId, ?FileUpload $mainImage = null): void
 	{
-		$request = $this->container->getByType(Request::class);
-		$productId = (int) $request->getPost('productId');
-
-		$image = $request->getFile('mainImage');
 		$product = $this->productRepository->getById($productId);
-
-		if ($image === null) {
+		if ($mainImage === null) {
 			$this->sendError('Please select media to upload.');
+		}
+		if ($mainImage->isOk() === false) {
+			if ($mainImage->getError() === UPLOAD_ERR_INI_SIZE) {
+				$this->sendError('The uploaded file exceeds the upload_max_filesize directive in php.ini.');
+			}
+			$this->sendError(sprintf(
+				'File upload failed. Error code: %d. More info: %s',
+				$mainImage->getError(),
+				'https://www.php.net/manual/en/features.file-upload.errors.php',
+			));
 		}
 		try {
 			$this->productManager->get()->addImage(
 				$product,
-				$image->getTemporaryFile(),
-				$image->getSanitizedName(),
+				$mainImage->getTemporaryFile(),
+				$mainImage->getSanitizedName(),
 			);
 		} catch (\InvalidArgumentException $e) {
 			$this->sendError($e->getMessage());
