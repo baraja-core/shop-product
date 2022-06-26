@@ -178,7 +178,7 @@ class ProductCategory implements CategoryInterface
 
 	public function getParentId(): ?int
 	{
-		return $this->parent === null ? null : $this->parent->getId();
+		return $this->parent?->getId();
 	}
 
 

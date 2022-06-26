@@ -83,7 +83,7 @@ class ProductImage implements ImageInterface
 
 	public function getUrl(): string
 	{
-		return Url::get()->getBaseUrl() . '/' . $this->getRelativePath();
+		return sprintf('%s/%s', Url::get()->getBaseUrl(), $this->getRelativePath());
 	}
 
 
