@@ -63,7 +63,10 @@ class Product implements ProductInterface
 	private ?int $oldId = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductImage::class)]
-	private ?ProductImage $mainImage;
+	private ?ProductImage $mainImage = null;
+
+	#[ORM\ManyToOne(targetEntity: ProductImage::class)]
+	private ?ProductImage $secondaryImage = null;
 
 	/** @var Collection<ProductImage> */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class)]
@@ -310,6 +313,18 @@ class Product implements ProductInterface
 	public function setMainImage(?ProductImage $mainImage): void
 	{
 		$this->mainImage = $mainImage;
+	}
+
+
+	public function getSecondaryImage(): ?ProductImage
+	{
+		return $this->secondaryImage;
+	}
+
+
+	public function setSecondaryImage(?ProductImage $secondaryImage): void
+	{
+		$this->secondaryImage = $secondaryImage;
 	}
 
 
