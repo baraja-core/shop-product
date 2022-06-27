@@ -20,7 +20,10 @@ final class ProductWarehouseStatus implements ProductWarehouseStatusInterface
 
 	public function isAvailable(ProductInterface|ProductVariantInterface $product): bool
 	{
-		$coreProduct = $product instanceof ProductVariantInterface ? $product->getProduct() : $product;
+		$coreProduct = $product instanceof ProductVariantInterface
+			? $product->getProduct()
+			: $product;
+
 		if ($coreProduct->isSoldOut()) {
 			return false;
 		}

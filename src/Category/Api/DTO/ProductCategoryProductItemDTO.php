@@ -10,7 +10,7 @@ use Baraja\EcommerceStandard\DTO\PriceInterface;
 final class ProductCategoryProductItemDTO
 {
 	/**
-	 * @param array{source: string, title: string, url: string} $mainImage
+	 * @param array{source: string, title: string, url: string}|null $mainImage
 	 * @param array{source: string, title: string, url: string}|null $secondaryImage
 	 */
 	public function __construct(
@@ -18,7 +18,7 @@ final class ProductCategoryProductItemDTO
 		public string $name,
 		public string $description,
 		public string $slug,
-		public array $mainImage,
+		public ?array $mainImage,
 		public ?array $secondaryImage,
 		public PriceInterface $price,
 		public string $pricePercentage,
