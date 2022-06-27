@@ -131,8 +131,8 @@ final class Feed
 
 
 	/**
-	 * @param array<int, array{id: int}> $items
-	 * @return array<int, array{id: int}>
+	 * @param array<int, int> $items
+	 * @return array<int, int>
 	 */
 	private function filterItemsByPaginator(array $items, int $limit, int $offset): array
 	{
@@ -163,7 +163,7 @@ final class Feed
 	{
 		$first = $paginator->getFirstPage();
 		$page = $paginator->getPage();
-		$last = $paginator->getLastPage();
+		$last = $paginator->getLastPage() ?? $first;
 
 		$return = [];
 		$return[] = $first;

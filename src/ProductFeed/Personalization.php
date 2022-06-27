@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\ProductFeed;
 
 
-use Baraja\Shop\Product\ProductFeed\Personalization\UserContext;
+use Baraja\Shop\Product\ProductFeed\Personalization\UserContextInterface;
 use Nette\Security\User;
 
 final class Personalization
 {
 	public function __construct(
-		private UserContext $userContext,
 		private User $user,
+		private ?UserContextInterface $userContext = null,
 	) {
 	}
 
@@ -27,6 +27,10 @@ final class Personalization
 	 */
 	public function getUserPreferredProductIds(): array
 	{
+		if ($this->userContext === null) {
+			return [];
+		}
+
 		$userId = $this->user->getId();
 
 		return is_scalar($userId)

@@ -9,6 +9,8 @@ use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Price\Price;
 use Baraja\Shop\Product\Category\Api\DTO\ProductCategoryDTO;
 use Baraja\Shop\Product\Category\Api\DTO\ProductCategoryItemDTO;
+use Baraja\Shop\Product\Category\Api\DTO\ProductCategoryProductItemDTO;
+use Baraja\Shop\Product\Category\Api\DTO\ProductCategoryResponse;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
 use Baraja\Shop\Product\ProductFeed\Feed;
@@ -65,7 +67,7 @@ final class ProductCategoryEndpoint extends BaseEndpoint
 		?string $filter = null,
 		?int $priceFrom = null,
 		?int $priceTo = null,
-	): ProductCategoryDTO {
+	): ProductCategoryResponse {
 		try {
 			$category = $this->repository->getBySlugForFrontend($slug);
 		} catch (NoResultException|NonUniqueResultException) {
@@ -85,34 +87,40 @@ final class ProductCategoryEndpoint extends BaseEndpoint
 
 		$currency = $this->currencyManagerAccessor->get()->getCurrencyResolver()->getCurrency();
 
-		return new ProductCategoryDTO(
-			category: [
-				'id' => $category->getId(),
-				'name' => $category->getLabel(),
-				'description' => $category->getDescription(),
-				'slug' => $category->getSlug(),
-				'mainPhotoPath' => $category->getMainPhotoUrl(),
-				'mainThumbnailPath' => $category->getMainThumbnailUrl(),
-			],
-			children: array_map(static fn(ProductCategory $categoryItem): array => [
-				'id' => $categoryItem->getId(),
-				'name' => $categoryItem->getLabel(),
-				'description' => $categoryItem->getDescription(),
-				'slug' => $categoryItem->getSlug(),
-				'mainPhotoPath' => $categoryItem->getMainPhotoUrl(),
-				'mainThumbnailPath' => $categoryItem->getMainThumbnailUrl(),
-			], $children->toArray()),
-			products: array_map(static fn(Product $product): array => [
-				'id' => $product->getId(),
-				'name' => $product->getLabel(),
-				'description' => $product->getShortDescription(),
-				'slug' => $product->getSlug(),
-				'mainImage' => $product->getMainImage()?->toArray(),
-				'secondaryImage' => $product->getSecondaryImage()?->toArray(),
-				'price' => new Price($product->getPrice(), $currency),
-				'pricePercentage' => $product->getStandardPrice(),
-				'warehouse' => self::renderWarehouseQuantity($product->getWarehouseAllQuantity()),
-			], $feed->getProducts()),
+		return new ProductCategoryResponse(
+			category: new ProductCategoryDTO(
+				id: $category->getId(),
+				name: $category->getLabel(),
+				description: (string) $category->getDescription(),
+				slug: $category->getSlug(),
+				mainPhotoUrl: $category->getMainPhotoUrl(),
+				mainThumbnailUrl: $category->getMainThumbnailUrl(),
+			),
+			children: array_map(
+				static fn(ProductCategory $categoryItem): ProductCategoryDTO => new ProductCategoryDTO(
+					id: $categoryItem->getId(),
+					name: $categoryItem->getLabel(),
+					description: (string) $categoryItem->getDescription(),
+					slug: $categoryItem->getSlug(),
+					mainPhotoUrl: $categoryItem->getMainPhotoUrl(),
+					mainThumbnailUrl: $categoryItem->getMainThumbnailUrl(),
+				),
+				$children->toArray(),
+			),
+			products: array_map(
+				static fn(Product $product): ProductCategoryProductItemDTO => new ProductCategoryProductItemDTO(
+					id: $product->getId(),
+					name: $product->getLabel(),
+					description: (string) $product->getShortDescription(),
+					slug: $product->getSlug(),
+					mainImage: $product->getMainImage()?->toArray(),
+					secondaryImage: $product->getSecondaryImage()?->toArray(),
+					price: new Price($product->getPrice(), $currency),
+					pricePercentage: $product->getStandardPrice(),
+					warehouse: self::renderWarehouseQuantity($product->getWarehouseAllQuantity()),
+				),
+				$feed->getProducts(),
+			),
 			statistic: $feed->getStatistic(),
 			paginator: $feed->getPaginator(),
 			pages: $feed->getPages(),
