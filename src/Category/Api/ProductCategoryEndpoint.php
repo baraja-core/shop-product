@@ -38,19 +38,6 @@ final class ProductCategoryEndpoint extends BaseEndpoint
 	}
 
 
-	private static function renderWarehouseQuantity(int $value): string
-	{
-		if ($value <= 0) {
-			return '0';
-		}
-		if ($value <= 5) {
-			return (string) $value;
-		}
-
-		return '>5';
-	}
-
-
 	/**
 	 * @return array<int, ProductCategoryItemDTO>
 	 */

@@ -106,7 +106,9 @@ class ProductSmartDescription
 	{
 		$imagePath = $this->getImageRelativePath();
 
-		return $imagePath !== null ? sprintf('%s/%s', Url::get()->getBaseUrl(), $imagePath) : null;
+		return $imagePath !== null
+			? sprintf('%s/%s', Url::get()->getBaseUrl(), $imagePath)
+			: null;
 	}
 
 

@@ -83,7 +83,7 @@ final class ProductCombinationFilter
 		}
 		$currency = $this->currencyManagerAccessor->get()->getCurrencyResolver()->getCurrency();
 
-		/** @var array<int, array{variantId: int, hash: string, available: bool, price: Price, regularPrice: Price, sale: bool}> $variantList */
+		/** @var array<int, array{variantId: int, hash: string, available: bool, price: string, regularPrice: string, sale: bool}> $variantList */
 		$variantList = [];
 
 		foreach ($product->getVariants() as $variantItem) {

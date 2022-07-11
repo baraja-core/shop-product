@@ -158,7 +158,7 @@ final class ProductEndpoint extends BaseEndpoint
 
 
 	/**
-	 * @return array<string, array{value: string}>
+	 * @return non-empty-array<string, array<int, array{value: string}>>
 	 */
 	private function processParameters(Product $product): array
 	{
@@ -203,7 +203,7 @@ final class ProductEndpoint extends BaseEndpoint
 				->orderBy('relatedProduct.position', 'DESC')
 				->setMaxResults(3)
 				->getQuery()
-				->getResult()
+				->getResult(),
 		);
 	}
 

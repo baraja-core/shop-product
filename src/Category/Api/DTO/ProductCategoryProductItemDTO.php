@@ -9,6 +9,7 @@ use Baraja\EcommerceStandard\DTO\CurrencyInterface;
 use Baraja\EcommerceStandard\DTO\PriceInterface;
 use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\Shop\Price\Price;
+use Baraja\Shop\Product\Entity\Product;
 
 final class ProductCategoryProductItemDTO
 {
@@ -35,10 +36,14 @@ final class ProductCategoryProductItemDTO
 		return new ProductCategoryProductItemDTO(
 			id: $product->getId(),
 			name: $product->getLabel(),
-			description: (string) $product->getShortDescription(),
+			description: $product instanceof Product
+				? (string) $product->getShortDescription()
+				: '',
 			slug: $product->getSlug(),
 			mainImage: $product->getMainImage()?->toArray(),
-			secondaryImage: $product->getSecondaryImage()?->toArray(),
+			secondaryImage: $product instanceof Product
+				? $product->getSecondaryImage()?->toArray()
+				: null,
 			price: new Price($product->getPrice(), $currency),
 			pricePercentage: $product->getStandardPrice(),
 			warehouse: self::renderWarehouseQuantity($product->getWarehouseAllQuantity()),

@@ -14,8 +14,8 @@ final class ProductCombinationFilterResult
 	 *     variantId: int,
 	 *     hash: string,
 	 *     available: bool,
-	 *     price: PriceInterface,
-	 *     regularPrice: PriceInterface,
+	 *     price: string,
+	 *     regularPrice: string,
 	 *     sale: bool
 	 *  }> $variantList
 	 * @param array<string, array<int, ProductCombinationFilterVariantResult>> $variants
