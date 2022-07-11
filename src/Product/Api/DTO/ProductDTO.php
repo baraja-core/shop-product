@@ -30,7 +30,7 @@ final class ProductDTO
 	 * }|null $brand
 	 * @param ProductCombinationFilterResult $combinationFilter
 	 * @param array<int, ProductCategoryProductItemDTO> $sameCategoryProducts
-	 * @param array<string, array{value: string}> $parameters
+	 * @param non-empty-array<string, array<int, array{value: string}>> $parameters
 	 * @param array<int, ProductCategoryProductItemDTO> $relatedProducts
 	 * @param array<string, string> $colorMap
 	 */
