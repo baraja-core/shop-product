@@ -7,9 +7,12 @@ namespace Baraja\Shop\Product\Entity;
 
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
+use Baraja\Url\Url;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @method Translation getTitle(?string $locale = null)
+ * @method void setTitle(string $content, ?string $locale = null)
  * @method Translation getDescription(?string $locale = null)
  * @method void setDescription(string $content, ?string $locale = null)
  */
@@ -23,6 +26,9 @@ class ProductSmartDescription
 	#[ORM\Column(type: 'integer', unique: true)]
 	#[ORM\GeneratedValue]
 	protected int $id;
+
+	#[ORM\Column(type: 'translate', nullable: true)]
+	protected ?Translation $title = null;
 
 	#[ORM\Column(type: 'translate')]
 	protected Translation $description;
@@ -53,6 +59,21 @@ class ProductSmartDescription
 	}
 
 
+	/**
+	 * @return array{id: int, title: string, description: string, imageUrl: string|null, color: string}
+	 */
+	public function toArray(): array
+	{
+		return [
+			'id' => $this->getId(),
+			'title' => (string) $this->getTitle(),
+			'description' => (string) $this->getDescription(),
+			'imageUrl' => $this->getImageUrl(),
+			'color' => $this->getFallbackColor(),
+		];
+	}
+
+
 	public function getProduct(): Product
 	{
 		return $this->product;
@@ -78,6 +99,14 @@ class ProductSmartDescription
 		}
 
 		return 'product-image/description/' . $this->image;
+	}
+
+
+	public function getImageUrl(): ?string
+	{
+		$imagePath = $this->getImageRelativePath();
+
+		return $imagePath !== null ? sprintf('%s/%s', Url::get()->getBaseUrl(), $imagePath) : null;
 	}
 
 
