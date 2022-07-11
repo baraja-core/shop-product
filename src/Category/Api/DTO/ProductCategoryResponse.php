@@ -17,6 +17,7 @@ final class ProductCategoryResponse
 	 */
 	public function __construct(
 		public ProductCategoryDTO $category,
+		public ?ProductCategoryDTO $parent,
 		public ?array $children,
 		public array $products,
 		public FeedStatistic $statistic,

@@ -69,6 +69,9 @@ final class ProductExtension extends CompilerExtension
 		$builder->addDefinition($this->prefix('feed'))
 			->setFactory(Feed::class);
 
+		$builder->addDefinition($this->prefix('productCombinationFilter'))
+			->setFactory(ProductCombinationFilter::class);
+
 		/** @var ServiceDefinition $pluginManager */
 		$pluginManager = $this->getContainerBuilder()->getDefinitionByType(PluginManager::class);
 		$pluginManager->addSetup('?->addComponent(?)', ['@self', [

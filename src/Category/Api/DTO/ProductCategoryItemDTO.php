@@ -14,6 +14,7 @@ final class ProductCategoryItemDTO
 		public int $id,
 		public string $name,
 		public string $slug,
+		public ?string $mainThumbnailUrl = null,
 		public ?array $children = null,
 	) {
 	}

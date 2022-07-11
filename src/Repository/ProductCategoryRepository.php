@@ -89,12 +89,14 @@ final class ProductCategoryRepository extends EntityRepository
 					id: $subCategory->getId(),
 					name: $subCategory->getLabel(),
 					slug: $subCategory->getSlug(),
+					mainThumbnailUrl: $subCategory->getMainThumbnailUrl() ?? $subCategory->getMainPhotoUrl(),
 				);
 			}
 			$return[] = new ProductCategoryItemDTO(
 				id: $category->getId(),
 				name: $category->getLabel(),
 				slug: $category->getSlug(),
+				mainThumbnailUrl: $category->getMainThumbnailUrl() ?? $category->getMainPhotoUrl(),
 				children: $children,
 			);
 		}
