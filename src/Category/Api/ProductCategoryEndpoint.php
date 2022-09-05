@@ -53,6 +53,7 @@ final class ProductCategoryEndpoint extends BaseEndpoint
 		?string $filter = null,
 		?int $priceFrom = null,
 		?int $priceTo = null,
+		?string $country = null,
 	): ProductCategoryResponse {
 		try {
 			$category = $this->repository->getBySlugForFrontend($slug);
