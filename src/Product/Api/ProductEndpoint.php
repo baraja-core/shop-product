@@ -23,7 +23,11 @@ use Baraja\Shop\Product\ProductCombinationFilter;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\StructuredApi\Attributes\PublicEndpoint;
 use Baraja\StructuredApi\BaseEndpoint;
+use Baraja\StructuredApi\Response\Status\ErrorResponse;
+use Baraja\StructuredApi\Response\Status\NotFoundResponse;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Nette\Utils\Strings;
 
 #[PublicEndpoint]
@@ -46,7 +50,11 @@ final class ProductEndpoint extends BaseEndpoint
 
 	public function actionDetail(string $slug): ProductDTO
 	{
-		$product = $this->repository->getBySlug($slug);
+		try {
+			$product = $this->repository->getBySlug($slug);
+		} catch (NoResultException|NonUniqueResultException) {
+			NotFoundResponse::invoke(sprintf('Product "%s" does not exist.', $slug));
+		}
 		$currency = $this->currencyManagerAccessor->get()->getCurrencyResolver()->getCurrency();
 		$combinationFilter = $this->combinationFilter->getFilter($product);
 
