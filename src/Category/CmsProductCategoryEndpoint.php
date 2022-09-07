@@ -114,7 +114,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 		}
 
 		$this->entityManager->flush();
-		$this->flashMessage('Category has been updated.', self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage('Category has been updated.', self::FlashMessageSuccess);
 		$this->sendOk();
 	}
 
@@ -146,7 +146,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function postCreateCategory(string $name, ?string $code = null, ?int $parentId = null): void
 	{
 		$category = $this->categoryManager->get()->createCategory($name, $code, $parentId);
-		$this->flashMessage('Category has been created.', self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage('Category has been created.', self::FlashMessageSuccess);
 		$this->sendJson(
 			[
 				'id' => $category->getId(),

@@ -713,12 +713,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		try {
 			$this->entityManager->flush();
-			$this->flashMessage('Variants has been saved.', self::FLASH_MESSAGE_ERROR);
+			$this->flashMessage('Variants has been saved.', self::FlashMessageError);
 		} catch (\Throwable $e) {
 			$this->flashMessage(
 				'Variants can not be saved, because some fields is duplicated. '
 				. 'Please check this error: ' . $e->getMessage(),
-				self::FLASH_MESSAGE_ERROR,
+				self::FlashMessageError,
 			);
 		}
 		$this->sendOk();
@@ -761,7 +761,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product->setSizeThickness($thickness);
 
 		$this->entityManager->flush();
-		$this->flashMessage('Stock settings has been saved.', self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage('Stock settings has been saved.', self::FlashMessageSuccess);
 		$this->sendOk();
 	}
 
@@ -829,10 +829,10 @@ final class CmsProductEndpoint extends BaseEndpoint
 		try {
 			$product = $this->productManager->get()->cloneProduct($id, $name, $code, $slug);
 		} catch (\InvalidArgumentException $e) {
-			$this->flashMessage($e->getMessage(), self::FLASH_MESSAGE_ERROR);
+			$this->flashMessage($e->getMessage(), self::FlashMessageError);
 			$this->sendError($e->getMessage());
 		}
-		$this->flashMessage(sprintf('Product "%s" has been cloned.', (string) $product->getName()), self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage(sprintf('Product "%s" has been cloned.', (string) $product->getName()), self::FlashMessageSuccess);
 		$this->sendJson(
 			[
 				'id' => $product->getId(),
