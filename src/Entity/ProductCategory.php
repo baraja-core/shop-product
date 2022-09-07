@@ -9,6 +9,7 @@ use Baraja\EcommerceStandard\DTO\CategoryInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\Repository\ProductCategoryRepository;
+use Baraja\Url\Url;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,7 +41,7 @@ class ProductCategory implements CategoryInterface
 	#[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'child')]
 	private ?self $parent = null;
 
-	/** @var self[]|Collection */
+	/** @var Collection<self> */
 	#[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class)]
 	private Collection $child;
 
@@ -68,11 +69,17 @@ class ProductCategory implements CategoryInterface
 	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
 	private ?int $heurekaCategoryId = null;
 
-	/** @var Product[]|Collection */
+	#[ORM\Column(type: 'string', length: 128, nullable: true)]
+	private ?string $mainPhotoPath = null;
+
+	#[ORM\Column(type: 'string', length: 128, nullable: true)]
+	private ?string $mainThumbnailPath = null;
+
+	/** @var Collection<Product> */
 	#[ORM\OneToMany(mappedBy: 'mainCategory', targetEntity: Product::class)]
 	private Collection $mainProducts;
 
-	/** @var Product[]|Collection */
+	/** @var Collection<Product> */
 	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'categories')]
 	private Collection $products;
 
@@ -171,7 +178,7 @@ class ProductCategory implements CategoryInterface
 
 	public function getParentId(): ?int
 	{
-		return $this->parent === null ? null : $this->parent->getId();
+		return $this->parent?->getId();
 	}
 
 
@@ -303,6 +310,46 @@ class ProductCategory implements CategoryInterface
 	public function setHeurekaCategoryId(?int $heurekaCategoryId): void
 	{
 		$this->heurekaCategoryId = $heurekaCategoryId;
+	}
+
+
+	public function getMainPhotoUrl(): ?string
+	{
+		return $this->mainPhotoPath !== null
+			? sprintf('%s/%s', Url::get()->getBaseUrl(), $this->mainPhotoPath)
+			: null;
+	}
+
+
+	public function getMainPhotoPath(): ?string
+	{
+		return $this->mainPhotoPath;
+	}
+
+
+	public function setMainPhotoPath(?string $mainPhotoPath): void
+	{
+		$this->mainPhotoPath = $mainPhotoPath;
+	}
+
+
+	public function getMainThumbnailUrl(): ?string
+	{
+		return $this->mainThumbnailPath !== null
+			? sprintf('%s/%s', Url::get()->getBaseUrl(), $this->mainThumbnailPath)
+			: null;
+	}
+
+
+	public function getMainThumbnailPath(): ?string
+	{
+		return $this->mainThumbnailPath;
+	}
+
+
+	public function setMainThumbnailPath(?string $mainThumbnailPath): void
+	{
+		$this->mainThumbnailPath = $mainThumbnailPath;
 	}
 
 

@@ -102,66 +102,73 @@ Vue.component('cms-product-parameter', {
 			newParameter: {
 				name: '',
 				values: [],
-				variant: false
+				variant: false,
 			},
 			newColor: {
 				color: '',
-				value: ''
-			}
-		}
+				value: '',
+			},
+		};
 	},
 	mounted() {
 		this.sync();
 	},
 	methods: {
 		sync() {
-			axiosApi.get(`cms-product/parameters?productId=${this.id}`)
-				.then(req => {
+			axiosApi
+				.get(`cms-product/parameters?productId=${this.id}`)
+				.then((req) => {
 					this.parameters = req.data.parameters;
 					this.colors = req.data.colors;
 				});
 		},
 		addParameter(evt) {
 			evt.preventDefault();
-			axiosApi.post('cms-product/add-parameter', {
-				productId: this.id,
-				name: this.newParameter.name,
-				values: this.newParameter.values,
-				variant: this.newParameter.variant,
-			}).then(req => {
-				this.newParameter = {
-					name: '',
-					values: [],
-					variant: false
-				};
-				this.sync();
-			});
+			axiosApi
+				.post('cms-product/add-parameter', {
+					productId: this.id,
+					name: this.newParameter.name,
+					values: this.newParameter.values,
+					variant: this.newParameter.variant,
+				})
+				.then(() => {
+					this.newParameter = {
+						name: '', values: [], variant: false,
+					};
+					this.sync();
+				});
 		},
 		deleteParameter(id) {
 			if (confirm('Really?')) {
-				axiosApi.post('cms-product/delete-parameter', {
-					id: id
-				}).then(req => {
-					this.sync();
-				});
+				axiosApi
+					.post('cms-product/delete-parameter', {
+						id: id,
+					})
+					.then(() => {
+						this.sync();
+					});
 			}
 		},
 		saveChanges(evt) {
 			evt.preventDefault();
-			axiosApi.post('cms-product/save-parameters', {
-				parameters: this.parameters
-			}).then(req => {
-				this.sync();
-			});
+			axiosApi
+				.post('cms-product/save-parameters', {
+					parameters: this.parameters,
+				})
+				.then(() => {
+					this.sync();
+				});
 		},
 		addColor(evt) {
 			evt.preventDefault();
-			axiosApi.get(`cms-product/add-color?color=${encodeURIComponent(this.newColor.color)}&value=${encodeURIComponent(this.newColor.value)}`)
-				.then(req => {
+			axiosApi
+				.post(`cms-product/add-color`, {
+					color: this.newColor.color, value: this.newColor.value,
+				})
+				.then((req) => {
 					if (req.data.state === 'ok') {
 						this.newColor = {
-							color: '',
-							value: ''
+							color: '', value: '',
 						};
 						this.sync();
 					}
@@ -169,11 +176,10 @@ Vue.component('cms-product-parameter', {
 		},
 		removeColor(id) {
 			if (confirm('Do you really want to remove this color?')) {
-				axiosApi.get(`cms-product/remove-color?id=${id}`)
-					.then(req => {
-						this.sync();
-					});
+				axiosApi.get(`cms-product/remove-color?id=${id}`).then(() => {
+					this.sync();
+				});
 			}
-		}
-	}
+		},
+	},
 });

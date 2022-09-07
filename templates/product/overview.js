@@ -9,6 +9,12 @@ Vue.component('cms-product-overview', {
 			<strong>Warning: This product is not visible to customers!</strong><br>
 			The product will be displayed to customers if it is active and not sold out or manually marked as sold out.
 		</b-alert>
+		<b-alert :show="product.collectionItems.length > 0" variant="info">
+			<strong>This product is a collection of products</strong><br>
+			This is not a physical product, but a collection of multiple products.
+			When a customer puts this product in their cart, they are actually buying
+			a collection of multiple products at the set price in this product.
+		</b-alert>
 		<b-form @submit="save">
 			<div class="row">
 				<div class="col" style="max-width:200px">
@@ -130,12 +136,7 @@ Vue.component('cms-product-overview', {
 										>Remove</span>
 									</div>
 								</div>
-								<b-form-select
-									v-model="product.seasonIds"
-									:options="product.seasons"
-									:select-size="product.seasons.length === 0 ? 2 : (product.seasons.length < 5 ? product.seasons.length : 4)"
-									multiple
-								></b-form-select>
+								<b-form-checkbox-group v-model="product.seasonIds" :options="product.seasons" />
 							</label>
 						</div>
 					</div>
@@ -158,6 +159,41 @@ Vue.component('cms-product-overview', {
 					<template v-else>
 						<input v-model="customField.value" class="form-control">
 					</template>
+				</div>
+			</div>
+			<div v-if="product.collectionItems.length > 0" class="row mt-3">
+				<div class="col">
+					<b-card>
+						<h3 class="h5">Collection</h3>
+						<table class="table table-sm cms-table-no-border-top">
+							<tr>
+								<th>Product</th>
+								<th>Variant</th>
+								<th></th>
+							</tr>
+							<tr v-for="collectionItem in product.collectionItems">
+								<td>
+									<a :href="link('Product:detail', {id: collectionItem.relevantProduct.id})">
+										{{ collectionItem.relevantProduct.label }} ({{ collectionItem.relevantProduct.price }})
+									</a>
+								</td>
+								<td>
+									<template v-if="collectionItem.relevantVariant">
+										{{ collectionItem.relevantVariant.label }} ({{ collectionItem.relevantVariant.price }})
+									</template>
+									<template v-else>-</template>
+								</td>
+								<td class="text-right">
+									<span class="btn btn-outline-danger btn-sm py-0" @click="deleteCollectionItem(collectionItem.id)">remove</span>
+								</td>
+							</tr>
+						</table>
+					</b-card>
+				</div>
+			</div>
+			<div class="row mt-3">
+				<div class="col">
+					<b-form-checkbox-group v-model="product.tagIds" :options="product.tags" />
 				</div>
 			</div>
 			<div class="row mt-3">
@@ -288,6 +324,46 @@ Vue.component('cms-product-overview', {
 			</b-button>
 		</b-form>
 	</b-modal>
+	<b-modal id="modal-add-to-collection" title="Add product to collection" size="lg" @shown="loadCollectionCandidates" hide-footer>
+		<div v-if="collectionRelated.candidates === null" class="my-5 text-center">
+			<b-spinner></b-spinner>
+		</div>
+		<template v-else>
+			<div class="row mb-3">
+				<div class="col">
+					<b-form-input v-model="collectionRelated.query" placeholder="Search products..."></b-form-input>
+				</div>
+				<div class="col-2 text-right">
+					<b-button type="submit" variant="primary" @click="loadCollectionCandidates">Search</b-button>
+				</div>
+			</div>
+			<div v-if="collectionRelated.candidates.length === 0" class="text-center my-5">
+				There are not results.
+			</div>
+			<table v-else class="table table-sm cms-table-no-border-top">
+				<tr>
+					<th>Product</th>
+					<th>Main category</th>
+					<th></th>
+				</tr>
+				<tr v-for="candidate in collectionRelated.candidates">
+					<td>
+						<a :href="link('Product:detail', { id: candidate.id })" target="_blank">{{ candidate.name }}</a>
+					</td>
+					<td>
+						<template v-if="candidate.mainCategory">
+							<a :href="link('ProductCategory:detail', { id: candidate.mainCategory.id })" target="_blank">
+								{{ candidate.mainCategory.name }}
+							</a>
+						</template>
+					</td>
+					<td class="text-right">
+						<b-button variant="secondary" size="sm" class="px-2 py-0" @click="addCollectionProduct(candidate.id)">+</b-button>
+					</td>
+				</tr>
+			</table>
+		</template>
+	</b-modal>
 	</cms-card>`,
 	data() {
 		return {
@@ -322,6 +398,11 @@ Vue.component('cms-product-overview', {
 				{value: '#CBF1CF', text: '[#CBF1CF] zelená'},
 				{value: '#CAE2F8', text: '[#CAE2F8] modrá'},
 			],
+			collectionRelated: {
+				list: null,
+				candidates: null,
+				query: '',
+			},
 		};
 	},
 	created() {
@@ -420,6 +501,31 @@ Vue.component('cms-product-overview', {
 						});
 					}
 				});
+		},
+		loadCollectionCandidates() {
+			axiosApi
+				.get(`cms-product/related-collection-products?id=${this.id}&query=${this.collectionRelated.query}&type=collection`)
+				.then((req) => {
+					this.collectionRelated.candidates = req.data.items;
+				});
+		},
+		addCollectionProduct(productId, variantId = null) {
+			axiosApi
+				.get(
+					`cms-product/add-product-to-collection?id=${this.id}&productId=${productId}&variantId=${variantId}`
+				)
+				.then(() => {
+					this.loadCollectionCandidates();
+					this.sync();
+				});
+		},
+		deleteCollectionItem(id) {
+			if (!confirm('Really?')) {
+				return;
+			}
+			axiosApi.get(`cms-product/delete-collection-item?id=${id}`).then(() => {
+				this.sync();
+			});
 		},
 	},
 });

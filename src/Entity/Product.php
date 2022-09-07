@@ -63,9 +63,12 @@ class Product implements ProductInterface
 	private ?int $oldId = null;
 
 	#[ORM\ManyToOne(targetEntity: ProductImage::class)]
-	private ?ProductImage $mainImage;
+	private ?ProductImage $mainImage = null;
 
-	/** @var ProductImage[]|Collection */
+	#[ORM\ManyToOne(targetEntity: ProductImage::class)]
+	private ?ProductImage $secondaryImage = null;
+
+	/** @var Collection<ProductImage> */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class)]
 	#[ORM\OrderBy(['position' => 'DESC'])]
 	private Collection $images;
@@ -124,39 +127,43 @@ class Product implements ProductInterface
 	#[ORM\Column(type: 'integer', nullable: true, options: ['unsigned' => true])]
 	private ?int $weight = null;
 
-	/** @var ProductCategory[]|Collection */
+	/** @var Collection<ProductCategory> */
 	#[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
 	#[ORM\OrderBy(['position' => 'DESC'])]
 	private Collection $categories;
 
-	/** @var ProductLabel[]|Collection */
+	/** @var Collection<ProductLabel> */
 	#[ORM\ManyToMany(targetEntity: ProductLabel::class, inversedBy: 'products')]
 	private Collection $labels;
 
-	/** @var ProductSmartDescription[]|Collection */
+	/** @var Collection<ProductSmartDescription> */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductSmartDescription::class)]
 	#[ORM\OrderBy(['position' => 'ASC'])]
 	private Collection $smartDescriptions;
 
-	/** @var ProductParameter[]|Collection */
+	/** @var Collection<ProductParameter> */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductParameter::class)]
 	private Collection $parameters;
 
-	/** @var ProductVariant[]|Collection */
+	/** @var Collection<ProductVariant> */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductVariant::class)]
 	private Collection $variants;
 
-	/** @var RelatedProduct[]|Collection */
+	/** @var Collection<RelatedProduct> */
 	#[ORM\OneToMany(mappedBy: 'product', targetEntity: RelatedProduct::class)]
 	private Collection $productRelatedBasic;
 
-	/** @var RelatedProduct[]|Collection */
+	/** @var Collection<RelatedProduct> */
 	#[ORM\OneToMany(mappedBy: 'relatedProduct', targetEntity: RelatedProduct::class)]
 	private Collection $productRelatedRelated;
 
-	/** @var ProductSeason[]|Collection */
+	/** @var Collection<ProductSeason> */
 	#[ORM\ManyToMany(targetEntity: ProductSeason::class, inversedBy: 'products')]
 	private Collection $productSeasons;
+
+	/** @var Collection<ProductTag> */
+	#[ORM\ManyToMany(targetEntity: ProductTag::class, inversedBy: 'products')]
+	private Collection $tags;
 
 	/** Total available quantity of this product in all warehouses. */
 	#[ORM\Column(type: 'integer')]
@@ -181,6 +188,7 @@ class Product implements ProductInterface
 		$this->productRelatedBasic = new ArrayCollection;
 		$this->productRelatedRelated = new ArrayCollection;
 		$this->productSeasons = new ArrayCollection;
+		$this->tags = new ArrayCollection;
 	}
 
 
@@ -305,6 +313,18 @@ class Product implements ProductInterface
 	public function setMainImage(?ProductImage $mainImage): void
 	{
 		$this->mainImage = $mainImage;
+	}
+
+
+	public function getSecondaryImage(): ?ProductImage
+	{
+		return $this->secondaryImage;
+	}
+
+
+	public function setSecondaryImage(?ProductImage $secondaryImage): void
+	{
+		$this->secondaryImage = $secondaryImage;
 	}
 
 
@@ -717,6 +737,21 @@ class Product implements ProductInterface
 
 
 	/**
+	 * @return Collection<ProductTag>
+	 */
+	public function getTags(): mixed
+	{
+		return $this->tags;
+	}
+
+
+	public function addTag(ProductTag $tag): void
+	{
+		$this->tags[] = $tag;
+	}
+
+
+	/**
 	 * @param array<int, ProductSeason> $seasons
 	 */
 	public function setSeasonList(array $seasons): void
@@ -735,6 +770,30 @@ class Product implements ProductInterface
 			if (in_array($season->getId(), $checkedIds, true) === false) {
 				$season->addProduct($this);
 				$this->addProductSeason($season);
+			}
+		}
+	}
+
+
+	/**
+	 * @param array<int, ProductTag> $tags
+	 */
+	public function setTagList(array $tags): void
+	{
+		$keepIds = array_map(static fn(ProductTag $tag): int => $tag->getId(), $tags);
+		$checkedIds = [];
+
+		foreach ($this->tags as $key => $tag) {
+			if (in_array($tag->getId(), $keepIds, true) === false) {
+				$tag->removeProduct($this);
+				$this->tags->remove($key);
+			}
+			$checkedIds[] = $tag->getId();
+		}
+		foreach ($tags as $tag) {
+			if (in_array($tag->getId(), $checkedIds, true) === false) {
+				$tag->addProduct($this);
+				$this->addTag($tag);
 			}
 		}
 	}

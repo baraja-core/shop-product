@@ -62,7 +62,7 @@ Vue.component('cms-product-default', {
 						<td class="py-0 pl-0">
 							<a :href="link('Product:detail', { id: item.id })">
 								<template v-if="item.mainImage">
-									<img :src="basePath + '/product-image/' + item.mainImage.source">
+									<img :src="basePath + '/product-image/' + item.mainImage.source" class="w-100">
 								</template>
 								<template v-else>
 									<img src="https://cdn.baraja.cz/icon/no-product-image.jpg" class="w-100" alt="No product image">

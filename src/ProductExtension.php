@@ -9,9 +9,11 @@ use Baraja\Doctrine\ORM\DI\OrmAnnotationsExtension;
 use Baraja\Plugin\Component\VueComponent;
 use Baraja\Plugin\PluginComponentExtension;
 use Baraja\Plugin\PluginManager;
+use Baraja\Shop\Product\Availability\ProductWarehouseStatus;
 use Baraja\Shop\Product\Category\ProductCategoryManager;
 use Baraja\Shop\Product\Category\ProductCategoryManagerAccessor;
 use Baraja\Shop\Product\Category\ProductCategoryPlugin;
+use Baraja\Shop\Product\ProductFeed\Feed;
 use Baraja\Shop\Product\Recommender\ProductRecommender;
 use Baraja\Shop\Product\Recommender\ProductRecommenderAccessor;
 use Nette\DI\CompilerExtension;
@@ -60,6 +62,15 @@ final class ProductExtension extends CompilerExtension
 
 		$builder->addDefinition($this->prefix('productPriceManager'))
 			->setFactory(ProductPriceManager::class);
+
+		$builder->addDefinition($this->prefix('productWarehouseStatus'))
+			->setFactory(ProductWarehouseStatus::class);
+
+		$builder->addDefinition($this->prefix('feed'))
+			->setFactory(Feed::class);
+
+		$builder->addDefinition($this->prefix('productCombinationFilter'))
+			->setFactory(ProductCombinationFilter::class);
 
 		/** @var ServiceDefinition $pluginManager */
 		$pluginManager = $this->getContainerBuilder()->getDefinitionByType(PluginManager::class);

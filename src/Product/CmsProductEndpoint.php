@@ -16,13 +16,17 @@ use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Product\DTO\ProductData;
 use Baraja\Shop\Product\Entity\Product;
 use Baraja\Shop\Product\Entity\ProductCategory;
+use Baraja\Shop\Product\Entity\ProductCollectionItem;
 use Baraja\Shop\Product\Entity\ProductImage;
 use Baraja\Shop\Product\Entity\ProductParameter;
+use Baraja\Shop\Product\Entity\ProductParameterColor;
 use Baraja\Shop\Product\Entity\ProductSeason;
 use Baraja\Shop\Product\Entity\ProductSmartDescription;
+use Baraja\Shop\Product\Entity\ProductTag;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\Shop\Product\Repository\ProductCategoryRepository;
+use Baraja\Shop\Product\Repository\ProductCollectionItemRepository;
 use Baraja\Shop\Product\Repository\ProductImageRepository;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\Shop\Product\Repository\ProductVariantRepository;
@@ -47,6 +51,8 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	private ProductImageRepository $productImageRepository;
 
+	private ProductCollectionItemRepository $productCollectionItemRepository;
+
 
 	public function __construct(
 		private EntityManager $entityManager,
@@ -62,16 +68,19 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$productVariantRepository = $entityManager->getRepository(ProductVariant::class);
 		$relatedProductRepository = $entityManager->getRepository(RelatedProduct::class);
 		$productImageRepository = $entityManager->getRepository(ProductImage::class);
+		$productCollectionItemRepository = $entityManager->getRepository(ProductCollectionItem::class);
 		assert($productRepository instanceof ProductRepository);
 		assert($productCategoryRepository instanceof ProductCategoryRepository);
 		assert($productVariantRepository instanceof ProductVariantRepository);
 		assert($relatedProductRepository instanceof RelatedProductRepository);
 		assert($productImageRepository instanceof ProductImageRepository);
+		assert($productCollectionItemRepository instanceof ProductCollectionItemRepository);
 		$this->productRepository = $productRepository;
 		$this->productCategoryRepository = $productCategoryRepository;
 		$this->productVariantRepository = $productVariantRepository;
 		$this->relatedProductRepository = $relatedProductRepository;
 		$this->productImageRepository = $productImageRepository;
+		$this->productCollectionItemRepository = $productCollectionItemRepository;
 	}
 
 
@@ -162,7 +171,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 				'image' => $smartDescriptionImage !== null
 					? ImageGenerator::from(
 						sprintf('product-image/description/%s', $smartDescriptionImage),
-						['w' => 100, 'h' => 100],
+						['w' => 200, 'h' => 200],
 					)
 					: null,
 				'color' => $description->getColor(),
@@ -170,25 +179,64 @@ final class CmsProductEndpoint extends BaseEndpoint
 			];
 		}
 
+		$collectionItems = array_map(
+			static fn(ProductCollectionItem $item): array => [
+				'id' => $item->getId(),
+				'relevantProduct' => [
+					'id' => $item->getRelevantProduct()->getId(),
+					'label' => $item->getRelevantProduct()->getLabel(),
+					'price' => $item->getRelevantProduct()->getPrice(),
+				],
+				'relevantVariant' => $item->getRelevantProductVariant() !== null
+					? [
+						'id' => $item->getRelevantProductVariant()->getId(),
+						'label' => $item->getRelevantProductVariant()->getLabel(),
+						'price' => $item->getRelevantProductVariant()->getPrice(),
+					] : null,
+			],
+			$this->productCollectionItemRepository->getByProduct($product),
+		);
+
 		/** @var array<int, array{value: int, text: string}> $categoryList */
 		$categoryList = $this->formatBootstrapSelectArray($cat->process($categories));
 
-		$brandList = [
-			['value' => null, 'text' => '--- No brand ---'],
-		];
-		foreach ($brands as $brand) {
-			$brandList[] = [
-				'value' => $brand['id'],
-				'text' => (string) $brand['name'],
+		$brandList = array_merge(
+			[0 => ['value' => null, 'text' => '--- No brand ---']],
+			array_map(
+				static fn(array $brand): array => [
+					'value' => $brand['id'],
+					'text' => (string) $brand['name'],
+				],
+				$brands,
+			),
+		);
+
+		$seasonList = array_map(
+			static fn(array $season): array => [
+				'value' => $season['id'],
+				'text' => (string) $season['name'],
+			],
+			$seasons,
+		);
+
+		/** @var array<int, array{id: int, name: Translation}> $allTags */
+		$allTags = $this->entityManager->getRepository(ProductTag::class)
+			->createQueryBuilder('tag')
+			->select('PARTIAL tag.{id, name}')
+			->getQuery()
+			->getArrayResult();
+
+		$tagList = [];
+		foreach ($allTags as $tag) {
+			$tagList[] = [
+				'value' => $tag['id'],
+				'text' => (string) $tag['name'],
 			];
 		}
 
-		$seasonList = [];
-		foreach ($seasons as $season) {
-			$seasonList[] = [
-				'value' => $season['id'],
-				'text' => (string) $season['name'],
-			];
+		$mainImage = $product->getMainImage()?->toArray();
+		if ($mainImage !== null) {
+			$mainImage['url'] = ImageGenerator::from($mainImage['url'], ['w' => 200, 'h' => 200]);
 		}
 
 		return new ProductData(
@@ -198,6 +246,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			ean: $product->getEan(),
 			slug: $product->getSlug(),
 			active: $product->isActive(),
+			collectionItems: $collectionItems,
 			shortDescription: (string) $product->getShortDescription(),
 			description: (string) $product->getDescription(),
 			price: $product->getPrice(),
@@ -207,18 +256,23 @@ final class CmsProductEndpoint extends BaseEndpoint
 			soldOut: $product->isSoldOut(),
 			showInFeed: $product->isShowInFeed(),
 			mainCurrency: $this->currencyManager->get()->getMainCurrency()->getCode(),
-			mainImage: $product->getMainImage()?->toArray(),
+			mainImage: $mainImage,
 			mainCategoryId: $product->getMainCategory()?->getId(),
 			brandId: $product->getBrand()?->getId(),
 			seasonIds: array_map(
 				static fn(ProductSeason $season): int => $season->getId(),
 				$product->getProductSeasons()->toArray(),
 			),
+			tagIds: array_map(
+				static fn(ProductTag $tag): int => $tag->getId(),
+				$product->getTags()->toArray(),
+			),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
 			categories: $categoryList,
 			brands: $brandList,
 			seasons: $seasonList,
+			tags: $tagList,
 		);
 	}
 
@@ -269,8 +323,20 @@ final class CmsProductEndpoint extends BaseEndpoint
 				->getQuery()
 				->getResult();
 		}
-
 		$product->setSeasonList($seasonList);
+
+		if ($productData->tagIds === []) {
+			$tagList = [];
+		} else {
+			/** @var array<int, ProductTag> $tagList */
+			$tagList = $this->entityManager->getRepository(ProductTag::class)
+				->createQueryBuilder('tag')
+				->where('tag.id IN (:ids)')
+				->setParameter('ids', $productData->tagIds)
+				->getQuery()
+				->getResult();
+		}
+		$product->setTagList($tagList);
 
 		$this->entityManager->flush();
 		$this->flashMessage('Product has been saved.', 'success');
@@ -285,11 +351,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$images = [];
 		foreach ($this->productImageRepository->getListByProduct($product) as $productImage) {
-			bdump($productImage);
 			$productImageVariant = $productImage->getVariant();
 			$images[] = [
 				'id' => $productImage->getId(),
 				'source' => $productImage->getSource(),
+				'thumbnail' => ImageGenerator::from($productImage->getSource(), ['w' => 200, 'h' => 200]),
 				'title' => $productImage->getTitle(),
 				'position' => $productImage->getPosition(),
 				'variant' => $productImageVariant?->getId(),
@@ -301,13 +367,12 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$variants[$variant->getId()] = $variant->getRelationHash();
 		}
 
-		$this->sendJson(
-			[
-				'images' => $images,
-				'mainImageId' => $mainImage?->getId(),
-				'variants' => $variants,
-			],
-		);
+		$this->sendJson([
+			'images' => $images,
+			'mainImageId' => $mainImage?->getId(),
+			'variants' => $variants,
+			'maxUploadFileSize' => ini_get('upload_max_filesize'),
+		]);
 	}
 
 
@@ -330,7 +395,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			$imageEntity->setTitle($image['title'] ?: null);
 			$imageEntity->setPosition($image['position'] ?: 0);
 			if ($image['variant'] !== null) {
-				$imageEntity->setVariant($this->productVariantRepository->getById($image['variant']));
+				$imageEntity->setVariant($this->productVariantRepository->getById((int) $image['variant']));
 			}
 			if ($image['id'] === $mainImageId) {
 				$mainImage = $imageEntity;
@@ -339,28 +404,32 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 		$product->setMainImage($mainImage);
 		$this->entityManager->flush();
+		$this->flashMessage('Media has been saved.', self::FlashMessageSuccess);
 		$this->sendOk();
 	}
 
 
-	public function postUploadImage(): void
+	public function postUploadImage(int $productId, ?FileUpload $mainImage = null): void
 	{
-		/** @var Request $request */
-		$request = $this->container->getByType(Request::class);
-		$productId = (int) $request->getPost('productId');
-
-		/** @var FileUpload|null $image */
-		$image = $request->getFile('mainImage');
 		$product = $this->productRepository->getById($productId);
-
-		if ($image === null) {
+		if ($mainImage === null) {
 			$this->sendError('Please select media to upload.');
+		}
+		if ($mainImage->isOk() === false) {
+			if ($mainImage->getError() === UPLOAD_ERR_INI_SIZE) {
+				$this->sendError('The uploaded file exceeds the upload_max_filesize directive in php.ini.');
+			}
+			$this->sendError(sprintf(
+				'File upload failed. Error code: %d. More info: %s',
+				$mainImage->getError(),
+				'https://www.php.net/manual/en/features.file-upload.errors.php',
+			));
 		}
 		try {
 			$this->productManager->get()->addImage(
 				$product,
-				$image->getTemporaryFile(),
-				$image->getSanitizedName(),
+				$mainImage->getTemporaryFile(),
+				$mainImage->getSanitizedName(),
 			);
 		} catch (\InvalidArgumentException $e) {
 			$this->sendError($e->getMessage());
@@ -450,21 +519,37 @@ final class CmsProductEndpoint extends BaseEndpoint
 			->getQuery()
 			->getArrayResult();
 
-		$this->sendJson(
-			[
-				'parameters' => $parameters,
-			],
-		);
+		/** @var array<int, ProductParameterColor> $parametersColors */
+		$parametersColors = $this->entityManager->getRepository(ProductParameterColor::class)->findAll();
+
+		$this->sendJson([
+			'parameters' => $parameters,
+			'colors' => array_map(static fn(ProductParameterColor $parameter): array => [
+				'id' => $parameter->getId(),
+				'value' => $parameter->getValue(),
+				'color' => $parameter->getColor(),
+				'imgPath' => $parameter->getImgPath(),
+			], $parametersColors),
+		]);
 	}
 
 
 	/**
-	 * @param string[] $values
+	 * @param array<int, string> $values
 	 */
 	public function postAddParameter(int $productId, string $name, array $values, bool $variant): void
 	{
 		$this->checkParameter($name, $values);
 		$parameter = new ProductParameter($this->productRepository->getById($productId), $name, $values, $variant);
+		$this->entityManager->persist($parameter);
+		$this->entityManager->flush();
+		$this->sendOk();
+	}
+
+
+	public function postAddColor(string $color, string $value): void
+	{
+		$parameter = new ProductParameterColor($color, $value);
 		$this->entityManager->persist($parameter);
 		$this->entityManager->flush();
 		$this->sendOk();
@@ -527,22 +612,95 @@ final class CmsProductEndpoint extends BaseEndpoint
 		$product = $this->productRepository->getById($id);
 		$relatedList = $this->relatedProductRepository->getRelatedList($product);
 
-		$this->sendJson(
-			[
-				'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $relatedList),
-			],
+		$this->sendJson([
+			'items' => array_map(static fn(array $item): array => $item['relatedProduct'], $relatedList),
+		]);
+	}
+
+
+	public function actionRelatedCollectionProducts(int $id, ?string $query = null): void
+	{
+		/** @var array<int, array{id: int, baseProduct: array{id: int}, relevantProduct: array{id: int}}> $collectionItems */
+		$collectionItems = $this->entityManager->getRepository(ProductCollectionItem::class)
+			->createQueryBuilder('pci')
+			->select('PARTIAL pci.{id}, PARTIAL baseProduct.{id}, PARTIAL relevantProduct.{id}')
+			->join('pci.baseProduct', 'baseProduct')
+			->join('pci.relevantProduct', 'relevantProduct')
+			->getQuery()
+			->getArrayResult();
+
+		$relatedIds = [];
+		$relatedIds = array_merge($relatedIds, array_map(static fn(array $item): int => $item['baseProduct']['id'], $collectionItems));
+		$relatedIds = array_merge($relatedIds, array_map(static fn(array $item): int => $item['relevantProduct']['id'], $collectionItems));
+		$relatedIds[] = $id;
+
+		$selection = $this->entityManager->getRepository(Product::class)
+			->createQueryBuilder('product')
+			->select('PARTIAL product.{id, name}, PARTIAL mainCategory.{id, name}')
+			->leftJoin('product.mainCategory', 'mainCategory')
+			->andWhere('product.id NOT IN (:relatedIds)')
+			->setParameter('relatedIds', $relatedIds)
+			->orderBy('mainCategory.name', 'ASC')
+			->addOrderBy('product.name', 'ASC')
+			->setMaxResults(128);
+
+		if ($query !== null) {
+			$selection->andWhere('product.name LIKE :query')
+				->setParameter('query', '%' . $query . '%');
+		}
+
+		$this->sendJson([
+			'items' => $selection->getQuery()->getArrayResult(),
+		]);
+	}
+
+
+	public function actionAddProductToCollection(int $id, int $productId, ?int $variantId = null): void
+	{
+		$product = $this->productRepository->getById($id);
+		$item = new ProductCollectionItem(
+			baseProduct: $product,
+			relevantProduct: $this->productRepository->getById($productId),
+			relevantProductVariant: $variantId !== null ? $this->productVariantRepository->getById($variantId) : null,
 		);
+		$positions = array_map(
+			static fn(ProductCollectionItem $item): int => $item->getPosition(),
+			$this->productCollectionItemRepository->getByProduct($product),
+		);
+		$item->setPosition($positions !== [] ? max($positions) + 1 : 0);
+
+		$this->entityManager->persist($item);
+		$this->entityManager->flush();
+		$this->flashMessage('Product has been added.', self::FlashMessageSuccess);
+		$this->sendOk();
+	}
+
+
+	public function actionDeleteCollectionItem(int $id): void
+	{
+		$item = $this->productCollectionItemRepository->find($id);
+		assert($item instanceof ProductCollectionItem);
+		$this->entityManager->remove($item);
+
+		$position = 1;
+		foreach ($this->productCollectionItemRepository->getByProduct($item->getBaseProduct()) as $collectionItem) {
+			if ($collectionItem->getId() === $id) {
+				continue;
+			}
+			$collectionItem->setPosition($position++);
+		}
+
+		$this->entityManager->flush();
+		$this->flashMessage('Collection item has been removed.', self::FlashMessageSuccess);
+		$this->sendOk();
 	}
 
 
 	public function actionRelatedCandidates(int $id, ?string $query = null): void
 	{
 		$product = $this->productRepository->getById($id);
-		$productCategoryId = null;
 		$mainCategory = $product->getMainCategory();
-		if ($mainCategory !== null) {
-			$productCategoryId = $mainCategory->getId();
-		}
+		$productCategoryId = $mainCategory !== null ? $mainCategory->getId() : null;
 
 		$relatedIds = array_map(
 			static fn(array $item): int => (int) $item['id'],
@@ -594,11 +752,9 @@ final class CmsProductEndpoint extends BaseEndpoint
 			static fn(array $a, array $b): int => $a['score'] < $b['score'] ? 1 : -1,
 		);
 
-		$this->sendJson(
-			[
-				'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
-			],
-		);
+		$this->sendJson([
+			'items' => array_map(static fn(array $item): array => $item['product'], $candidates),
+		]);
 	}
 
 
@@ -963,6 +1119,18 @@ final class CmsProductEndpoint extends BaseEndpoint
 	 */
 	private function getExcludeMap(): array
 	{
-		return [];
+		static $cache;
+		if ($cache === null) {
+			/** @var array<int, array{id: int, color: string}> $colors */
+			$colors = $this->entityManager->getRepository(ProductParameterColor::class)
+				->createQueryBuilder('color')
+				->select('PARTIAL color.{id, color}')
+				->getQuery()
+				->getArrayResult();
+
+			$cache = array_map(static fn(array $item): string => $item['color'], $colors);
+		}
+
+		return $cache;
 	}
 }

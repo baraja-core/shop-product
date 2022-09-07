@@ -23,7 +23,7 @@ class ProductParameter
 	#[ORM\Column(type: 'string')]
 	private string $name;
 
-	/** @var string[] */
+	/** @var array<int, string> */
 	#[ORM\Column(name: '`values`', type: 'simple_array')]
 	private array $values;
 

@@ -32,6 +32,12 @@ class ProductImageFileSystem implements ProductFileSystem
 	}
 
 
+	public function getPublicDir(): string
+	{
+		return $this->wwwDir;
+	}
+
+
 	private function detectWwwDir(): string
 	{
 		$scriptFileName = $_SERVER['SCRIPT_FILENAME'] ?? null;

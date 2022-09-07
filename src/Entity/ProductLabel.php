@@ -36,7 +36,7 @@ class ProductLabel
 	#[ORM\Column(type: 'string', length: 7)]
 	private string $color;
 
-	/** @var Product[]|Collection */
+	/** @var Collection<Product> */
 	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'labels')]
 	private Collection $products;
 

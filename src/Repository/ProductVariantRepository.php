@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Repository;
 
 
-use Baraja\Shop\Product\Entity\Product;
+use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\Shop\Product\Entity\ProductVariant;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -44,7 +44,7 @@ final class ProductVariantRepository extends EntityRepository
 	/**
 	 * @return array<int, ProductVariant>
 	 */
-	public function getListByProduct(Product|int $product): array
+	public function getListByProduct(ProductInterface|int $product): array
 	{
 		/** @var array<int, ProductVariant> $variants */
 		$variants = $this->createQueryBuilder('variant')
@@ -57,5 +57,23 @@ final class ProductVariantRepository extends EntityRepository
 			->getResult();
 
 		return $variants;
+	}
+
+
+	/**
+	 * @return array<int, array{id: int, relationHash: string, soldOut: bool}>
+	 */
+	public function getVariantsInfoByProduct(ProductInterface|int $product): array
+	{
+		/** @var array<int, array{id: int, relationHash: string, soldOut: bool}> $variantList */
+		$variantList = $this->createQueryBuilder('variant')
+			->select('PARTIAL variant.{id, relationHash, soldOut}')
+			->andWhere('variant.product = :productId')
+			->setParameter('productId', is_int($product) ? $product : $product->getId())
+			->orderBy('variant.relationHash', 'ASC')
+			->getQuery()
+			->getArrayResult();
+
+		return $variantList;
 	}
 }

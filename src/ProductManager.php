@@ -133,20 +133,16 @@ final class ProductManager
 	}
 
 
-	public function addImage(Product $product, string $path, ?string $sanitizedName = null): void
+	public function addImage(Product $product, string $path, string $sanitizedName): void
 	{
 		if (is_file($path) === false) {
-			throw new \InvalidArgumentException(sprintf('Given file does not exist. Path "%s" given.', $path));
+			throw new \RuntimeException(sprintf('Given file does not exist. Path "%s" given.', $path));
 		}
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 		/** @phpstan-ignore-next-line */
 		$type = finfo_file($finfo, $path);
 		if (in_array($type, ['image/gif', 'image/png', 'image/jpeg', 'image/webp'], true) === false) {
 			throw new \InvalidArgumentException(sprintf('Given file must be a image. Path "%s" given.', $path));
-		}
-
-		if ($sanitizedName === null) {
-			$sanitizedName = basename($path);
 		}
 		$source = date('Y-m-d') . '/' . strtolower(Random::generate(8) . '-' . $sanitizedName);
 		$productImage = new ProductImage($product, $source);
