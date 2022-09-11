@@ -6,6 +6,7 @@ namespace Baraja\Shop\Product\Entity;
 
 
 use Baraja\EcommerceStandard\DTO\ImageInterface;
+use Baraja\ImageGenerator\ImageGenerator;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Baraja\Shop\Product\Repository\ProductImageRepository;
@@ -63,14 +64,24 @@ class ProductImage implements ImageInterface
 
 
 	/**
-	 * @return array{source: string, title: string, url: string}
+	 * @return array{
+	 *     source: string,
+	 *     title: string,
+	 *     url: string,
+	 *     urlBig: string,
+	 *     urlThumbnail: string
+	 * }
 	 */
 	public function toArray(): array
 	{
+		$url = $this->getUrl();
+
 		return [
 			'source' => $this->source,
 			'title' => $this->getAltTitle(),
-			'url' => $this->getUrl(),
+			'url' => $url,
+			'urlBig' => ImageGenerator::from($url, ['w' => 1024, 'h' => 1024]),
+			'urlThumbnail' => ImageGenerator::from($url, ['w' => 200, 'h' => 200]),
 		];
 	}
 
