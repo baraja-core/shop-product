@@ -49,7 +49,7 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 				->getSingleResult();
 			$this->flashMessage(
 				'Field definition "' . $definition->getName() . '" already exist.',
-				self::FLASH_MESSAGE_ERROR,
+				self::FlashMessageError,
 			);
 			$this->sendError('Must be unique.');
 		} catch (NoResultException | NonUniqueResultException) {
@@ -69,7 +69,7 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 		}
 		$this->entityManager->persist($definition);
 		$this->entityManager->flush();
-		$this->flashMessage('Field definition has been created.', self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage('Field definition has been created.', self::FlashMessageSuccess);
 		$this->sendOk();
 	}
 
@@ -100,7 +100,7 @@ final class CmsProductFieldEndpoint extends BaseEndpoint
 			$definition->setPosition($field['position']);
 		}
 		$this->entityManager->flush();
-		$this->flashMessage('Definitions has been updated.', self::FLASH_MESSAGE_SUCCESS);
+		$this->flashMessage('Definitions has been updated.', self::FlashMessageSuccess);
 		$this->sendOk();
 	}
 }
