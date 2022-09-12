@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\ProductInterface;
 use Baraja\EcommerceStandard\DTO\ProductTagInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
@@ -139,13 +140,14 @@ class ProductTag implements ProductTagInterface
 	}
 
 
-	public function addProduct(Product $product): void
+	public function addProduct(ProductInterface $product): void
 	{
+		assert($product instanceof Product);
 		$this->products[] = $product;
 	}
 
 
-	public function removeProduct(Product $product): void
+	public function removeProduct(ProductInterface $product): void
 	{
 		foreach ($this->products as $key => $productItem) {
 			if ($productItem->getId() === $product->getId()) {
