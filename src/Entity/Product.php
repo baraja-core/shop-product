@@ -737,11 +737,11 @@ class Product implements ProductInterface
 
 
 	/**
-	 * @return Collection<ProductTag>
+	 * @return array<int, ProductTag>
 	 */
-	public function getTags(): mixed
+	public function getTags(): array
 	{
-		return $this->tags;
+		return $this->tags->toArray();
 	}
 
 

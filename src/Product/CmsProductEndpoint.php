@@ -265,7 +265,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 			),
 			tagIds: array_map(
 				static fn(ProductTag $tag): int => $tag->getId(),
-				$product->getTags()->toArray(),
+				$product->getTags(),
 			),
 			customFields: $this->productFieldManager->getFieldsInfo($product),
 			smartDescriptions: $smartDescriptions,
