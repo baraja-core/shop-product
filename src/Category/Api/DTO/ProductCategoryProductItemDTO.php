@@ -8,7 +8,9 @@ namespace Baraja\Shop\Product\Category\Api\DTO;
 use Baraja\EcommerceStandard\DTO\CurrencyInterface;
 use Baraja\EcommerceStandard\DTO\PriceInterface;
 use Baraja\EcommerceStandard\DTO\ProductInterface;
+use Baraja\EcommerceStandard\DTO\ProductTagInterface;
 use Baraja\Shop\Price\Price;
+use Baraja\Shop\Product\Api\DTO\ProductTagDTO;
 use Baraja\Shop\Product\Entity\Product;
 
 final class ProductCategoryProductItemDTO
@@ -16,6 +18,7 @@ final class ProductCategoryProductItemDTO
 	/**
 	 * @param array{source: string, title: string, url: string}|null $mainImage
 	 * @param array{source: string, title: string, url: string}|null $secondaryImage
+	 * @param array<int, ProductTagDTO> $tags
 	 */
 	public function __construct(
 		public int $id,
@@ -24,6 +27,7 @@ final class ProductCategoryProductItemDTO
 		public string $slug,
 		public ?array $mainImage,
 		public ?array $secondaryImage,
+		public array $tags,
 		public PriceInterface $price,
 		public string $pricePercentage,
 		public string $warehouse,
@@ -44,6 +48,10 @@ final class ProductCategoryProductItemDTO
 			secondaryImage: $product instanceof Product
 				? $product->getSecondaryImage()?->toArray()
 				: null,
+			tags: array_map(
+				static fn (ProductTagInterface $tag): ProductTagDTO => ProductTagDTO::fromEntity($tag),
+				$product->getTags(),
+			),
 			price: new Price($product->getPrice(), $currency),
 			pricePercentage: $product->getStandardPrice(),
 			warehouse: self::renderWarehouseQuantity($product->getWarehouseAllQuantity()),

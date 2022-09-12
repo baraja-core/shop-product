@@ -38,8 +38,9 @@ final class ProductRepository extends EntityRepository
 	public function getBySlug(string $slug): Product
 	{
 		return $this->createQueryBuilder('product')
-			->select('product, image')
+			->select('product, image, tag')
 			->leftJoin('product.images', 'image')
+			->leftJoin('product.tags', 'tag')
 			->where('product.slug = :slug')
 			->setParameter('slug', $slug)
 			->orderBy('image.position', 'DESC')

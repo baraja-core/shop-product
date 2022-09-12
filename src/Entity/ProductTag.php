@@ -83,6 +83,12 @@ class ProductTag implements ProductTagInterface
 	}
 
 
+	public function getLabel(): string
+	{
+		return (string) $this->getName();
+	}
+
+
 	public function getImageUrl(): ?string
 	{
 		return $this->imageUrl;
