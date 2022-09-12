@@ -33,6 +33,7 @@ final class ProductDTO
 	 * @param non-empty-array<string, array<int, array{value: string}>> $parameters
 	 * @param array<int, ProductCategoryProductItemDTO> $relatedProducts
 	 * @param array<string, string> $colorMap
+	 * @param array<int, ProductTagDTO> $tags
 	 */
 	public function __construct(
 		public int $id,
@@ -52,6 +53,7 @@ final class ProductDTO
 		public ProductCombinationFilterResult $combinationFilter,
 		public array $sameCategoryProducts,
 		public array $parameters,
+		public array $tags,
 		public array $relatedProducts,
 		public array $colorMap,
 	) {

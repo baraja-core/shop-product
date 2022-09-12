@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Api;
 
 
+use Baraja\EcommerceStandard\DTO\ProductTagInterface;
 use Baraja\Markdown\Renderer;
 use Baraja\Shop\Brand\Entity\Brand;
 use Baraja\Shop\Currency\CurrencyManagerAccessor;
 use Baraja\Shop\Product\Api\DTO\ProductDTO;
+use Baraja\Shop\Product\Api\DTO\ProductTagDTO;
 use Baraja\Shop\Product\Category\Api\DTO\ProductCategoryDTO as PCItem;
 use Baraja\Shop\Product\Category\Api\DTO\ProductCategoryProductItemDTO as ProductItem;
 use Baraja\Shop\Product\DTO\ProductCombinationFilterResult;
@@ -23,7 +25,6 @@ use Baraja\Shop\Product\ProductCombinationFilter;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\StructuredApi\Attributes\PublicEndpoint;
 use Baraja\StructuredApi\BaseEndpoint;
-use Baraja\StructuredApi\Response\Status\ErrorResponse;
 use Baraja\StructuredApi\Response\Status\NotFoundResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -89,6 +90,10 @@ final class ProductEndpoint extends BaseEndpoint
 				$this->processSameCategoryProducts($product),
 			),
 			parameters: $this->processParameters($product),
+			tags: array_map(
+				static fn (ProductTagInterface $tag): ProductTagDTO => ProductTagDTO::fromEntity($tag),
+				$product->getTags(),
+			),
 			relatedProducts: array_map(
 				static fn(Product $product): ProductItem => ProductItem::createFromEntity($product, $currency),
 				$this->processRelatedProducts($product),
