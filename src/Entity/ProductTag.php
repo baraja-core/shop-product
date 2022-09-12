@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\ProductTagInterface;
 use Baraja\Localization\TranslateObject;
 use Baraja\Localization\Translation;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -20,7 +21,7 @@ use Nette\Utils\Strings;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'shop__product_tag')]
-class ProductTag
+class ProductTag implements ProductTagInterface
 {
 	use TranslateObject;
 
@@ -46,6 +47,9 @@ class ProductTag
 
 	#[ORM\Column(type: 'boolean')]
 	private bool $showOnCard = false;
+
+	#[ORM\Column(type: 'boolean')]
+	private bool $freeDelivery = false;
 
 	/** @var Collection<Product> */
 	#[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'tags')]
@@ -111,6 +115,18 @@ class ProductTag
 	public function setShowOnCard(bool $showOnCard): void
 	{
 		$this->showOnCard = $showOnCard;
+	}
+
+
+	public function isFreeDelivery(): bool
+	{
+		return $this->freeDelivery;
+	}
+
+
+	public function setFreeDelivery(bool $freeDelivery): void
+	{
+		$this->freeDelivery = $freeDelivery;
 	}
 
 
