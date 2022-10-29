@@ -24,6 +24,7 @@ use Baraja\Shop\Product\Entity\RelatedProduct;
 use Baraja\Shop\Product\ProductCombinationFilter;
 use Baraja\Shop\Product\Repository\ProductRepository;
 use Baraja\StructuredApi\Attributes\PublicEndpoint;
+use Baraja\StructuredApi\Attributes\Role;
 use Baraja\StructuredApi\BaseEndpoint;
 use Baraja\StructuredApi\Response\Status\NotFoundResponse;
 use Doctrine\ORM\EntityManagerInterface;

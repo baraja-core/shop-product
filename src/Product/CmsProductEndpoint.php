@@ -34,6 +34,7 @@ use Baraja\Shop\Product\Repository\RelatedProductRepository;
 use Baraja\StructuredApi\BaseEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Nette\DI\Container;
 use Nette\Http\FileUpload;
 use Nette\Http\Request;
 use Nette\Utils\Random;
@@ -62,6 +63,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 		private CurrencyManagerAccessor $currencyManager,
 		private ProductFeedFacade $productFeedFacade,
 		private ProductPriceManager $priceManager,
+		private Container $legacyContainer,
 	) {
 		$productRepository = $entityManager->getRepository(Product::class);
 		$productCategoryRepository = $entityManager->getRepository(ProductCategory::class);
@@ -488,7 +490,11 @@ final class CmsProductEndpoint extends BaseEndpoint
 				date('Y-m-d')
 				. '/' . strtolower(Random::generate(8) . '-' . $image->getSanitizedName()),
 			);
-			$image->move($this->getParameter('wwwDir') . '/' . $desc->getImageRelativePath());
+			$wwwDir = $this->legacyContainer->getParameters()['wwwDir'] ?? null;
+			if ($wwwDir === null) {
+				throw new \LogicException('Parameter "wwwDir" is not allowed.');
+			}
+			$image->move(sprintf('%s/%s', $wwwDir, $desc->getImageRelativePath()));
 		}
 
 		$this->entityManager->flush();
