@@ -463,8 +463,7 @@ final class CmsProductEndpoint extends BaseEndpoint
 
 	public function postSaveSmartDescription(): void
 	{
-		/** @var Request $request */
-		$request = $this->container->getByType(Request::class);
+		$request = $this->legacyContainer->getByType(Request::class);
 
 		/** @var ProductSmartDescription $desc */
 		$desc = $this->entityManager->getRepository(ProductSmartDescription::class)

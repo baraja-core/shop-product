@@ -21,6 +21,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 	public function __construct(
 		private EntityManager $entityManager,
 		private ProductCategoryManagerAccessor $categoryManager,
+		private Request $httpRequest,
 	) {
 	}
 
@@ -159,9 +160,8 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 
 	public function postUploadImage(): void
 	{
-		$request = $this->container->getByType(Request::class);
-		$categoryId = (int) $request->getPost('categoryId');
-		$imageType = (string) $request->getPost('type');
+		$categoryId = (int) $this->httpRequest->getPost('categoryId');
+		$imageType = (string) $this->httpRequest->getPost('type');
 
 		try {
 			$category = $this->categoryManager->get()->getCategoryById($categoryId);
@@ -169,7 +169,7 @@ final class CmsProductCategoryEndpoint extends BaseEndpoint
 			$this->sendError(sprintf('Category "%s" does not exist.', $categoryId));
 		}
 
-		$image = $request->getFile('mainImage');
+		$image = $this->httpRequest->getFile('mainImage');
 		if ($image === null) {
 			$this->sendError('Please select media to upload.');
 		}
