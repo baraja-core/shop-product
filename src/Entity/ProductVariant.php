@@ -84,7 +84,7 @@ class ProductVariant implements ProductVariantInterface
 		$return = [];
 		foreach (explode(';', $hash) as $parameter) {
 			if (preg_match('/^([^=]+)=(.+)$/', $parameter, $parser) === 1) {
-				$return[(string) $parser[1]] = (string) $parser[2];
+				$return[$parser[1]] = $parser[2];
 			} else {
 				throw new \InvalidArgumentException(sprintf(
 					'Hash parameter "%s" is invalid, because hash "%s" given.',
