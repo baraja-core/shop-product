@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Baraja\Shop\Product\Entity;
 
 
+use Baraja\EcommerceStandard\DTO\ManufacturerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Nette\Utils\Strings;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'shop__product_manufacturer')]
-class ProductManufacturer
+class ProductManufacturer implements ManufacturerInterface
 {
 	#[ORM\Id]
 	#[ORM\Column(type: 'integer', unique: true, options: ['unsigned' => true])]
