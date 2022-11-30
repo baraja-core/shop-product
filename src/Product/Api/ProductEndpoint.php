@@ -78,7 +78,6 @@ final class ProductEndpoint extends BaseEndpoint
 			),
 			isVariantProduct: $product->isVariantProduct(),
 			isSoldOut: $product->isSoldOut(),
-			deliveryDate: null,
 			mainImage: $product->getMainImage()?->toArray(),
 			images: array_map(
 				static fn(ProductImage $image): array => $image->toArray(),

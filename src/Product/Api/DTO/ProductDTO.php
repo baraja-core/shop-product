@@ -46,7 +46,6 @@ final class ProductDTO
 		public array $smartDescriptions,
 		public bool $isVariantProduct,
 		public bool $isSoldOut,
-		public ?string $deliveryDate,
 		public ?array $mainImage,
 		public array $images,
 		public ?array $brand,
